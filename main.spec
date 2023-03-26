@@ -8,7 +8,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('dnd.png', '.')],
+    datas=[],
     hiddenimports=["collect_data_files"],
     hookspath=['.'],
     hooksconfig={},
@@ -47,4 +47,5 @@ app = BUNDLE(
     name='SD Prompt Reader.app',
     icon='icon.png',
     bundle_identifier=None,
+    version='0.1.0',
 )
