@@ -28,7 +28,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='main',
+    name='SD Prompt Reader',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -36,16 +36,17 @@ exe = EXE(
     upx_exclude=[],
     runtime_tmpdir=None,
     windowed=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='icon.png',
 )
 app = BUNDLE(
     exe,
     name='SD Prompt Reader.app',
     icon='icon.png',
     bundle_identifier=None,
-    version='0.1.0',
 )
