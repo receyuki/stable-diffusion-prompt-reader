@@ -5,3 +5,4 @@ pyinstaller~=5.9.0
 pyinstaller-hooks-contrib~=2023.1
 tkinterdnd2~=0.3.0
 pyperclip~=1.8.2
+customtkinter~=5.1.2
