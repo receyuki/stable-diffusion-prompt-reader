@@ -1,6 +1,7 @@
-altgraph==0.17.3
-macholib==1.16.2
-Pillow==9.4.0
-pyinstaller==5.9.0
-pyinstaller-hooks-contrib==2023.1
-tkinterdnd2==0.3.0
+altgraph~=0.17.3
+macholib~=1.16.2
+Pillow~=9.4.0
+pyinstaller~=5.9.0
+pyinstaller-hooks-contrib~=2023.1
+tkinterdnd2~=0.3.0
+pyperclip~=1.8.2
