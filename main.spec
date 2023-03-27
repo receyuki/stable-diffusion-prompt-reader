@@ -48,5 +48,5 @@ app = BUNDLE(
     name='SD Prompt Reader.app',
     icon='resources/icon.png',
     bundle_identifier=None,
-    version='0.3.0'
+    version='0.4.0'
 )
