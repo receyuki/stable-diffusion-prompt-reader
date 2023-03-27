@@ -8,8 +8,8 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('resources', 'resources')],
-    hiddenimports=["collect_data_files"],
+    datas=[('resources', 'resources'), ('venv/lib/python3.11/site-packages/customtkinter', 'customtkinter')],
+    hiddenimports=['collect_data_files', 'pyobjus', 'plyer.platforms.macosx.notification', 'plyer.platforms.win.notification'],
     hookspath=['.'],
     hooksconfig={},
     runtime_hooks=[],
@@ -36,7 +36,6 @@ exe = EXE(
     upx_exclude=[],
     runtime_tmpdir=None,
     windowed=True,
-    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
@@ -49,5 +48,5 @@ app = BUNDLE(
     name='SD Prompt Reader.app',
     icon='resources/icon.png',
     bundle_identifier=None,
-    version='0.2.0'
+    version='0.3.0'
 )
