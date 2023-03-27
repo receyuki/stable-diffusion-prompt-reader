@@ -42,12 +42,12 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='icon.png',
+    icon='resources/icon.png',
 )
 app = BUNDLE(
     exe,
     name='SD Prompt Reader.app',
-    icon='icon.png',
+    icon='resources/icon.png',
     bundle_identifier=None,
     version='0.2.0'
 )
