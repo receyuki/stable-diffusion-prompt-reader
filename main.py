@@ -82,7 +82,7 @@ def image_info_format(text):
 
 
 def display_info(event):
-    global image, image_tk, image_label, info
+    global image, image_tk, image_label, info, scaling
     # clear text
     boxes = [positive_box, negative_box, setting_box]
     for box in boxes:
@@ -110,14 +110,21 @@ def display_info(event):
             # setting_box.configure(state=DISABLED)
             image = Image.open(f)
             image_tk = CTkImage(light_image=image, dark_image=image)
+            print((image.size[0],image.size[1]))
             aspect_ratio = image.size[0] / image.size[1]
+            print(aspect_ratio)
+            scaling = ScalingTracker.get_window_dpi_scaling(Tk())
             # resize image to window size
             if image.size[0] > image.size[1]:
-                image_tk.configure(size=(image_frame.winfo_height(), image_frame.winfo_height() / aspect_ratio))
-
+                image_tk.configure(size=tuple(num / scaling for num in
+                                              (image_frame.winfo_height(), image_frame.winfo_height() / aspect_ratio)))
             else:
-                image_tk.configure(size=(image_label.winfo_height() * aspect_ratio, image_label.winfo_height()))
+                image_tk.configure(size=tuple(num / scaling for num in
+                                              (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
+                print((image_label.winfo_height() * aspect_ratio, image_label.winfo_height()))
             # display image
+            print(image_tk.cget("size"))
+            image_tk.configure()
             image_label.configure(image=image_tk)
 
 
@@ -128,10 +135,12 @@ def resize_image(event):
         aspect_ratio = image.size[0] / image.size[1]
         # resize image to window size
         if image.size[0] > image.size[1]:
-            image_tk.configure(size=(image_frame.winfo_height(), image_frame.winfo_height() / aspect_ratio))
-
+            image_tk.configure(size=tuple(num / scaling for num in
+                                          (image_frame.winfo_height(), image_frame.winfo_height() / aspect_ratio)))
         else:
-            image_tk.configure(size=(image_label.winfo_height() * aspect_ratio, image_label.winfo_height()))
+            image_tk.configure(
+                size=tuple(num / scaling for num in
+                           (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
         image_label.configure(image=image_tk)
 
 
@@ -141,7 +150,7 @@ def copy_to_clipboard(content):
     except:
         print("copy error")
     else:
-        notification.notify(title="Success", message="copied to clipboard", timeout=10)
+        notification.notify(title="Success", message="copied to clipboard", app_icon=ico_file, timeout=10)
 
 
 # window = TkinterDnD.Tk()
@@ -153,10 +162,14 @@ window.geometry("1400x650")
 
 # set_appearance_mode("Light")
 # deactivate_automatic_dpi_awareness()
-# set_widget_scaling(0.8)
+# set_widget_scaling(1)
 # set_window_scaling(0.8)
+# info_font = CTkFont(size=20)
+info_font = CTkFont()
+scaling = ScalingTracker.get_window_dpi_scaling(Tk())
 
 icon_file = path.join(bundle_dir, "resources/icon.png")
+ico_file = path.join(bundle_dir, "resources/icon.ico")
 icon_image = PhotoImage(file=icon_file)
 window.iconphoto(False, icon_image)
 
@@ -179,23 +192,23 @@ positive = CTkFrame(prompt_frame, fg_color="transparent")
 positive.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 20))
 positive_box = CTkTextbox(positive, wrap=WORD)
 positive_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 0))
-default_text_colour = positive_box.text_color
+default_text_colour = positive_box._text_color
 positive_box.insert(END, "Prompt")
-positive_box.configure(state=DISABLED, text_color="gray")
+positive_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
 negative = CTkFrame(prompt_frame, fg_color="transparent")
 negative.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 20))
 negative_box = CTkTextbox(negative, wrap=WORD)
 negative_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 0))
 negative_box.insert(END, "Negative Prompt")
-negative_box.configure(state=DISABLED, text_color="gray")
+negative_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
 setting = CTkFrame(prompt_frame, fg_color="transparent")
 setting.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 10))
 setting_box = CTkTextbox(setting, wrap=WORD, height=80)
 setting_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 85))
 setting_box.insert(END, "Setting")
-setting_box.configure(state=DISABLED, text_color="gray")
+setting_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
 clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
 clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
@@ -208,7 +221,7 @@ button_negative = CTkButton(negative, width=50, height=50, image=clipboard_image
                             command=lambda: copy_to_clipboard(info[1]))
 button_negative.pack(side=RIGHT, padx=(20, 0))
 
-button_prompt = CTkButton(prompt_frame, width=50, height=50, image=clipboard_image, text="Raw Data",
+button_prompt = CTkButton(prompt_frame, width=50, height=50, image=clipboard_image, text="Raw Data", font=info_font,
                           command=lambda: copy_to_clipboard(info[3]))
 button_prompt.pack(side=BOTTOM)
 
