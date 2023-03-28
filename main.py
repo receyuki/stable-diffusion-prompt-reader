@@ -102,8 +102,9 @@ def display_info(event):
             positive_box.insert(END, info[0])
             negative_box.insert(END, info[1])
             setting_box.insert(END, info[2])
+
             for box in boxes:
-                box.configure(state=DISABLED)
+                box.configure(state=DISABLED, text_color=default_text_colour)
             # positive_box.configure(state=DISABLED)
             # negative_box.configure(state=DISABLED)
             # setting_box.configure(state=DISABLED)
@@ -178,16 +179,23 @@ positive = CTkFrame(prompt_frame, fg_color="transparent")
 positive.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 20))
 positive_box = CTkTextbox(positive, wrap=WORD)
 positive_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 0))
+default_text_colour = positive_box.text_color
+positive_box.insert(END, "Prompt")
+positive_box.configure(state=DISABLED, text_color="gray")
 
 negative = CTkFrame(prompt_frame, fg_color="transparent")
 negative.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 20))
 negative_box = CTkTextbox(negative, wrap=WORD)
 negative_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 0))
+negative_box.insert(END, "Negative Prompt")
+negative_box.configure(state=DISABLED, text_color="gray")
 
 setting = CTkFrame(prompt_frame, fg_color="transparent")
 setting.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 10))
 setting_box = CTkTextbox(setting, wrap=WORD, height=80)
 setting_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 85))
+setting_box.insert(END, "Setting")
+setting_box.configure(state=DISABLED, text_color="gray")
 
 clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
 clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
