@@ -5,7 +5,7 @@ from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, 
     WORD, BOTTOM, CENTER, Label, ttk, PhotoImage
 from tkinter.ttk import *
 from tkinterdnd2 import *
-from os import path
+from os import path, name
 from customtkinter import *
 from plyer import notification
 
@@ -169,7 +169,8 @@ icon_file = path.join(bundle_dir, "resources/icon.png")
 ico_file = path.join(bundle_dir, "resources/icon.ico")
 icon_image = PhotoImage(file=icon_file)
 window.iconphoto(False, icon_image)
-window.iconbitmap(ico_file)
+if name == "nt":
+    window.iconbitmap(ico_file)
 
 
 image_frame = CTkFrame(window)

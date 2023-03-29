@@ -19,7 +19,7 @@ OPTIONS = {
     'plist': {
         'CFBundleName': 'SD Prompt Reader',
         'CFBundleDisplayName': 'SD Prompt Reader',
-        'CFBundleVersion': '0.6.0',
+        'CFBundleVersion': '1.0.0',
         'CFBundleIdentifier': 'com.receyuki.sd-prompt-reader',
         'NSHumanReadableCopyright': 'Copyright © 2023 receyuki All rights reserved.',
     },
@@ -42,8 +42,8 @@ tcl_dir = Path(root.tk.exprstring('$tcl_library'))
 tk_dir = Path(root.tk.exprstring('$tk_library'))
 root.destroy()
 
-os.makedirs("/Users/RY/Program/stable-diffusion-prompt-reader/dist/SD Prompt Reader.app/Contents/lib", exist_ok=True)
+os.makedirs("./dist/SD Prompt Reader.app/Contents/lib", exist_ok=True)
 print(f"Copying TK from: {tk_dir}")
-shutil.copytree(tk_dir, f"/Users/RY/Program/stable-diffusion-prompt-reader/dist/SD Prompt Reader.app/Contents/lib/{tk_dir.parts[-1]}")
+shutil.copytree(tk_dir, f"./dist/SD Prompt Reader.app/Contents/lib/{tk_dir.parts[-1]}")
 print(f"Copying TCL from: {tcl_dir}")
-shutil.copytree(tcl_dir, f"/Users/RY/Program/stable-diffusion-prompt-reader/dist/SD Prompt Reader.app/Contents/lib/{tcl_dir.parts[-1]}")
+shutil.copytree(tcl_dir, f"./dist/SD Prompt Reader.app/Contents/lib/{tcl_dir.parts[-1]}")

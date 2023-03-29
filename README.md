@@ -9,4 +9,4 @@ A simple standalone viewer for reading prompts from Stable Diffusion generated p
 ## Credits
 - Image data reader function modified from [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
 - Dnd and Copy icons [Icons8](https://icons8.com/)
-- App icon generated using [Dreamlike Diffusion](https://civitai.com/models/1274/dreamlike-diffusion-10)
+- App icon generated using [IconsMI](https://huggingface.co/jvkape/IconsMI-AppIconsModelforSD)
