@@ -3,8 +3,12 @@ macholib~=1.16.2
 Pillow~=9.4.0
 pyinstaller~=5.9.0
 pyinstaller-hooks-contrib~=2023.1
-tkinterdnd2~=0.3.0
+tkinterdnd2-universal~=1.7.3
 pyperclip~=1.8.2
 customtkinter~=5.1.2
 plyer~=2.1.0
-pyobjus~=1.2.1
+pyobjus~=1.2.1; sys_platform == 'darwin'
+py2app~=0.28.5; sys_platform == 'darwin'
+modulegraph~=0.19.3
+setuptools~=65.5.1
+piexif~=1.1.3

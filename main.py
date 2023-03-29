@@ -1,3 +1,4 @@
+import piexif
 import pyperclip as pyperclip
 from PIL import Image, ImageTk
 from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, BOTH, X, Canvas, DISABLED, NORMAL, \
@@ -18,9 +19,13 @@ class Tk(CTk, TkinterDnD.DnDWrapper):
         self.TkdndVersion = TkinterDnD._require(self)
 
 
+# Modified from:
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/22bcc7be428c94e9408f589966c2040187245d81/modules/images.py#L614
 def read_info_from_image(image):
     items = image.info or {}
+
     geninfo = items.pop('parameters', None)
+
     if "exif" in items:
         exif = piexif.load(items["exif"])
         exif_comment = (exif or {}).get("Exif", {}).get(piexif.ExifIFD.UserComment, b'')
@@ -37,21 +42,23 @@ def read_info_from_image(image):
                       'loop', 'background', 'timestamp', 'duration']:
             items.pop(field, None)
 
-    if items.get("Software", None) == "NovelAI":
-        try:
-            json_info = json.loads(items["Comment"])
-            sampler = sd_samplers.samplers_map.get(json_info["sampler"], "Euler a")
-
-            geninfo = f"""{items["Description"]}
-Negative prompt: {json_info["uc"]}
-Steps: {json_info["steps"]}, Sampler: {sampler}, CFG scale: {json_info["scale"]}, Seed: {json_info["seed"]}, Size: {image.width}x{image.height}, Clip skip: 2, ENSD: 31337"""
-        except Exception:
-            print("Error parsing NovelAI image generation parameters:", file=sys.stderr)
-            print(traceback.format_exc(), file=sys.stderr)
+    #     if items.get("Software", None) == "NovelAI":
+    #         try:
+    #             json_info = json.loads(items["Comment"])
+    #             sampler = sd_samplers.samplers_map.get(json_info["sampler"], "Euler a")
+    #
+    #             geninfo = f"""{items["Description"]}
+    # Negative prompt: {json_info["uc"]}
+    # Steps: {json_info["steps"]}, Sampler: {sampler}, CFG scale: {json_info["scale"]}, Seed: {json_info["seed"]}, Size: {image.width}x{image.height}, Clip skip: 2, ENSD: 31337"""
+    #         except Exception:
+    #             print("Error parsing NovelAI image generation parameters:", file=sys.stderr)
+    #             print(traceback.format_exc(), file=sys.stderr)
 
     return geninfo, items
 
 
+# Modified from:
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/22bcc7be428c94e9408f589966c2040187245d81/modules/images.py#L650
 def image_data(file):
     try:
         image = Image.open(file)
@@ -61,13 +68,13 @@ def image_data(file):
     except Exception:
         pass
 
-    try:
-        text = data.decode('utf8')
-        assert len(text) < 10000
-        return text, None
-
-    except Exception:
-        pass
+    # try:
+    #     text = data.decode('utf8')
+    #     assert len(text) < 10000
+    #     return text, None
+    #
+    # except Exception:
+    #     pass
 
     return '', None
 
@@ -83,17 +90,11 @@ def image_info_format(text):
 
 def display_info(event):
     global image, image_tk, image_label, info, scaling
-    # clear text
     boxes = [positive_box, negative_box, setting_box]
+    # clear text
     for box in boxes:
         box.configure(state=NORMAL)
         box.delete("1.0", END)
-    # positive_box.configure(state=NORMAL)
-    # negative_box.configure(state=NORMAL)
-    # setting_box.configure(state=NORMAL)
-    # positive_box.delete("1.0", END)
-    # negative_box.delete("1.0", END)
-    # setting_box.delete("1.0", END)
     if event.data.endswith(".png"):
         with open(event.data, "rb") as f:
             text_line, _ = image_data(f)
@@ -105,15 +106,10 @@ def display_info(event):
 
             for box in boxes:
                 box.configure(state=DISABLED, text_color=default_text_colour)
-            # positive_box.configure(state=DISABLED)
-            # negative_box.configure(state=DISABLED)
-            # setting_box.configure(state=DISABLED)
             image = Image.open(f)
             image_tk = CTkImage(light_image=image, dark_image=image)
-            print((image.size[0],image.size[1]))
             aspect_ratio = image.size[0] / image.size[1]
-            print(aspect_ratio)
-            scaling = ScalingTracker.get_window_dpi_scaling(Tk())
+            scaling = ScalingTracker.get_window_dpi_scaling(window)
             # resize image to window size
             if image.size[0] > image.size[1]:
                 image_tk.configure(size=tuple(num / scaling for num in
@@ -121,26 +117,24 @@ def display_info(event):
             else:
                 image_tk.configure(size=tuple(num / scaling for num in
                                               (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
-                print((image_label.winfo_height() * aspect_ratio, image_label.winfo_height()))
             # display image
-            print(image_tk.cget("size"))
             image_tk.configure()
             image_label.configure(image=image_tk)
 
 
 def resize_image(event):
     # resize image to window size
-    global image, image_label, image_tk
+    global image, image_label, image_tk, scaling
     if image:
         aspect_ratio = image.size[0] / image.size[1]
+        scaling = ScalingTracker.get_window_dpi_scaling(window)
         # resize image to window size
         if image.size[0] > image.size[1]:
             image_tk.configure(size=tuple(num / scaling for num in
                                           (image_frame.winfo_height(), image_frame.winfo_height() / aspect_ratio)))
         else:
-            image_tk.configure(
-                size=tuple(num / scaling for num in
-                           (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
+            image_tk.configure(size=tuple(num / scaling for num in
+                                          (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
         image_label.configure(image=image_tk)
 
 
@@ -148,17 +142,20 @@ def copy_to_clipboard(content):
     try:
         pyperclip.copy(content)
     except:
-        print("copy error")
+        print("Copy error")
     else:
-        notification.notify(title="Success", message="copied to clipboard", app_icon=ico_file, timeout=10)
+        notification.notify(title="Success",
+                            message="copied to clipboard",
+                            app_icon=ico_file,
+                            timeout=50,
+                            toast=True,
+                            )
 
 
 # window = TkinterDnD.Tk()
 window = Tk()
-window.title('SD Prompt Reader')
-# window.geometry("960x540")
-window.geometry("1400x650")
-# window.geometry("1024x450")
+window.title("SD Prompt Reader")
+window.geometry("1200x650")
 
 # set_appearance_mode("Light")
 # deactivate_automatic_dpi_awareness()
@@ -166,12 +163,13 @@ window.geometry("1400x650")
 # set_window_scaling(0.8)
 # info_font = CTkFont(size=20)
 info_font = CTkFont()
-scaling = ScalingTracker.get_window_dpi_scaling(Tk())
+scaling = ScalingTracker.get_window_dpi_scaling(window)
 
 icon_file = path.join(bundle_dir, "resources/icon.png")
 ico_file = path.join(bundle_dir, "resources/icon.ico")
 icon_image = PhotoImage(file=icon_file)
 window.iconphoto(False, icon_image)
+
 
 image_frame = CTkFrame(window)
 image_frame.pack(side=LEFT, fill=BOTH, expand=True, padx=20, pady=20)
@@ -184,6 +182,7 @@ image_label.pack(fill=BOTH, expand=True)
 image = None
 image_tk = None
 info = [""] * 4
+
 
 prompt_frame = CTkFrame(window, fg_color="transparent")
 prompt_frame.pack(side=RIGHT, fill=BOTH, expand=True, padx=(0, 20), pady=20)
@@ -205,13 +204,14 @@ negative_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
 setting = CTkFrame(prompt_frame, fg_color="transparent")
 setting.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 10))
-setting_box = CTkTextbox(setting, wrap=WORD, height=80)
+setting_box = CTkTextbox(setting, wrap=WORD, height=120)
 setting_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 85))
 setting_box.insert(END, "Setting")
 setting_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
 clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
 clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
+
 
 button_positive = CTkButton(positive, width=50, height=50, image=clipboard_image, text="",
                             command=lambda: copy_to_clipboard(info[0]))
@@ -224,6 +224,7 @@ button_negative.pack(side=RIGHT, padx=(20, 0))
 button_prompt = CTkButton(prompt_frame, width=50, height=50, image=clipboard_image, text="Raw Data", font=info_font,
                           command=lambda: copy_to_clipboard(info[3]))
 button_prompt.pack(side=BOTTOM)
+
 
 window.drop_target_register(DND_FILES)
 window.dnd_bind("<<Drop>>", display_info)
