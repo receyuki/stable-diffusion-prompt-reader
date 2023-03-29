@@ -8,8 +8,8 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('resources', 'resources'), ('venv/lib/site-packages/customtkinter', 'customtkinter')],
-    hiddenimports=['collect_data_files', 'plyer.platforms.win.notification'],
+    datas=[('resources', 'resources'), ('venv/lib/python3.11/site-packages/customtkinter', 'customtkinter')],
+    hiddenimports=['collect_data_files', 'pyobjus', 'plyer.platforms.macosx.notification', 'plyer.platforms.win.notification'],
     hookspath=['.'],
     hooksconfig={},
     runtime_hooks=[],
@@ -36,18 +36,17 @@ exe = EXE(
     upx_exclude=[],
     runtime_tmpdir=None,
     windowed=True,
-    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='resources/icon.ico',
+    icon='resources/icon.png',
 )
 app = BUNDLE(
     exe,
     name='SD Prompt Reader.app',
     icon='resources/icon.png',
-    bundle_identifier=None,
-    version='0.6.0'
+    bundle_identifier='com.receyuki.sd-prompt-reader',
+    version='0.5.1'
 )
