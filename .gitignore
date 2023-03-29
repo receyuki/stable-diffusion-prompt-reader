@@ -1,4 +1,5 @@
 /venv/
-/test/
+/tests/
 /build/
 /dist/
+/.eggs/
