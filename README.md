@@ -1,6 +1,9 @@
-# Stable Diffusion Prompt Reader
+<div align="center">
+<img src="/resources/icon.png" width=20% height=20%>
+<h1>Stable Diffusion Prompt Reader</h1>
 A simple standalone viewer for reading prompts from Stable Diffusion generated png outside the webui.
-![ScreenShot.png](images%2FScreenShot.png)
+<img src="/images/ScreenShot.png" width=80% height=80%>
+</div>
 
 ## Features
 - Supports macOS & Windows.
