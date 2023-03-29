@@ -169,6 +169,7 @@ icon_file = path.join(bundle_dir, "resources/icon.png")
 ico_file = path.join(bundle_dir, "resources/icon.ico")
 icon_image = PhotoImage(file=icon_file)
 window.iconphoto(False, icon_image)
+window.iconbitmap(ico_file)
 
 
 image_frame = CTkFrame(window)
