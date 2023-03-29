@@ -204,7 +204,7 @@ negative_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
 setting = CTkFrame(prompt_frame, fg_color="transparent")
 setting.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 10))
-setting_box = CTkTextbox(setting, wrap=WORD, height=120)
+setting_box = CTkTextbox(setting, wrap=WORD, height=100)
 setting_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 85))
 setting_box.insert(END, "Setting")
 setting_box.configure(state=DISABLED, text_color="gray", font=info_font)
