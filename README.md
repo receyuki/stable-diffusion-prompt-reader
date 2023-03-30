@@ -9,6 +9,9 @@ A simple standalone viewer for reading prompts from Stable Diffusion generated p
 - Supports macOS & Windows.
 - Simple drag and drop interaction.
 
+## Download
+Download from [GitHub Releases](https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest)
+
 ## Credits
 - Image data reader function modified from [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
 - Dnd and Copy icons [Icons8](https://icons8.com/)
