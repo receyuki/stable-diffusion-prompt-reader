@@ -8,6 +8,7 @@ A simple standalone viewer for reading prompts from Stable Diffusion generated p
 ## Features
 - Support macOS & Windows.
 - Simple drag and drop interaction.
+- Currently only support AUTOMATIC1111's [webUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
 
 ## TODO
 - Function to remove prompt from images
