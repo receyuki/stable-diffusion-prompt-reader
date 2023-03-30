@@ -6,8 +6,13 @@ A simple standalone viewer for reading prompts from Stable Diffusion generated p
 </div>
 
 ## Features
-- Supports macOS & Windows.
+- Support macOS & Windows.
 - Simple drag and drop interaction.
+
+## TODO
+- Function to remove prompt from images
+- Add Support for NovelAI png
+- Better settings display UI
 
 ## Download
 Download from [GitHub Releases](https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest)
