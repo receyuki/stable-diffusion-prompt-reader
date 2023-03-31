@@ -80,23 +80,27 @@ def image_data(file):
 
 
 def image_info_format(text):
-    prompt_index = [text.index("\nNegative prompt:"),
-                    text.index("\nSteps:")]
-    positive = text[:prompt_index[0]]
-    negative = text[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
-    setting = text[prompt_index[1] + 1:]
+    if text:
+        prompt_index = [text.index("\nNegative prompt:"),
+                        text.index("\nSteps:")]
+        positive = text[:prompt_index[0]]
+        negative = text[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
+        setting = text[prompt_index[1] + 1:]
+    else:
+        positive = negative = setting = "No data detected or unsupported formats"
     return positive, negative, setting, text
 
 
 def display_info(event):
     global image, image_tk, image_label, info, scaling
     boxes = [positive_box, negative_box, setting_box]
+    file_path = event.data.replace("}", "").replace("{", "")
     # clear text
     for box in boxes:
         box.configure(state=NORMAL)
         box.delete("1.0", END)
-    if event.data.endswith(".png"):
-        with open(event.data, "rb") as f:
+    if file_path.lower().endswith(".png"):
+        with open(file_path, "rb") as f:
             text_line, _ = image_data(f)
             info = image_info_format(text_line)
             # insert prompt
@@ -120,6 +124,9 @@ def display_info(event):
             # display image
             image_tk.configure()
             image_label.configure(image=image_tk)
+    else:
+        for box in boxes:
+            box.insert(END, "Unsupported formats")
 
 
 def resize_image(event):

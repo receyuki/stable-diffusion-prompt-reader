@@ -6,8 +6,8 @@ VSVersionInfo(
   ffi=FixedFileInfo(
     # filevers and prodvers should be always a tuple with four items: (1, 2, 3, 4)
     # Set not needed items to zero 0.
-    filevers=(1, 0, 0, 0),
-    prodvers=(1, 0, 0, 0),
+    filevers=(1, 0, 1, 0),
+    prodvers=(1, 0, 1, 0),
     # Contains a bitmask that specifies the valid bits 'flags'r
     mask=0x17,
     # Contains a bitmask that specifies the Boolean attributes of the file.
@@ -32,7 +32,7 @@ VSVersionInfo(
         [StringStruct('CompanyName', ''),
         StringStruct('LegalCopyright', 'Copyright © 2023 receyuki All rights reserved.'),
         StringStruct('ProductName', 'SD Prompt Reader'),
-        StringStruct('ProductVersion', '1.0.0.0'),
+        StringStruct('ProductVersion', '1.0.1.0'),
         StringStruct('FileDescription', 'SD Prompt Reader'),
         StringStruct('InternalName', 'SD Prompt Reader'),
         StringStruct('OriginalFilename', 'SD Prompt Reader.exe')])
