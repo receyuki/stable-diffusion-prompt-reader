@@ -218,6 +218,9 @@ setting_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 85))
 setting_box.insert(END, "Setting")
 setting_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
+tool_bar = CTkFrame(prompt_frame, fg_color="transparent")
+tool_bar.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 10))
+
 clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
 clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
 
@@ -230,10 +233,12 @@ button_negative = CTkButton(negative, width=50, height=50, image=clipboard_image
                             command=lambda: copy_to_clipboard(info[1]))
 button_negative.pack(side=RIGHT, padx=(20, 0))
 
-button_prompt = CTkButton(prompt_frame, width=50, height=50, image=clipboard_image, text="Raw Data", font=info_font,
+button_prompt = CTkButton(tool_bar, width=50, height=50, image=clipboard_image, text="Raw Data", font=info_font,
                           command=lambda: copy_to_clipboard(info[3]))
-button_prompt.pack(side=BOTTOM)
+button_prompt.grid(row=0, column=0, sticky="nsew", padx=10)
 
+status_frame = CTkFrame(tool_bar, width=200, height=50)
+status_frame.grid(row=0, column=1, padx=10)
 
 window.drop_target_register(DND_FILES)
 window.dnd_bind("<<Drop>>", display_info)
