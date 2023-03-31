@@ -219,7 +219,7 @@ setting_box.insert(END, "Setting")
 setting_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
 tool_bar = CTkFrame(prompt_frame, fg_color="transparent")
-tool_bar.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 10))
+tool_bar.pack(side=TOP, fill=BOTH, expand=True)
 
 clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
 clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
