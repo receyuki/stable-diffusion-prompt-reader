@@ -2,6 +2,7 @@
 <img src="/resources/icon.png" width=20% height=20%>
 <h1>Stable Diffusion Prompt Reader</h1>
 A simple standalone viewer for reading prompts from Stable Diffusion generated png outside the webui.
+<br>
 <img src="/images/screenshot.png" width=80% height=80%>
 </div>
 

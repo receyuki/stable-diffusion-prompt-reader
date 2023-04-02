@@ -179,9 +179,15 @@ window.iconphoto(False, icon_image)
 if name == "nt":
     window.iconbitmap(ico_file)
 
+window.rowconfigure(tuple(range(4)), weight=1)
+window.columnconfigure(tuple(range(5)), weight=1)
+window.columnconfigure(0, weight=5)
+window.rowconfigure(0, weight=2)
+window.rowconfigure(1, weight=2)
+
 
 image_frame = CTkFrame(window)
-image_frame.pack(side=LEFT, fill=BOTH, expand=True, padx=20, pady=20)
+image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
 
 drop_file = path.join(bundle_dir, "resources/drag-and-drop.png")
 drop_image = CTkImage(light_image=Image.open(drop_file), dark_image=Image.open(drop_file), size=(100, 100))
@@ -193,57 +199,43 @@ image_tk = None
 info = [""] * 4
 
 
-prompt_frame = CTkFrame(window, fg_color="transparent")
-prompt_frame.pack(side=RIGHT, fill=BOTH, expand=True, padx=(0, 20), pady=20)
-
-positive = CTkFrame(prompt_frame, fg_color="transparent")
-positive.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 20))
-positive_box = CTkTextbox(positive, wrap=WORD)
-positive_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 0))
+positive_box = CTkTextbox(window, wrap=WORD)
+positive_box.grid(row=0, column=1, columnspan=4, sticky="news", pady=(20, 20))
 default_text_colour = positive_box._text_color
 positive_box.insert(END, "Prompt")
 positive_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
-negative = CTkFrame(prompt_frame, fg_color="transparent")
-negative.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 20))
-negative_box = CTkTextbox(negative, wrap=WORD)
-negative_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 0))
+negative_box = CTkTextbox(window, wrap=WORD)
+negative_box.grid(row=1, column=1, columnspan=4, sticky="news", pady=(0, 20))
 negative_box.insert(END, "Negative Prompt")
 negative_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
-setting = CTkFrame(prompt_frame, fg_color="transparent")
-setting.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 10))
-setting_box = CTkTextbox(setting, wrap=WORD, height=100)
-setting_box.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 85))
+setting_box = CTkTextbox(window, wrap=WORD, height=100)
+setting_box.grid(row=2, column=1, columnspan=4, sticky="news", pady=(0, 20))
 setting_box.insert(END, "Setting")
 setting_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
-tool_bar = CTkFrame(prompt_frame, fg_color="transparent")
-tool_bar.pack(side=TOP, fill=BOTH, expand=True, pady=(0, 0))
 
 clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
 clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
 
-button_positive = CTkButton(positive, width=50, height=50, image=clipboard_image, text="",
+button_positive = CTkButton(window, width=50, height=50, image=clipboard_image, text="",
                             command=lambda: copy_to_clipboard(info[0]))
-button_positive.pack(side=RIGHT, padx=(20, 0))
+button_positive.grid(row=0, column=5, padx=20, pady=(20, 20))
 
-button_negative = CTkButton(negative, width=50, height=50, image=clipboard_image, text="",
+button_negative = CTkButton(window, width=50, height=50, image=clipboard_image, text="",
                             command=lambda: copy_to_clipboard(info[1]))
-button_negative.pack(side=RIGHT, padx=(20, 0))
+button_negative.grid(row=1, column=5, padx=20, pady=(0, 20))
 
-button_prompt = CTkButton(tool_bar, width=50, height=50, image=clipboard_image, text="Raw Data", font=info_font,
-                          command=lambda: copy_to_clipboard(info[3]))
-button_prompt.grid(row=0, column=0, sticky="nsew", padx=10)
 
-status_frame = CTkFrame(tool_bar, width=200, height=50)
-status_frame.grid(row=0, column=1, sticky="nsew", padx=(50, 0))
-status = CTkLabel(status_frame, text="test")
-status.grid(sticky="nsew", padx=5, pady=5)
+button_raw = CTkButton(window, width=50, height=50, image=clipboard_image, text="Raw Data", font=info_font,
+                       command=lambda: copy_to_clipboard(info[3]))
+button_raw.grid(row=3, column=3, pady=(0, 20))
 
-# tool_bar.columnconfigure(1, weight=1)
-# tool_bar.columnconfigure(1, weight=1)
-# tool_bar.columnconfigure(2, weight=1)
+# status_frame = CTkFrame(window, height=50)
+# status_frame.grid(row=3, column=4, columnspan=2, sticky="news", padx=20, pady=(0, 20))
+# status = CTkLabel(status_frame, height=50, text="test", justify="center")
+# status.pack(fill=X, expand=True, padx=5, pady=5)
 
 window.drop_target_register(DND_FILES)
 window.dnd_bind("<<Drop>>", display_info)
