@@ -100,7 +100,6 @@ def display_info(event, is_selected=False):
         file_path = event
     else:
         file_path = event.data.replace("}", "").replace("{", "")
-    print(file_path)
     # clear text
     for box in boxes:
         box.configure(state=NORMAL)
@@ -134,12 +133,14 @@ def display_info(event, is_selected=False):
                 image_tk.configure(size=tuple(num / scaling for num in
                                               (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
             # display image
-            image_tk.configure()
+            # image_tk.configure()
             image_label.configure(image=image_tk)
     else:
         for box in boxes:
             box.insert(END, "Unsupported format")
             box.configure(state=DISABLED, text_color="gray")
+            image_label.configure(image=drop_image)
+            image = None
             status_label.configure(image=error_image, text="Unsupported format")
 
 
