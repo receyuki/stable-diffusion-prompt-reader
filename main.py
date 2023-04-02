@@ -86,9 +86,10 @@ def image_info_format(text):
         positive = text[:prompt_index[0]]
         negative = text[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
         setting = text[prompt_index[1] + 1:]
+        return positive, negative, setting, text
     else:
-        positive = negative = setting = "No data detected or unsupported formats"
-    return positive, negative, setting, text
+        return None
+
 
 
 def display_info(event):
@@ -103,6 +104,12 @@ def display_info(event):
         with open(file_path, "rb") as f:
             text_line, _ = image_data(f)
             info = image_info_format(text_line)
+            if not info:
+                for box in boxes:
+                    box.insert(END, "No data")
+                    status_label.configure(image=error_image, text="No data detected or unsupported format")
+                    box.configure(state=DISABLED, text_color="gray")
+                return
             # insert prompt
             positive_box.insert(END, info[0])
             negative_box.insert(END, info[1])
@@ -124,9 +131,12 @@ def display_info(event):
             # display image
             image_tk.configure()
             image_label.configure(image=image_tk)
+            status_label.configure(image=ok_image, text="Voilà!")
     else:
         for box in boxes:
-            box.insert(END, "Unsupported formats")
+            box.insert(END, "Unsupported format")
+            box.configure(state=DISABLED, text_color="gray")
+            status_label.configure(image=error_image, text="Unsupported format")
 
 
 def resize_image(event):
@@ -159,6 +169,15 @@ def copy_to_clipboard(content):
                             )
 
 
+def add_margin(img, top, bottom, left, right):
+    width, height = img.size
+    new_width = width + right + left
+    new_height = height + top + bottom
+    result = Image.new(img.mode, (new_width, new_height))
+    result.paste(img, (left, top))
+    return result
+
+
 # window = TkinterDnD.Tk()
 window = Tk()
 window.title("SD Prompt Reader")
@@ -185,7 +204,6 @@ window.columnconfigure(0, weight=5)
 window.rowconfigure(0, weight=2)
 window.rowconfigure(1, weight=2)
 
-
 image_frame = CTkFrame(window)
 image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
 
@@ -197,7 +215,6 @@ image_label.pack(fill=BOTH, expand=True)
 image = None
 image_tk = None
 info = [""] * 4
-
 
 positive_box = CTkTextbox(window, wrap=WORD)
 positive_box.grid(row=0, column=1, columnspan=4, sticky="news", pady=(20, 20))
@@ -215,7 +232,6 @@ setting_box.grid(row=2, column=1, columnspan=4, sticky="news", pady=(0, 20))
 setting_box.insert(END, "Setting")
 setting_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
-
 clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
 clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
 
@@ -227,15 +243,27 @@ button_negative = CTkButton(window, width=50, height=50, image=clipboard_image, 
                             command=lambda: copy_to_clipboard(info[1]))
 button_negative.grid(row=1, column=5, padx=20, pady=(0, 20))
 
-
 button_raw = CTkButton(window, width=50, height=50, image=clipboard_image, text="Raw Data", font=info_font,
                        command=lambda: copy_to_clipboard(info[3]))
 button_raw.grid(row=3, column=3, pady=(0, 20))
 
-# status_frame = CTkFrame(window, height=50)
-# status_frame.grid(row=3, column=4, columnspan=2, sticky="news", padx=20, pady=(0, 20))
-# status = CTkLabel(status_frame, height=50, text="test", justify="center")
-# status.pack(fill=X, expand=True, padx=5, pady=5)
+add_file = path.join(bundle_dir, "resources/add.png")
+add_image = CTkImage(add_margin(Image.open(add_file), 0, 0, 0, 33), size=(40, 30))
+error_file = path.join(bundle_dir, "resources/error.png")
+error_image = CTkImage(add_margin(Image.open(error_file), 0, 0, 0, 33), size=(40, 30))
+ok_file = path.join(bundle_dir, "resources/ok.png")
+ok_image = CTkImage(add_margin(Image.open(ok_file), 0, 0, 0, 33), size=(40, 30))
+available_updates_file = path.join(bundle_dir, "resources/available-updates.png")
+available_updates_image = CTkImage(add_margin(Image.open(available_updates_file), 0, 0, 0, 33), size=(40, 30))
+
+
+status = "Drag and drop your file into the window"
+status_frame = CTkFrame(window, height=50)
+status_frame.grid(row=3, column=4, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5, ipady=5)
+
+status_label = CTkLabel(status_frame, height=50, text=status, text_color="gray", wraplength=130,
+                        image=add_image, compound="left")
+status_label.pack(side=LEFT, expand=True)
 
 window.drop_target_register(DND_FILES)
 window.dnd_bind("<<Drop>>", display_info)
