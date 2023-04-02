@@ -2,7 +2,7 @@ import piexif
 import pyperclip as pyperclip
 from PIL import Image, ImageTk
 from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, BOTH, X, Canvas, DISABLED, NORMAL, \
-    WORD, BOTTOM, CENTER, Label, ttk, PhotoImage
+    WORD, BOTTOM, CENTER, Label, ttk, PhotoImage, filedialog
 from tkinter.ttk import *
 from tkinterdnd2 import *
 from os import path, name
@@ -91,11 +91,13 @@ def image_info_format(text):
         return None
 
 
-
-def display_info(event):
+def display_info(event, is_selected=False):
     global image, image_tk, image_label, info, scaling
     boxes = [positive_box, negative_box, setting_box]
-    file_path = event.data.replace("}", "").replace("{", "")
+    if is_selected:
+        file_path = event
+    else:
+        file_path = event.data.replace("}", "").replace("{", "")
     # clear text
     for box in boxes:
         box.configure(state=NORMAL)
@@ -178,6 +180,14 @@ def add_margin(img, top, bottom, left, right):
     return result
 
 
+def select_image():
+    return filedialog.askopenfilename(
+        title='Select your image file',
+        initialdir="/",
+        filetypes=(("png files", "*.png"),)
+    )
+
+
 # window = TkinterDnD.Tk()
 window = Tk()
 window.title("SD Prompt Reader")
@@ -211,6 +221,7 @@ drop_file = path.join(bundle_dir, "resources/drag-and-drop.png")
 drop_image = CTkImage(light_image=Image.open(drop_file), dark_image=Image.open(drop_file), size=(100, 100))
 image_label = CTkLabel(image_frame, text="", image=drop_image)
 image_label.pack(fill=BOTH, expand=True)
+image_label.bind("<Button-1>", lambda e: display_info(select_image(), True))
 
 image = None
 image_tk = None
@@ -255,7 +266,6 @@ ok_file = path.join(bundle_dir, "resources/ok.png")
 ok_image = CTkImage(add_margin(Image.open(ok_file), 0, 0, 0, 33), size=(40, 30))
 available_updates_file = path.join(bundle_dir, "resources/available-updates.png")
 available_updates_image = CTkImage(add_margin(Image.open(available_updates_file), 0, 0, 0, 33), size=(40, 30))
-
 
 status = "Drag and drop your file into the window"
 status_frame = CTkFrame(window, height=50)
