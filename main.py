@@ -95,9 +95,12 @@ def display_info(event, is_selected=False):
     global image, image_tk, image_label, info, scaling
     boxes = [positive_box, negative_box, setting_box]
     if is_selected:
+        if event == "":
+            return
         file_path = event
     else:
         file_path = event.data.replace("}", "").replace("{", "")
+    print(file_path)
     # clear text
     for box in boxes:
         box.configure(state=NORMAL)
@@ -109,18 +112,18 @@ def display_info(event, is_selected=False):
             if not info:
                 for box in boxes:
                     box.insert(END, "No data")
-                    status_label.configure(image=error_image, text="No data detected or unsupported format")
                     box.configure(state=DISABLED, text_color="gray")
-                return
-            # insert prompt
-            positive_box.insert(END, info[0])
-            negative_box.insert(END, info[1])
-            setting_box.insert(END, info[2])
-
-            for box in boxes:
-                box.configure(state=DISABLED, text_color=default_text_colour)
+                status_label.configure(image=error_image, text="No data detected or unsupported format")
+            else:
+                # insert prompt
+                positive_box.insert(END, info[0])
+                negative_box.insert(END, info[1])
+                setting_box.insert(END, info[2])
+                for box in boxes:
+                    box.configure(state=DISABLED, text_color=default_text_colour)
+                status_label.configure(image=ok_image, text="Voilà!")
             image = Image.open(f)
-            image_tk = CTkImage(light_image=image, dark_image=image)
+            image_tk = CTkImage(image)
             aspect_ratio = image.size[0] / image.size[1]
             scaling = ScalingTracker.get_window_dpi_scaling(window)
             # resize image to window size
@@ -133,7 +136,6 @@ def display_info(event, is_selected=False):
             # display image
             image_tk.configure()
             image_label.configure(image=image_tk)
-            status_label.configure(image=ok_image, text="Voilà!")
     else:
         for box in boxes:
             box.insert(END, "Unsupported format")
