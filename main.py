@@ -1,9 +1,10 @@
 import asyncio
 import threading
-import time
+# import time
 
-import piexif
-from piexif import helper
+# import piexif
+import requests
+# from piexif import helper
 import pyperclip as pyperclip
 from PIL import Image, ImageTk
 from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, BOTH, X, Canvas, DISABLED, NORMAL, \
@@ -14,7 +15,7 @@ from os import path, name
 from customtkinter import *
 # from plyer import notification
 from packaging import version
-import aiohttp
+# import aiohttp
 import webbrowser
 
 bundle_dir = path.abspath(path.dirname(__file__))
@@ -214,29 +215,34 @@ def select_image():
     )
 
 
-async def check_update():
-    # response = requests.get(url, timeout=1)
-    # latest = response.json()["name"]
-    # return version.parse(latest) > version.parse(current_version)
+# async def check_update():
+def check_update():
+    print(threading.enumerate())
     url = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
-    async with aiohttp.request("GET", url, timeout=aiohttp.ClientTimeout(total=1)) as resp:
-        assert resp.status == 200
-        data = await resp.json()
-        print(data["name"])
-        latest = data["name"]
-    async_loop.call_soon_threadsafe(async_loop.stop)
+    # async with aiohttp.request("GET", url, timeout=aiohttp.ClientTimeout(total=1)) as resp:
+    #     assert resp.status == 200
+    #     data = await resp.json()
+    #     print(data["name"])
+    #     latest = data["name"]
+    # async_loop.call_soon_threadsafe(async_loop.stop)
+    response = requests.get(url, timeout=1).json()
+    latest = response["name"]
     if version.parse(latest) > version.parse(current_version):
-        url = data["html_url"]
+        # url = data["html_url"]
+        download_url = response["html_url"]
         status_label.configure(image=available_updates_image, text="A new version is available, click here to download")
-        status_label.bind("<Button-1>", lambda e: webbrowser.open_new(url))
+        status_label.bind("<Button-1>", lambda e: webbrowser.open_new(download_url))
+    print(threading.enumerate())
 
 
 # clean up threads that are no longer in use
 def close_update_thread():
+    print(threading.enumerate())
     global update_check
     update_check = False
+    status_label.unbind("<Button-1>")
     # async_loop.call_soon_threadsafe(async_loop.stop)
-    async_loop.close()
+    # async_loop.close()
     update_thread.join()
 
 
@@ -344,12 +350,13 @@ update_check = True
 print(threading.enumerate())
 print("before")
 # start a new thread for checking update
-async_loop = asyncio.get_event_loop()
-update_thread = threading.Thread(target=get_loop, args=(async_loop,))
+# async_loop = asyncio.get_event_loop()
+# update_thread = threading.Thread(target=get_loop, args=(async_loop,))
+update_thread = threading.Thread(target=check_update)
 update_thread.start()
-asyncio.run_coroutine_threadsafe(check_update(), async_loop)
+# asyncio.run_coroutine_threadsafe(check_update(), async_loop)
 print("after")
-
+print(threading.enumerate())
 window.mainloop()
 
 print(threading.enumerate())
