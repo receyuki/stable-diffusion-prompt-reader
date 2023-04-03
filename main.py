@@ -8,9 +8,11 @@ from tkinterdnd2 import *
 from os import path, name
 from customtkinter import *
 from plyer import notification
+import requests
+from packaging import version
 
 bundle_dir = path.abspath(path.dirname(__file__))
-
+current_version = "1.0.1"
 
 # Make dnd work with ctk
 class Tk(CTk, TkinterDnD.DnDWrapper):
@@ -191,6 +193,14 @@ def select_image():
     )
 
 
+def check_update():
+    url = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
+    response = requests.get(url, timeout=1)
+    latest = response.json()["name"]
+    return version.parse(latest) > version.parse(current_version)
+
+
+
 # window = TkinterDnD.Tk()
 window = Tk()
 window.title("SD Prompt Reader")
@@ -282,4 +292,8 @@ window.drop_target_register(DND_FILES)
 window.dnd_bind("<<Drop>>", display_info)
 window.bind("<Configure>", resize_image)
 
+print(check_update())
+# TODO thread
+# TODO disable buttons
+# TODO copy notification
 window.mainloop()
