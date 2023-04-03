@@ -1,4 +1,9 @@
+import asyncio
+import threading
+import time
+
 import piexif
+from piexif import helper
 import pyperclip as pyperclip
 from PIL import Image, ImageTk
 from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, BOTH, X, Canvas, DISABLED, NORMAL, \
@@ -7,12 +12,14 @@ from tkinter.ttk import *
 from tkinterdnd2 import *
 from os import path, name
 from customtkinter import *
-from plyer import notification
-import requests
+# from plyer import notification
 from packaging import version
+import aiohttp
+import webbrowser
 
 bundle_dir = path.abspath(path.dirname(__file__))
-current_version = "1.0.1"
+current_version = "1.0.0"
+
 
 # Make dnd work with ctk
 class Tk(CTk, TkinterDnD.DnDWrapper):
@@ -28,21 +35,21 @@ def read_info_from_image(image):
 
     geninfo = items.pop('parameters', None)
 
-    if "exif" in items:
-        exif = piexif.load(items["exif"])
-        exif_comment = (exif or {}).get("Exif", {}).get(piexif.ExifIFD.UserComment, b'')
-        try:
-            exif_comment = piexif.helper.UserComment.load(exif_comment)
-        except ValueError:
-            exif_comment = exif_comment.decode('utf8', errors="ignore")
-
-        if exif_comment:
-            items['exif comment'] = exif_comment
-            geninfo = exif_comment
-
-        for field in ['jfif', 'jfif_version', 'jfif_unit', 'jfif_density', 'dpi', 'exif',
-                      'loop', 'background', 'timestamp', 'duration']:
-            items.pop(field, None)
+    # if "exif" in items:
+    #     exif = piexif.load(items["exif"])
+    #     exif_comment = (exif or {}).get("Exif", {}).get(piexif.ExifIFD.UserComment, b'')
+    #     try:
+    #         exif_comment = piexif.helper.UserComment.load(exif_comment)
+    #     except ValueError:
+    #         exif_comment = exif_comment.decode('utf8', errors="ignore")
+    #
+    #     if exif_comment:
+    #         items['exif comment'] = exif_comment
+    #         geninfo = exif_comment
+    #
+    #     for field in ['jfif', 'jfif_version', 'jfif_unit', 'jfif_density', 'dpi', 'exif',
+    #                   'loop', 'background', 'timestamp', 'duration']:
+    #         items.pop(field, None)
 
     #     if items.get("Software", None) == "NovelAI":
     #         try:
@@ -96,6 +103,10 @@ def image_info_format(text):
 def display_info(event, is_selected=False):
     global image, image_tk, image_label, info, scaling
     boxes = [positive_box, negative_box, setting_box]
+    # stop update thread when reading first image
+    if update_check:
+        close_update_thread()
+    # select or drag and drop
     if is_selected:
         if event == "":
             return
@@ -115,6 +126,9 @@ def display_info(event, is_selected=False):
                     box.insert(END, "No data")
                     box.configure(state=DISABLED, text_color="gray")
                 status_label.configure(image=error_image, text="No data detected or unsupported format")
+                button_positive.configure(state=DISABLED)
+                button_negative.configure(state=DISABLED)
+                button_raw.configure(state=DISABLED)
             else:
                 # insert prompt
                 positive_box.insert(END, info[0])
@@ -123,6 +137,9 @@ def display_info(event, is_selected=False):
                 for box in boxes:
                     box.configure(state=DISABLED, text_color=default_text_colour)
                 status_label.configure(image=ok_image, text="Voilà!")
+                button_positive.configure(state=NORMAL)
+                button_negative.configure(state=NORMAL)
+                button_raw.configure(state=NORMAL)
             image = Image.open(f)
             image_tk = CTkImage(image)
             aspect_ratio = image.size[0] / image.size[1]
@@ -144,6 +161,9 @@ def display_info(event, is_selected=False):
             image_label.configure(image=drop_image)
             image = None
             status_label.configure(image=error_image, text="Unsupported format")
+        button_positive.configure(state=DISABLED)
+        button_negative.configure(state=DISABLED)
+        button_raw.configure(state=DISABLED)
 
 
 def resize_image(event):
@@ -168,12 +188,13 @@ def copy_to_clipboard(content):
     except:
         print("Copy error")
     else:
-        notification.notify(title="Success",
-                            message="copied to clipboard",
-                            app_icon=ico_file,
-                            timeout=50,
-                            toast=True,
-                            )
+        # notification.notify(title="Success",
+        #                     message="copied to clipboard",
+        #                     app_icon=ico_file,
+        #                     timeout=50,
+        #                     toast=True,
+        #                     )
+        status_label.configure(image=ok_image, text="Copied to clipboard")
 
 
 def add_margin(img, top, bottom, left, right):
@@ -193,12 +214,35 @@ def select_image():
     )
 
 
-def check_update():
+async def check_update():
+    # response = requests.get(url, timeout=1)
+    # latest = response.json()["name"]
+    # return version.parse(latest) > version.parse(current_version)
     url = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
-    response = requests.get(url, timeout=1)
-    latest = response.json()["name"]
-    return version.parse(latest) > version.parse(current_version)
+    async with aiohttp.request("GET", url, timeout=aiohttp.ClientTimeout(total=1)) as resp:
+        assert resp.status == 200
+        data = await resp.json()
+        print(data["name"])
+        latest = data["name"]
+    async_loop.call_soon_threadsafe(async_loop.stop)
+    if version.parse(latest) > version.parse(current_version):
+        url = data["html_url"]
+        status_label.configure(image=available_updates_image, text="A new version is available, click here to download")
+        status_label.bind("<Button-1>", lambda e: webbrowser.open_new(url))
 
+
+# clean up threads that are no longer in use
+def close_update_thread():
+    global update_check
+    update_check = False
+    # async_loop.call_soon_threadsafe(async_loop.stop)
+    async_loop.close()
+    update_thread.join()
+
+
+def get_loop(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
 
 
 # window = TkinterDnD.Tk()
@@ -288,12 +332,24 @@ status_label = CTkLabel(status_frame, height=50, text=status, text_color="gray",
                         image=add_image, compound="left")
 status_label.pack(side=LEFT, expand=True)
 
+button_positive.configure(state=DISABLED)
+button_negative.configure(state=DISABLED)
+button_raw.configure(state=DISABLED)
+
 window.drop_target_register(DND_FILES)
 window.dnd_bind("<<Drop>>", display_info)
 window.bind("<Configure>", resize_image)
 
-print(check_update())
-# TODO thread
-# TODO disable buttons
-# TODO copy notification
+update_check = True
+print(threading.enumerate())
+print("before")
+# start a new thread for checking update
+async_loop = asyncio.get_event_loop()
+update_thread = threading.Thread(target=get_loop, args=(async_loop,))
+update_thread.start()
+asyncio.run_coroutine_threadsafe(check_update(), async_loop)
+print("after")
+
 window.mainloop()
+
+print(threading.enumerate())
