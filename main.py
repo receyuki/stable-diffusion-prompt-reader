@@ -1,3 +1,9 @@
+# -*- encoding:utf-8 -*-
+__author__ = 'receyuki'
+__filename__ = 'main.py'
+__copyright__ = 'Copyright 2023'
+__email__ = 'receyuki@gmail.com'
+
 # import asyncio
 import threading
 # import piexif
