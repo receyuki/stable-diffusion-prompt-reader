@@ -126,7 +126,7 @@ def display_info(event, is_selected=False):
                 for box in boxes:
                     box.insert(END, "No data")
                     box.configure(state=DISABLED, text_color="gray")
-                status_label.configure(image=error_image, text="No data detected or unsupported format")
+                status_label.configure(image=box_important_image, text="No data detected or unsupported format")
                 button_positive.configure(state=DISABLED)
                 button_negative.configure(state=DISABLED)
                 button_raw.configure(state=DISABLED)
@@ -161,7 +161,7 @@ def display_info(event, is_selected=False):
             box.configure(state=DISABLED, text_color="gray")
             image_label.configure(image=drop_image)
             image = None
-            status_label.configure(image=error_image, text="Unsupported format")
+            status_label.configure(image=box_important_image, text="Unsupported format")
         button_positive.configure(state=DISABLED)
         button_negative.configure(state=DISABLED)
         button_raw.configure(state=DISABLED)
@@ -228,11 +228,11 @@ def check_update():
     response = requests.get(url, timeout=1).json()
     latest = response["name"]
     if version.parse(latest) > version.parse(current_version):
+        print(latest)
         # url = data["html_url"]
         download_url = response["html_url"]
         status_label.configure(image=available_updates_image, text="A new version is available, click here to download")
         status_label.bind("<Button-1>", lambda e: webbrowser.open_new(download_url))
-    print(threading.enumerate())
 
 
 # clean up threads that are no longer in use
@@ -325,6 +325,8 @@ add_file = path.join(bundle_dir, "resources/add.png")
 add_image = CTkImage(add_margin(Image.open(add_file), 0, 0, 0, 33), size=(40, 30))
 error_file = path.join(bundle_dir, "resources/error.png")
 error_image = CTkImage(add_margin(Image.open(error_file), 0, 0, 0, 33), size=(40, 30))
+box_important_file = path.join(bundle_dir, "resources/box-important.png")
+box_important_image = CTkImage(add_margin(Image.open(box_important_file), 0, 0, 0, 33), size=(40, 30))
 ok_file = path.join(bundle_dir, "resources/ok.png")
 ok_image = CTkImage(add_margin(Image.open(ok_file), 0, 0, 0, 33), size=(40, 30))
 available_updates_file = path.join(bundle_dir, "resources/available-updates.png")
