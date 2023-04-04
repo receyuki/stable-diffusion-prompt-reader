@@ -1,10 +1,8 @@
-import asyncio
+# import asyncio
 import threading
-# import time
-
 # import piexif
-import requests
 # from piexif import helper
+import requests
 import pyperclip as pyperclip
 from PIL import Image, ImageTk
 from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, BOTH, X, Canvas, DISABLED, NORMAL, \
@@ -13,13 +11,11 @@ from tkinter.ttk import *
 from tkinterdnd2 import *
 from os import path, name
 from customtkinter import *
-# from plyer import notification
 from packaging import version
-# import aiohttp
 import webbrowser
 
 bundle_dir = path.abspath(path.dirname(__file__))
-current_version = "1.0.0"
+current_version = "1.1.0"
 
 
 # Make dnd work with ctk
@@ -72,7 +68,6 @@ def read_info_from_image(image):
 def image_data(file):
     try:
         image = Image.open(file)
-        image.info
         textinfo, _ = read_info_from_image(image)
         return textinfo, None
     except Exception:
@@ -103,7 +98,6 @@ def image_info_format(text):
 
 def display_info(event, is_selected=False):
     global image, image_tk, image_label, info, scaling
-    boxes = [positive_box, negative_box, setting_box]
     # stop update thread when reading first image
     if update_check:
         close_update_thread()
@@ -127,9 +121,8 @@ def display_info(event, is_selected=False):
                     box.insert(END, "No data")
                     box.configure(state=DISABLED, text_color="gray")
                 status_label.configure(image=box_important_image, text="No data detected or unsupported format")
-                button_positive.configure(state=DISABLED)
-                button_negative.configure(state=DISABLED)
-                button_raw.configure(state=DISABLED)
+                for button in buttons:
+                    button.configure(state=DISABLED)
             else:
                 # insert prompt
                 positive_box.insert(END, info[0])
@@ -138,23 +131,22 @@ def display_info(event, is_selected=False):
                 for box in boxes:
                     box.configure(state=DISABLED, text_color=default_text_colour)
                 status_label.configure(image=ok_image, text="Voilà!")
-                button_positive.configure(state=NORMAL)
-                button_negative.configure(state=NORMAL)
-                button_raw.configure(state=NORMAL)
+                for button in buttons:
+                    button.configure(state=NORMAL)
             image = Image.open(f)
             image_tk = CTkImage(image)
-            aspect_ratio = image.size[0] / image.size[1]
-            scaling = ScalingTracker.get_window_dpi_scaling(window)
-            # resize image to window size
-            if image.size[0] > image.size[1]:
-                image_tk.configure(size=tuple(num / scaling for num in
-                                              (image_frame.winfo_height(), image_frame.winfo_height() / aspect_ratio)))
-            else:
-                image_tk.configure(size=tuple(num / scaling for num in
-                                              (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
-            # display image
-            # image_tk.configure()
-            image_label.configure(image=image_tk)
+            resize_image()
+            # aspect_ratio = image.size[0] / image.size[1]
+            # scaling = ScalingTracker.get_window_dpi_scaling(window)
+            # # resize image to window size
+            # if image.size[0] > image.size[1]:
+            #     image_tk.configure(size=tuple(num / scaling for num in
+            #                                   (image_frame.winfo_height(), image_frame.winfo_height() / aspect_ratio)))
+            # else:
+            #     image_tk.configure(size=tuple(num / scaling for num in
+            #                                   (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
+            # # display image
+            # image_label.configure(image=image_tk)
     else:
         for box in boxes:
             box.insert(END, "Unsupported format")
@@ -162,12 +154,11 @@ def display_info(event, is_selected=False):
             image_label.configure(image=drop_image)
             image = None
             status_label.configure(image=box_important_image, text="Unsupported format")
-        button_positive.configure(state=DISABLED)
-        button_negative.configure(state=DISABLED)
-        button_raw.configure(state=DISABLED)
+        for button in buttons:
+            button.configure(state=DISABLED)
 
 
-def resize_image(event):
+def resize_image(event=None):
     # resize image to window size
     global image, image_label, image_tk, scaling
     if image:
@@ -180,6 +171,7 @@ def resize_image(event):
         else:
             image_tk.configure(size=tuple(num / scaling for num in
                                           (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
+        # display image
         image_label.configure(image=image_tk)
 
 
@@ -189,12 +181,6 @@ def copy_to_clipboard(content):
     except:
         print("Copy error")
     else:
-        # notification.notify(title="Success",
-        #                     message="copied to clipboard",
-        #                     app_icon=ico_file,
-        #                     timeout=50,
-        #                     toast=True,
-        #                     )
         status_label.configure(image=ok_image, text="Copied to clipboard")
 
 
@@ -217,7 +203,6 @@ def select_image():
 
 # async def check_update():
 def check_update():
-    print(threading.enumerate())
     url = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
     # async with aiohttp.request("GET", url, timeout=aiohttp.ClientTimeout(total=1)) as resp:
     #     assert resp.status == 200
@@ -225,19 +210,21 @@ def check_update():
     #     print(data["name"])
     #     latest = data["name"]
     # async_loop.call_soon_threadsafe(async_loop.stop)
-    response = requests.get(url, timeout=1).json()
-    latest = response["name"]
-    if version.parse(latest) > version.parse(current_version):
-        print(latest)
-        # url = data["html_url"]
-        download_url = response["html_url"]
-        status_label.configure(image=available_updates_image, text="A new version is available, click here to download")
-        status_label.bind("<Button-1>", lambda e: webbrowser.open_new(download_url))
+    try:
+        response = requests.get(url, timeout=3).json()
+    except Exception:
+        print("Github api connection error")
+    else:
+        latest = response["name"]
+        if version.parse(latest) > version.parse(current_version):
+            download_url = response["html_url"]
+            status_label.configure(image=available_updates_image,
+                                   text="A new version is available, click here to download")
+            status_label.bind("<Button-1>", lambda e: webbrowser.open_new(download_url))
 
 
 # clean up threads that are no longer in use
 def close_update_thread():
-    print(threading.enumerate())
     global update_check
     update_check = False
     status_label.unbind("<Button-1>")
@@ -264,6 +251,21 @@ window.geometry("1200x650")
 info_font = CTkFont()
 scaling = ScalingTracker.get_window_dpi_scaling(window)
 
+add_file = path.join(bundle_dir, "resources/add.png")
+add_image = CTkImage(add_margin(Image.open(add_file), 0, 0, 0, 33), size=(40, 30))
+error_file = path.join(bundle_dir, "resources/error.png")
+error_image = CTkImage(add_margin(Image.open(error_file), 0, 0, 0, 33), size=(40, 30))
+box_important_file = path.join(bundle_dir, "resources/box-important.png")
+box_important_image = CTkImage(add_margin(Image.open(box_important_file), 0, 0, 0, 33), size=(40, 30))
+ok_file = path.join(bundle_dir, "resources/ok.png")
+ok_image = CTkImage(add_margin(Image.open(ok_file), 0, 0, 0, 33), size=(40, 30))
+available_updates_file = path.join(bundle_dir, "resources/available-updates.png")
+available_updates_image = CTkImage(add_margin(Image.open(available_updates_file), 0, 0, 0, 33), size=(40, 30))
+drop_file = path.join(bundle_dir, "resources/drag-and-drop.png")
+drop_image = CTkImage(light_image=Image.open(drop_file), dark_image=Image.open(drop_file), size=(100, 100))
+clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
+clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
+
 icon_file = path.join(bundle_dir, "resources/icon.png")
 ico_file = path.join(bundle_dir, "resources/icon.ico")
 icon_image = PhotoImage(file=icon_file)
@@ -280,8 +282,6 @@ window.rowconfigure(1, weight=2)
 image_frame = CTkFrame(window)
 image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
 
-drop_file = path.join(bundle_dir, "resources/drag-and-drop.png")
-drop_image = CTkImage(light_image=Image.open(drop_file), dark_image=Image.open(drop_file), size=(100, 100))
 image_label = CTkLabel(image_frame, text="", image=drop_image)
 image_label.pack(fill=BOTH, expand=True)
 image_label.bind("<Button-1>", lambda e: display_info(select_image(), True))
@@ -306,9 +306,6 @@ setting_box.grid(row=2, column=1, columnspan=4, sticky="news", pady=(0, 20))
 setting_box.insert(END, "Setting")
 setting_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
-clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
-clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
-
 button_positive = CTkButton(window, width=50, height=50, image=clipboard_image, text="",
                             command=lambda: copy_to_clipboard(info[0]))
 button_positive.grid(row=0, column=5, padx=20, pady=(20, 20))
@@ -321,44 +318,29 @@ button_raw = CTkButton(window, width=50, height=50, image=clipboard_image, text=
                        command=lambda: copy_to_clipboard(info[3]))
 button_raw.grid(row=3, column=3, pady=(0, 20))
 
-add_file = path.join(bundle_dir, "resources/add.png")
-add_image = CTkImage(add_margin(Image.open(add_file), 0, 0, 0, 33), size=(40, 30))
-error_file = path.join(bundle_dir, "resources/error.png")
-error_image = CTkImage(add_margin(Image.open(error_file), 0, 0, 0, 33), size=(40, 30))
-box_important_file = path.join(bundle_dir, "resources/box-important.png")
-box_important_image = CTkImage(add_margin(Image.open(box_important_file), 0, 0, 0, 33), size=(40, 30))
-ok_file = path.join(bundle_dir, "resources/ok.png")
-ok_image = CTkImage(add_margin(Image.open(ok_file), 0, 0, 0, 33), size=(40, 30))
-available_updates_file = path.join(bundle_dir, "resources/available-updates.png")
-available_updates_image = CTkImage(add_margin(Image.open(available_updates_file), 0, 0, 0, 33), size=(40, 30))
 
 status = "Drag and drop your file into the window"
 status_frame = CTkFrame(window, height=50)
 status_frame.grid(row=3, column=4, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5, ipady=5)
-
 status_label = CTkLabel(status_frame, height=50, text=status, text_color="gray", wraplength=130,
                         image=add_image, compound="left")
 status_label.pack(side=LEFT, expand=True)
 
-button_positive.configure(state=DISABLED)
-button_negative.configure(state=DISABLED)
-button_raw.configure(state=DISABLED)
+boxes = [positive_box, negative_box, setting_box]
+buttons = [button_positive, button_negative, button_raw]
+
+for button in buttons:
+    button.configure(state=DISABLED)
 
 window.drop_target_register(DND_FILES)
 window.dnd_bind("<<Drop>>", display_info)
 window.bind("<Configure>", resize_image)
 
 update_check = True
-print(threading.enumerate())
-print("before")
 # start a new thread for checking update
 # async_loop = asyncio.get_event_loop()
 # update_thread = threading.Thread(target=get_loop, args=(async_loop,))
 update_thread = threading.Thread(target=check_update)
 update_thread.start()
 # asyncio.run_coroutine_threadsafe(check_update(), async_loop)
-print("after")
-print(threading.enumerate())
 window.mainloop()
-
-print(threading.enumerate())

@@ -32,7 +32,7 @@ VSVersionInfo(
         [StringStruct('CompanyName', ''),
         StringStruct('LegalCopyright', 'Copyright © 2023 receyuki All rights reserved.'),
         StringStruct('ProductName', 'SD Prompt Reader'),
-        StringStruct('ProductVersion', '1.1.0.0 beta4'),
+        StringStruct('ProductVersion', '1.1.0.0'),
         StringStruct('FileDescription', 'SD Prompt Reader'),
         StringStruct('InternalName', 'SD Prompt Reader'),
         StringStruct('OriginalFilename', 'SD Prompt Reader.exe')])

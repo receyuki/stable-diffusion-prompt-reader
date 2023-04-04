@@ -6,7 +6,6 @@ Usage:
 """
 
 from pathlib import Path
-
 from setuptools import setup
 import tkinter as tk
 import shutil
@@ -19,7 +18,7 @@ OPTIONS = {
     'plist': {
         'CFBundleName': 'SD Prompt Reader',
         'CFBundleDisplayName': 'SD Prompt Reader',
-        'CFBundleVersion': '1.1.0 beta4',
+        'CFBundleVersion': '1.1.0',
         'CFBundleIdentifier': 'com.receyuki.sd-prompt-reader',
         'NSHumanReadableCopyright': 'Copyright © 2023 receyuki All rights reserved.',
     },
