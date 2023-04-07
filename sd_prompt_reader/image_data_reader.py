@@ -32,7 +32,7 @@ class ImageDataReader:
             self._raw = ""
 
     def read_data(self, file):
-        with Image.open(file, formats=["PNG", "JPEG", "WEBP"]) as f:
+        with Image.open(file) as f:
             self._width = f.width
             self._height = f.height
             self._info = f.info
