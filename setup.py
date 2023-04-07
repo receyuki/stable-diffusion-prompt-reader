@@ -18,12 +18,13 @@ OPTIONS = {
     'plist': {
         'CFBundleName': 'SD Prompt Reader',
         'CFBundleDisplayName': 'SD Prompt Reader',
-        'CFBundleVersion': '1.1.0',
+        'CFBundleVersion': '1.1.1beta',
         'CFBundleIdentifier': 'com.receyuki.sd-prompt-reader',
         'NSHumanReadableCopyright': 'Copyright © 2023 receyuki All rights reserved.',
     },
     'includes': ['pyperclip', 'PIL', 'tkinter', 'tkinterdnd2', 'os', 'customtkinter', 'plyer', 'pyobjus',
-                 'plyer.platforms.macosx.notification', 'tcl8', 'tcl8.6', 'charset_normalizer.md__mypyc']
+                 'plyer.platforms.macosx.notification', 'tcl8', 'tcl8.6', 'charset_normalizer.md__mypyc',
+                 'PIL.WebPImagePlugin']
 }
 
 setup(

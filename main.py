@@ -20,8 +20,10 @@ from customtkinter import *
 from packaging import version
 import webbrowser
 
+from sd_prompt_reader.image_data_reader import ImageDataReader
+
 bundle_dir = path.abspath(path.dirname(__file__))
-current_version = "1.1.0"
+current_version = "1.1.1beta"
 
 
 # Make dnd work with ctk
@@ -33,51 +35,51 @@ class Tk(CTk, TkinterDnD.DnDWrapper):
 
 # Modified from:
 # https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/22bcc7be428c94e9408f589966c2040187245d81/modules/images.py#L614
-def read_info_from_image(image):
-    items = image.info or {}
-
-    geninfo = items.pop('parameters', None)
-
-    # if "exif" in items:
-    #     exif = piexif.load(items["exif"])
-    #     exif_comment = (exif or {}).get("Exif", {}).get(piexif.ExifIFD.UserComment, b'')
-    #     try:
-    #         exif_comment = piexif.helper.UserComment.load(exif_comment)
-    #     except ValueError:
-    #         exif_comment = exif_comment.decode('utf8', errors="ignore")
-    #
-    #     if exif_comment:
-    #         items['exif comment'] = exif_comment
-    #         geninfo = exif_comment
-    #
-    #     for field in ['jfif', 'jfif_version', 'jfif_unit', 'jfif_density', 'dpi', 'exif',
-    #                   'loop', 'background', 'timestamp', 'duration']:
-    #         items.pop(field, None)
-
-    #     if items.get("Software", None) == "NovelAI":
-    #         try:
-    #             json_info = json.loads(items["Comment"])
-    #             sampler = sd_samplers.samplers_map.get(json_info["sampler"], "Euler a")
-    #
-    #             geninfo = f"""{items["Description"]}
-    # Negative prompt: {json_info["uc"]}
-    # Steps: {json_info["steps"]}, Sampler: {sampler}, CFG scale: {json_info["scale"]}, Seed: {json_info["seed"]}, Size: {image.width}x{image.height}, Clip skip: 2, ENSD: 31337"""
-    #         except Exception:
-    #             print("Error parsing NovelAI image generation parameters:", file=sys.stderr)
-    #             print(traceback.format_exc(), file=sys.stderr)
-
-    return geninfo, items
+# def read_info_from_image(image):
+#     items = image.info or {}
+#
+#     geninfo = items.pop('parameters', None)
+#
+#     if "exif" in items:
+#         exif = piexif.load(items["exif"])
+#         exif_comment = (exif or {}).get("Exif", {}).get(piexif.ExifIFD.UserComment, b'')
+#         try:
+#             exif_comment = piexif.helper.UserComment.load(exif_comment)
+#         except ValueError:
+#             exif_comment = exif_comment.decode('utf8', errors="ignore")
+#
+#         if exif_comment:
+#             items['exif comment'] = exif_comment
+#             geninfo = exif_comment
+#
+#         for field in ['jfif', 'jfif_version', 'jfif_unit', 'jfif_density', 'dpi', 'exif',
+#                       'loop', 'background', 'timestamp', 'duration']:
+#             items.pop(field, None)
+#
+#         if items.get("Software", None) == "NovelAI":
+#             try:
+#                 json_info = json.loads(items["Comment"])
+#                 sampler = sd_samplers.samplers_map.get(json_info["sampler"], "Euler a")
+#
+#                 geninfo = f"""{items["Description"]}
+#     Negative prompt: {json_info["uc"]}
+#     Steps: {json_info["steps"]}, Sampler: {sampler}, CFG scale: {json_info["scale"]}, Seed: {json_info["seed"]}, Size: {image.width}x{image.height}, Clip skip: 2, ENSD: 31337"""
+#             except Exception:
+#                 print("Error parsing NovelAI image generation parameters:", file=sys.stderr)
+#                 print(traceback.format_exc(), file=sys.stderr)
+#
+#     return geninfo, items
 
 
 # Modified from:
 # https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/22bcc7be428c94e9408f589966c2040187245d81/modules/images.py#L650
-def image_data(file):
-    try:
-        image = Image.open(file)
-        textinfo, _ = read_info_from_image(image)
-        return textinfo, None
-    except Exception:
-        pass
+# def image_data(file):
+#     try:
+#         image = Image.open(file)
+#         textinfo, _ = read_info_from_image(image)
+#         return textinfo, None
+#     except Exception:
+#         pass
 
     # try:
     #     text = data.decode('utf8')
@@ -87,19 +89,19 @@ def image_data(file):
     # except Exception:
     #     pass
 
-    return '', None
+    # return '', None
 
 
-def image_info_format(text):
-    if text:
-        prompt_index = [text.index("\nNegative prompt:"),
-                        text.index("\nSteps:")]
-        positive = text[:prompt_index[0]]
-        negative = text[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
-        setting = text[prompt_index[1] + 1:]
-        return positive, negative, setting, text
-    else:
-        return None
+# def image_info_format(text):
+#     if text:
+#         prompt_index = [text.index("\nNegative prompt:"),
+#                         text.index("\nSteps:")]
+#         positive = text[:prompt_index[0]]
+#         negative = text[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
+#         setting = text[prompt_index[1] + 1:]
+#         return positive, negative, setting, text
+#     else:
+#         return None
 
 
 def display_info(event, is_selected=False):
@@ -118,11 +120,19 @@ def display_info(event, is_selected=False):
     for box in boxes:
         box.configure(state=NORMAL)
         box.delete("1.0", END)
-    if file_path.lower().endswith(".png"):
+    if file_path.lower().endswith(".png") or \
+            file_path.lower().endswith(".jpg") or \
+            file_path.lower().endswith(".jpeg") or \
+            file_path.lower().endswith(".webp"):
         with open(file_path, "rb") as f:
-            text_line, _ = image_data(f)
-            info = image_info_format(text_line)
-            if not info:
+            # text_line, _ = image_data(f)
+            # info = image_info_format(text_line)
+            image_data = ImageDataReader(f)
+            info = [image_data.positive,
+                    image_data.negative,
+                    image_data.setting,
+                    image_data.raw]
+            if not image_data.raw:
                 for box in boxes:
                     box.insert(END, "No data")
                     box.configure(state=DISABLED, text_color="gray")
@@ -131,9 +141,9 @@ def display_info(event, is_selected=False):
                     button.configure(state=DISABLED)
             else:
                 # insert prompt
-                positive_box.insert(END, info[0])
-                negative_box.insert(END, info[1])
-                setting_box.insert(END, info[2])
+                positive_box.insert(END, image_data.positive)
+                negative_box.insert(END, image_data.negative)
+                setting_box.insert(END, image_data.setting)
                 for box in boxes:
                     box.configure(state=DISABLED, text_color=default_text_colour)
                 status_label.configure(image=ok_image, text="Voilà!")
@@ -142,17 +152,6 @@ def display_info(event, is_selected=False):
             image = Image.open(f)
             image_tk = CTkImage(image)
             resize_image()
-            # aspect_ratio = image.size[0] / image.size[1]
-            # scaling = ScalingTracker.get_window_dpi_scaling(window)
-            # # resize image to window size
-            # if image.size[0] > image.size[1]:
-            #     image_tk.configure(size=tuple(num / scaling for num in
-            #                                   (image_frame.winfo_height(), image_frame.winfo_height() / aspect_ratio)))
-            # else:
-            #     image_tk.configure(size=tuple(num / scaling for num in
-            #                                   (image_label.winfo_height() * aspect_ratio, image_label.winfo_height())))
-            # # display image
-            # image_label.configure(image=image_tk)
     else:
         for box in boxes:
             box.insert(END, "Unsupported format")
@@ -203,7 +202,7 @@ def select_image():
     return filedialog.askopenfilename(
         title='Select your image file',
         initialdir="/",
-        filetypes=(("png files", "*.png"),)
+        filetypes=(("PNG files", "*.png"), ("JPEG files", "*.jpg *jpeg"), ("WEBP files", "*.webp"))
     )
 
 
@@ -239,9 +238,9 @@ def close_update_thread():
     update_thread.join()
 
 
-def get_loop(loop):
-    asyncio.set_event_loop(loop)
-    loop.run_forever()
+# def get_loop(loop):
+#     asyncio.set_event_loop(loop)
+#     loop.run_forever()
 
 
 # window = TkinterDnD.Tk()

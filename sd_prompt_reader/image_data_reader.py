@@ -5,80 +5,92 @@ __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 import json
-import traceback
-
 import piexif
+import piexif.helper
 from PIL import Image
-from piexif import helper
 
 
-class ImageDataReader():
+class ImageDataReader:
     def __init__(self, file):
-        self.file = file
+        self._height = None
+        self._width = None
+        self._info = {}
+        self._positive = ""
+        self._negative = ""
+        self._setting = ""
+        self._raw = ""
+        self.read_data(file)
 
-    @staticmethod
-    def read_info_from_image(self, image):
-        items = image.info or {}
+    def _sd_format(self):
+        if self._raw and "Negative prompt:" in self._raw and "\nSteps:" in self._raw:
+            prompt_index = [self._raw.index("\nNegative prompt:"),
+                            self._raw.index("\nSteps:")]
+            self._positive = self._raw[:prompt_index[0]]
+            self._negative = self._raw[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
+            self._setting = self._raw[prompt_index[1] + 1:]
+        else:
+            self._raw = ""
 
-        geninfo = items.pop('parameters', None)
+    def read_data(self, file):
+        with Image.open(file, formats=["PNG", "JPEG", "WEBP"]) as f:
+            self._width = f.width
+            self._height = f.height
+            self._info = f.info
+            if "parameters" in self._info and f.format == "PNG":
+                self._sd_png()
+            elif "exif" in self._info and (f.format == "JPEG" or f.format == "WEBP"):
+                self._sd_jpg()
+            elif self._info.get("Software") == "NovelAI" and f.format == "PNG":
+                self._nai_png()
 
-        if "exif" in items:
-            exif = piexif.load(items["exif"])
-            exif_comment = (exif or {}).get("Exif", {}).get(piexif.ExifIFD.UserComment, b'')
-            try:
-                exif_comment = piexif.helper.UserComment.load(exif_comment)
-            except ValueError:
-                exif_comment = exif_comment.decode('utf8', errors="ignore")
+    def _sd_png(self):
+        self._raw = self._info.get("parameters")
+        self._sd_format()
 
-            if exif_comment:
-                items['exif comment'] = exif_comment
-                geninfo = exif_comment
-
-            for field in ['jfif', 'jfif_version', 'jfif_unit', 'jfif_density', 'dpi', 'exif',
-                          'loop', 'background', 'timestamp', 'duration']:
-                items.pop(field, None)
-
-            if items.get("Software", None) == "NovelAI":
-                try:
-                    json_info = json.loads(items["Comment"])
-                    sampler = sd_samplers.samplers_map.get(json_info["sampler"], "Euler a")
-
-                    geninfo = f"""{items["Description"]}
-        Negative prompt: {json_info["uc"]}
-        Steps: {json_info["steps"]}, Sampler: {sampler}, CFG scale: {json_info["scale"]}, Seed: {json_info["seed"]}, Size: {image.width}x{image.height}, Clip skip: 2, ENSD: 31337"""
-                except Exception:
-                    print("Error parsing NovelAI image generation parameters:", file=sys.stderr)
-                    print(traceback.format_exc(), file=sys.stderr)
-
-        return geninfo, items
-
-    def image_data(file):
+    def _sd_jpg(self):
+        exif = piexif.load(self._info.get("exif")) or {}
         try:
-            image = Image.open(file)
-            image.info
-            textinfo, _ = read_info_from_image(image)
-            return textinfo, None
+            self._raw = piexif.helper.UserComment.load(exif.get("Exif").get(piexif.ExifIFD.UserComment))
         except Exception:
             pass
+        else:
+            self._sd_format()
 
-        # try:
-        #     text = data.decode('utf8')
-        #     assert len(text) < 10000
-        #     return text, None
-        #
-        # except Exception:
-        #     pass
+    def _nai_png(self):
+        self._positive = self._info.get("Description")
+        self._raw += self._positive
+        comment = self._info.get("Comment") or {}
+        comment_json = json.loads(comment)
+        self._raw += "\n"+comment
+        self._negative = comment_json.get("uc")
+        self._setting = (
+            f"Steps: {comment_json.get('steps')}"
+            f", Sampler: {comment_json.get('sampler')}"
+            f", CFG scale: {comment_json.get('scale')}"
+            f", Seed: {comment_json.get('seed')}"
+            f", Size: {self._width}x{self._height}"
+        )
+        if "strength" in comment_json:
+            self._setting += f", Strength: {comment_json.get('strength')}"
+        if "noise" in comment_json:
+            self._setting += f", Noise: {comment_json.get('noise')}"
+        if "scale" in comment_json:
+            self._setting += f", Scale: {comment_json.get('scale')}"
+        if self._setting:
+            self._setting += ", Clip skip: 2, ENSD: 31337"
 
-        return '', None
+    @property
+    def positive(self):
+        return self._positive
 
-    @staticmethod
-    def read_info(file):
-        with Image.open(file) as image:
-            items = image.info or {}
-            # geninfo = items.pop('parameters', None)
-            print(items.pop('parameters'))
-            print(items.pop('exif'))
+    @property
+    def negative(self):
+        return self._negative
 
-            print("parammeters" in items)
-            print("exif" in items)
+    @property
+    def setting(self):
+        return self._setting
 
+    @property
+    def raw(self):
+        return self._raw
