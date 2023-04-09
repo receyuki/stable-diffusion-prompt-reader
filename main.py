@@ -4,10 +4,7 @@ __filename__ = 'main.py'
 __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
-# import asyncio
 import threading
-# import piexif
-# from piexif import helper
 import requests
 import pyperclip as pyperclip
 from PIL import Image, ImageTk
@@ -23,7 +20,7 @@ import webbrowser
 from sd_prompt_reader.image_data_reader import ImageDataReader
 
 bundle_dir = path.abspath(path.dirname(__file__))
-current_version = "1.1.1beta"
+current_version = "1.1.1"
 
 
 # Make dnd work with ctk
@@ -31,77 +28,6 @@ class Tk(CTk, TkinterDnD.DnDWrapper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.TkdndVersion = TkinterDnD._require(self)
-
-
-# Modified from:
-# https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/22bcc7be428c94e9408f589966c2040187245d81/modules/images.py#L614
-# def read_info_from_image(image):
-#     items = image.info or {}
-#
-#     geninfo = items.pop('parameters', None)
-#
-#     if "exif" in items:
-#         exif = piexif.load(items["exif"])
-#         exif_comment = (exif or {}).get("Exif", {}).get(piexif.ExifIFD.UserComment, b'')
-#         try:
-#             exif_comment = piexif.helper.UserComment.load(exif_comment)
-#         except ValueError:
-#             exif_comment = exif_comment.decode('utf8', errors="ignore")
-#
-#         if exif_comment:
-#             items['exif comment'] = exif_comment
-#             geninfo = exif_comment
-#
-#         for field in ['jfif', 'jfif_version', 'jfif_unit', 'jfif_density', 'dpi', 'exif',
-#                       'loop', 'background', 'timestamp', 'duration']:
-#             items.pop(field, None)
-#
-#         if items.get("Software", None) == "NovelAI":
-#             try:
-#                 json_info = json.loads(items["Comment"])
-#                 sampler = sd_samplers.samplers_map.get(json_info["sampler"], "Euler a")
-#
-#                 geninfo = f"""{items["Description"]}
-#     Negative prompt: {json_info["uc"]}
-#     Steps: {json_info["steps"]}, Sampler: {sampler}, CFG scale: {json_info["scale"]}, Seed: {json_info["seed"]}, Size: {image.width}x{image.height}, Clip skip: 2, ENSD: 31337"""
-#             except Exception:
-#                 print("Error parsing NovelAI image generation parameters:", file=sys.stderr)
-#                 print(traceback.format_exc(), file=sys.stderr)
-#
-#     return geninfo, items
-
-
-# Modified from:
-# https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/22bcc7be428c94e9408f589966c2040187245d81/modules/images.py#L650
-# def image_data(file):
-#     try:
-#         image = Image.open(file)
-#         textinfo, _ = read_info_from_image(image)
-#         return textinfo, None
-#     except Exception:
-#         pass
-
-    # try:
-    #     text = data.decode('utf8')
-    #     assert len(text) < 10000
-    #     return text, None
-    #
-    # except Exception:
-    #     pass
-
-    # return '', None
-
-
-# def image_info_format(text):
-#     if text:
-#         prompt_index = [text.index("\nNegative prompt:"),
-#                         text.index("\nSteps:")]
-#         positive = text[:prompt_index[0]]
-#         negative = text[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
-#         setting = text[prompt_index[1] + 1:]
-#         return positive, negative, setting, text
-#     else:
-#         return None
 
 
 def display_info(event, is_selected=False):
@@ -128,10 +54,10 @@ def display_info(event, is_selected=False):
             # text_line, _ = image_data(f)
             # info = image_info_format(text_line)
             image_data = ImageDataReader(f)
-            info = [image_data.positive,
-                    image_data.negative,
-                    image_data.setting,
-                    image_data.raw]
+            info = {"positive": image_data.positive,
+                    "negative": image_data.negative,
+                    "setting": image_data.setting,
+                    "raw": image_data.raw}
             if not image_data.raw:
                 for box in boxes:
                     box.insert(END, "No data")
@@ -238,11 +164,6 @@ def close_update_thread():
     update_thread.join()
 
 
-# def get_loop(loop):
-#     asyncio.set_event_loop(loop)
-#     loop.run_forever()
-
-
 # window = TkinterDnD.Tk()
 window = Tk()
 window.title("SD Prompt Reader")
@@ -256,8 +177,8 @@ window.geometry("1200x650")
 info_font = CTkFont()
 scaling = ScalingTracker.get_window_dpi_scaling(window)
 
-add_file = path.join(bundle_dir, "resources/add.png")
-add_image = CTkImage(add_margin(Image.open(add_file), 0, 0, 0, 33), size=(40, 30))
+info_file = path.join(bundle_dir, "resources/info.png")
+info_image = CTkImage(add_margin(Image.open(info_file), 0, 0, 0, 33), size=(40, 30))
 error_file = path.join(bundle_dir, "resources/error.png")
 error_image = CTkImage(add_margin(Image.open(error_file), 0, 0, 0, 33), size=(40, 30))
 box_important_file = path.join(bundle_dir, "resources/box-important.png")
@@ -296,7 +217,7 @@ image_label.bind("<Button-1>", lambda e: display_info(select_image(), True))
 
 image = None
 image_tk = None
-info = [""] * 4
+info = {}
 default_text_colour = ThemeManager.theme["CTkTextbox"]["text_color"]
 
 positive_box = CTkTextbox(window, wrap=WORD)
@@ -315,15 +236,15 @@ setting_box.insert(END, "Setting")
 setting_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
 button_positive = CTkButton(window, width=50, height=50, image=clipboard_image, text="",
-                            command=lambda: copy_to_clipboard(info[0]))
+                            command=lambda: copy_to_clipboard(info.get("positive")))
 button_positive.grid(row=0, column=5, padx=20, pady=(20, 20))
 
 button_negative = CTkButton(window, width=50, height=50, image=clipboard_image, text="",
-                            command=lambda: copy_to_clipboard(info[1]))
+                            command=lambda: copy_to_clipboard(info.get("negative")))
 button_negative.grid(row=1, column=5, padx=20, pady=(0, 20))
 
 button_raw = CTkButton(window, width=50, height=50, image=clipboard_image, text="Raw Data", font=info_font,
-                       command=lambda: copy_to_clipboard(info[3]))
+                       command=lambda: copy_to_clipboard(info.get("raw")))
 button_raw.grid(row=3, column=3, pady=(0, 20))
 
 # switch_setting_frame = CTkFrame(window, fg_color="transparent")
@@ -333,15 +254,15 @@ button_raw.grid(row=3, column=3, pady=(0, 20))
 # switch_setting_text = CTkLabel(switch_setting_frame, text="Display\nMode")
 # switch_setting_text.pack(side=TOP)
 
-# button_remove = CTkButton(window, width=50, height=50, image=remove_tag_image, text="Remove\n Metadata", font=info_font,
-#                        command=lambda: copy_to_clipboard(info[3]))
+# button_remove = CTkButton(window, width=50, height=50, image=remove_tag_image, text="Remove\n Metadata",
+#                           font=info_font, command=lambda: copy_to_clipboard(info[3]))
 # button_remove.grid(row=3, column=2, pady=(0, 20))
 
 status = "Drag and drop your file into the window"
 status_frame = CTkFrame(window, height=50)
 status_frame.grid(row=3, column=4, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5, ipady=5)
 status_label = CTkLabel(status_frame, height=50, text=status, text_color="gray", wraplength=130,
-                        image=add_image, compound="left")
+                        image=info_image, compound="left")
 status_label.pack(side=LEFT, expand=True)
 
 boxes = [positive_box, negative_box, setting_box]
