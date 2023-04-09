@@ -12,7 +12,7 @@
 
 [English](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.md) | [简体中文](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md)
 
-一个独立的简易查看器，用于在 webui 之外读取由 Stable Diffusion 生成图片内包含的 prompt
+一个独立的简易 AI 图片 prompt 查看器，用于在不依赖 webui 的情况下提取由 Stable Diffusion 生成图片内包含的 prompt
     <br>
     <img src="/images/screenshot.png" width=80% height=80%>
 </div>
