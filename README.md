@@ -8,8 +8,11 @@
     <a href="https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest">
         <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/receyuki/stable-diffusion-prompt-reader"></a>
         <img src="https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey">
-    <br>
-    A simple standalone viewer for reading prompts from Stable Diffusion generated image outside the webui.
+    <br><br>
+
+[简体中文](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md) | [English](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.md)
+
+A simple standalone viewer for reading prompts from Stable Diffusion generated image outside the webui.
     <br>
     <img src="/images/screenshot.png" width=80% height=80%>
 </div>
