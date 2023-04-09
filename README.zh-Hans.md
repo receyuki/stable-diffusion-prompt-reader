@@ -8,8 +8,11 @@
     <a href="https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest">
         <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/receyuki/stable-diffusion-prompt-reader"></a>
         <img src="https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey">
-    <br>
-    一个独立的简易查看器，用于在 webui 之外读取由 Stable Diffusion 生成图片内包含的 prompt
+    <br><br>
+
+[English](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.md) | [简体中文](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md)
+
+一个独立的简易查看器，用于在 webui 之外读取由 Stable Diffusion 生成图片内包含的 prompt
     <br>
     <img src="/images/screenshot.png" width=80% height=80%>
 </div>
