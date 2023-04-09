@@ -18,7 +18,7 @@ OPTIONS = {
     'plist': {
         'CFBundleName': 'SD Prompt Reader',
         'CFBundleDisplayName': 'SD Prompt Reader',
-        'CFBundleVersion': '1.1.1beta',
+        'CFBundleVersion': '1.1.1',
         'CFBundleIdentifier': 'com.receyuki.sd-prompt-reader',
         'NSHumanReadableCopyright': 'Copyright © 2023 receyuki All rights reserved.',
     },
