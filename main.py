@@ -267,9 +267,12 @@ ok_image = CTkImage(add_margin(Image.open(ok_file), 0, 0, 0, 33), size=(40, 30))
 available_updates_file = path.join(bundle_dir, "resources/available-updates.png")
 available_updates_image = CTkImage(add_margin(Image.open(available_updates_file), 0, 0, 0, 33), size=(40, 30))
 drop_file = path.join(bundle_dir, "resources/drag-and-drop.png")
-drop_image = CTkImage(light_image=Image.open(drop_file), dark_image=Image.open(drop_file), size=(100, 100))
+drop_image = CTkImage(Image.open(drop_file), size=(100, 100))
 clipboard_file = path.join(bundle_dir, "resources/copy-to-clipboard.png")
-clipboard_image = CTkImage(light_image=Image.open(clipboard_file), dark_image=Image.open(clipboard_file), size=(50, 50))
+clipboard_image = CTkImage(Image.open(clipboard_file), size=(50, 50))
+remove_tag_file = path.join(bundle_dir, "resources/remove-tag.png")
+remove_tag_image = CTkImage(Image.open(remove_tag_file), size=(50, 50))
+
 
 icon_file = path.join(bundle_dir, "resources/icon.png")
 ico_file = path.join(bundle_dir, "resources/icon.ico")
@@ -294,10 +297,10 @@ image_label.bind("<Button-1>", lambda e: display_info(select_image(), True))
 image = None
 image_tk = None
 info = [""] * 4
+default_text_colour = ThemeManager.theme["CTkTextbox"]["text_color"]
 
 positive_box = CTkTextbox(window, wrap=WORD)
 positive_box.grid(row=0, column=1, columnspan=4, sticky="news", pady=(20, 20))
-default_text_colour = positive_box._text_color
 positive_box.insert(END, "Prompt")
 positive_box.configure(state=DISABLED, text_color="gray", font=info_font)
 
@@ -323,6 +326,16 @@ button_raw = CTkButton(window, width=50, height=50, image=clipboard_image, text=
                        command=lambda: copy_to_clipboard(info[3]))
 button_raw.grid(row=3, column=3, pady=(0, 20))
 
+# switch_setting_frame = CTkFrame(window, fg_color="transparent")
+# switch_setting_frame.grid(row=2, column=5, pady=(0, 20))
+# switch_setting = CTkSwitch(switch_setting_frame, switch_width=50, switch_height=25, width=50, text="", font=info_font)
+# switch_setting.pack(side=TOP)
+# switch_setting_text = CTkLabel(switch_setting_frame, text="Display\nMode")
+# switch_setting_text.pack(side=TOP)
+
+# button_remove = CTkButton(window, width=50, height=50, image=remove_tag_image, text="Remove\n Metadata", font=info_font,
+#                        command=lambda: copy_to_clipboard(info[3]))
+# button_remove.grid(row=3, column=2, pady=(0, 20))
 
 status = "Drag and drop your file into the window"
 status_frame = CTkFrame(window, height=50)
