@@ -11,6 +11,7 @@ import pyperclip as pyperclip
 from packaging import version
 import webbrowser
 from pathlib import Path
+from importlib import resources
 
 from PIL import Image, ImageTk
 from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, BOTH, X, Canvas, DISABLED, NORMAL, \
@@ -22,19 +23,19 @@ from customtkinter import *
 from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.__version__ import VERSION
 
-bundle_dir = Path().resolve()
+resource_dir = str(resources.files("resources"))
 release_url = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
 supported_formats = [".png", ".jpg", ".jpeg", ".webp"]
-info_file = Path(bundle_dir, "./resources/info.png")
-error_file = Path(bundle_dir, "./resources/error.png")
-box_important_file = Path(bundle_dir, "./resources/box-important.png")
-ok_file = Path(bundle_dir, "./resources/ok.png")
-available_updates_file = Path(bundle_dir, "./resources/available-updates.png")
-drop_file = Path(bundle_dir, "./resources/drag-and-drop.png")
-clipboard_file = Path(bundle_dir, "./resources/copy-to-clipboard.png")
-remove_tag_file = Path(bundle_dir, "./resources/remove-tag.png")
-icon_file = Path(bundle_dir, "./resources/icon.png")
-ico_file = Path(bundle_dir, "./resources/icon.ico")
+info_file = Path(resource_dir, "info.png")
+error_file = Path(resource_dir, "error.png")
+box_important_file = Path(resource_dir, "box-important.png")
+ok_file = Path(resource_dir, "ok.png")
+available_updates_file = Path(resource_dir, "available-updates.png")
+drop_file = Path(resource_dir, "drag-and-drop.png")
+clipboard_file = Path(resource_dir, "copy-to-clipboard.png")
+remove_tag_file = Path(resource_dir, "remove-tag.png")
+icon_file = Path(resource_dir, "icon.png")
+ico_file = Path(resource_dir, "icon.ico")
 
 
 # Make dnd work with ctk

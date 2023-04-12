@@ -36,7 +36,7 @@ elif platform.system() == "Darwin":
     import os
 
     APP = ['main.py']
-    DATA_FILES = ['resources']
+    DATA_FILES = []
     OPTIONS = {
         'iconfile': 'resources/icon.icns',
         'plist': {
@@ -48,7 +48,8 @@ elif platform.system() == "Darwin":
         },
         'includes': ['pyperclip', 'PIL', 'tkinter', 'tkinterdnd2', 'os', 'customtkinter', 'plyer', 'pyobjus',
                      'plyer.platforms.macosx.notification', 'tcl8', 'tcl8.6', 'charset_normalizer.md__mypyc',
-                     'PIL.WebPImagePlugin', 'sd_prompt_reader']
+                     'PIL.WebPImagePlugin', 'sd_prompt_reader'],
+        'packages': ['resources']
     }
 
     setup(
