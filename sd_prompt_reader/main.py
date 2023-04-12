@@ -17,10 +17,10 @@ from customtkinter import *
 from packaging import version
 import webbrowser
 
-from sd_prompt_reader.image_data_reader import ImageDataReader
+from image_data_reader import ImageDataReader
+from __version__ import VERSION
 
 bundle_dir = path.abspath(path.dirname(__file__))
-current_version = "1.1.0"
 release_url = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
 info_file = path.join(bundle_dir, "../resources/info.png")
 error_file = path.join(bundle_dir, "../resources/error.png")
@@ -240,7 +240,7 @@ class App(Tk):
             print("Github api connection error")
         else:
             latest = response["name"]
-            if version.parse(latest) > version.parse(current_version):
+            if version.parse(latest) > version.parse(VERSION):
                 download_url = response["html_url"]
                 self.status_label.configure(image=self.available_updates_image,
                                             text="A new version is available, click here to download")

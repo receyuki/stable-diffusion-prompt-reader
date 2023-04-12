@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['main.py'],
+    ['sd_prompt_reader/main.py'],
     pathex=[],
     binaries=[],
     datas=[('resources', 'resources'), ('venv/lib/site-packages/customtkinter', 'customtkinter')],
@@ -43,11 +43,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='resources/icon.ico',
-)
-app = BUNDLE(
-    exe,
-    name='SD Prompt Reader.app',
-    icon='resources/icon.png',
-    bundle_identifier=None,
-    version='0.6.0'
+    version='file_version_info.txt',
 )
