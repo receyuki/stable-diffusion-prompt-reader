@@ -48,7 +48,7 @@ elif platform.system() == "Darwin":
         },
         'includes': ['pyperclip', 'PIL', 'tkinter', 'tkinterdnd2', 'os', 'customtkinter', 'plyer', 'pyobjus',
                      'plyer.platforms.macosx.notification', 'tcl8', 'tcl8.6', 'charset_normalizer.md__mypyc',
-                     'PIL.WebPImagePlugin']
+                     'PIL.WebPImagePlugin', 'sd_prompt_reader']
     }
 
     setup(
@@ -57,7 +57,6 @@ elif platform.system() == "Darwin":
         data_files=DATA_FILES,
         options={'py2app': OPTIONS},
         setup_requires=['py2app'],
-        package=['sd_prompt_reader'],
     )
 
     root = tk.Tk()
