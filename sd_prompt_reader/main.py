@@ -19,12 +19,13 @@ from tkinter.ttk import *
 from tkinterdnd2 import *
 from customtkinter import *
 
-from image_data_reader import ImageDataReader
-from __version__ import VERSION
+from sd_prompt_reader.image_data_reader import ImageDataReader
+from sd_prompt_reader.__version__ import VERSION
 
 bundle_dir = Path(__file__).resolve().parent
+print(Path(__file__).resolve())
 release_url = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
-image_format = [".png", ".jpg", ".jpeg", ".webp"]
+supported_formats = [".png", ".jpg", ".jpeg", ".webp"]
 info_file = Path(bundle_dir, "../resources/info.png")
 error_file = Path(bundle_dir, "../resources/error.png")
 box_important_file = Path(bundle_dir, "../resources/box-important.png")
@@ -170,7 +171,7 @@ class App(Tk):
             box.configure(state=NORMAL)
             box.delete("1.0", END)
 
-        if file_path.suffix in image_format:
+        if file_path.suffix in supported_formats:
             with open(file_path, "rb") as f:
                 self.image_data = ImageDataReader(f)
                 if not self.image_data.raw:
@@ -230,7 +231,7 @@ class App(Tk):
         else:
             self.status_label.configure(image=self.ok_image, text="Copied to clipboard")
 
-    # async def check_update():
+    # check update from github release
     def check_update(self):
         try:
             response = requests.get(release_url, timeout=3).json()

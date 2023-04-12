@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['sd_prompt_reader/main.py'],
+    ['sd_prompt_reader/main.py', 'sd_prompt_reader/image_data_reader.py', 'sd_prompt_reader/__version__.py'],
     pathex=[],
     binaries=[],
     datas=[('resources', 'resources'), ('venv/lib/site-packages/customtkinter', 'customtkinter')],
