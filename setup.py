@@ -6,10 +6,10 @@ Usage:
     windows:
         python setup.py
 """
-from sys import platform
+import platform
 from sd_prompt_reader.__version__ import VERSION
 
-if platform == "win32":
+if platform.system() == "Windows":
     import pyinstaller_versionfile
     pyinstaller_versionfile.create_versionfile(
         output_file="file_version_info.txt",
@@ -28,7 +28,7 @@ if platform == "win32":
         "win.spec"
     ])
 
-elif platform == "darwin":
+elif platform.system() == "Darwin":
     from pathlib import Path
     from setuptools import setup
     import tkinter as tk

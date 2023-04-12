@@ -4,34 +4,37 @@ __filename__ = 'main.py'
 __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
+import platform
 import threading
 import requests
 import pyperclip as pyperclip
+from packaging import version
+import webbrowser
+from pathlib import Path
+
 from PIL import Image, ImageTk
 from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, BOTH, X, Canvas, DISABLED, NORMAL, \
     WORD, BOTTOM, CENTER, Label, ttk, PhotoImage, filedialog
 from tkinter.ttk import *
 from tkinterdnd2 import *
-from os import path, name
 from customtkinter import *
-from packaging import version
-import webbrowser
 
 from image_data_reader import ImageDataReader
 from __version__ import VERSION
 
-bundle_dir = path.abspath(path.dirname(__file__))
+bundle_dir = Path(__file__).resolve().parent
 release_url = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
-info_file = path.join(bundle_dir, "../resources/info.png")
-error_file = path.join(bundle_dir, "../resources/error.png")
-box_important_file = path.join(bundle_dir, "../resources/box-important.png")
-ok_file = path.join(bundle_dir, "../resources/ok.png")
-available_updates_file = path.join(bundle_dir, "../resources/available-updates.png")
-drop_file = path.join(bundle_dir, "../resources/drag-and-drop.png")
-clipboard_file = path.join(bundle_dir, "../resources/copy-to-clipboard.png")
-remove_tag_file = path.join(bundle_dir, "../resources/remove-tag.png")
-icon_file = path.join(bundle_dir, "../resources/icon.png")
-ico_file = path.join(bundle_dir, "../resources/icon.ico")
+image_format = [".png", ".jpg", ".jpeg", ".webp"]
+info_file = Path(bundle_dir, "../resources/info.png")
+error_file = Path(bundle_dir, "../resources/error.png")
+box_important_file = Path(bundle_dir, "../resources/box-important.png")
+ok_file = Path(bundle_dir, "../resources/ok.png")
+available_updates_file = Path(bundle_dir, "../resources/available-updates.png")
+drop_file = Path(bundle_dir, "../resources/drag-and-drop.png")
+clipboard_file = Path(bundle_dir, "../resources/copy-to-clipboard.png")
+remove_tag_file = Path(bundle_dir, "../resources/remove-tag.png")
+icon_file = Path(bundle_dir, "../resources/icon.png")
+ico_file = Path(bundle_dir, "../resources/icon.ico")
 
 
 # Make dnd work with ctk
@@ -68,7 +71,7 @@ class App(Tk):
         self.remove_tag_image = CTkImage(Image.open(remove_tag_file), size=(50, 50))
         self.icon_image = PhotoImage(file=icon_file)
         self.iconphoto(False, self.icon_image)
-        if name == "nt":
+        if platform.system() == "Windows":
             self.iconbitmap(ico_file)
 
         self.rowconfigure(tuple(range(4)), weight=1)
@@ -86,7 +89,7 @@ class App(Tk):
 
         self.image = None
         self.image_tk = None
-        self.info = {}
+        self.image_data = None
         self.default_text_colour = ThemeManager.theme["CTkTextbox"]["text_color"]
 
         self.positive_box = CTkTextbox(self, wrap=WORD)
@@ -105,15 +108,15 @@ class App(Tk):
         self.setting_box.configure(state=DISABLED, text_color="gray", font=self.info_font)
 
         self.button_positive = CTkButton(self, width=50, height=50, image=self.clipboard_image, text="",
-                                         command=lambda: self.copy_to_clipboard(self.info.get("positive")))
+                                         command=lambda: self.copy_to_clipboard(self.image_data.positive))
         self.button_positive.grid(row=0, column=5, padx=20, pady=(20, 20))
 
         self.button_negative = CTkButton(self, width=50, height=50, image=self.clipboard_image, text="",
-                                         command=lambda: self.copy_to_clipboard(self.info.get("negative")))
+                                         command=lambda: self.copy_to_clipboard(self.image_data.negative))
         self.button_negative.grid(row=1, column=5, padx=20, pady=(0, 20))
 
         self.button_raw = CTkButton(self, width=50, height=50, image=self.clipboard_image, text="Raw Data",
-                                    font=self.info_font, command=lambda: self.copy_to_clipboard(self.info.get("raw")))
+                                    font=self.info_font, command=lambda: self.copy_to_clipboard(self.image_data.raw))
         self.button_raw.grid(row=3, column=3, pady=(0, 20))
 
         # switch_setting_frame = CTkFrame(window, fg_color="transparent")
@@ -153,30 +156,24 @@ class App(Tk):
         # stop update thread when reading first image
         if self.update_check:
             self.close_update_thread()
+
         # select or drag and drop
         if is_selected:
             if event == "":
                 return
-            file_path = event
+            file_path = Path(event)
         else:
-            file_path = event.data.replace("}", "").replace("{", "")
+            file_path = Path(event.data.replace("}", "").replace("{", ""))
+
         # clear text
         for box in self.boxes:
             box.configure(state=NORMAL)
             box.delete("1.0", END)
-        if file_path.lower().endswith(".png") or \
-                file_path.lower().endswith(".jpg") or \
-                file_path.lower().endswith(".jpeg") or \
-                file_path.lower().endswith(".webp"):
+
+        if file_path.suffix in image_format:
             with open(file_path, "rb") as f:
-                # text_line, _ = image_data(f)
-                # info = image_info_format(text_line)
-                image_data = ImageDataReader(f)
-                self.info = {"positive": image_data.positive,
-                             "negative": image_data.negative,
-                             "setting": image_data.setting,
-                             "raw": image_data.raw}
-                if not image_data.raw:
+                self.image_data = ImageDataReader(f)
+                if not self.image_data.raw:
                     for box in self.boxes:
                         box.insert(END, "No data")
                         box.configure(state=DISABLED, text_color="gray")
@@ -186,9 +183,9 @@ class App(Tk):
                         button.configure(state=DISABLED)
                 else:
                     # insert prompt
-                    self.positive_box.insert(END, image_data.positive)
-                    self.negative_box.insert(END, image_data.negative)
-                    self.setting_box.insert(END, image_data.setting)
+                    self.positive_box.insert(END, self.image_data.positive)
+                    self.negative_box.insert(END, self.image_data.negative)
+                    self.setting_box.insert(END, self.image_data.setting)
                     for box in self.boxes:
                         box.configure(state=DISABLED, text_color=self.default_text_colour)
                     self.status_label.configure(image=self.ok_image, text="Voilà!")
@@ -211,16 +208,17 @@ class App(Tk):
         # resize image to window size
         if self.image:
             aspect_ratio = self.image.size[0] / self.image.size[1]
+            # fix windows tiny font problem under hidpi
             self.scaling = ScalingTracker.get_window_dpi_scaling(self)
             # resize image to window size
             if self.image.size[0] > self.image.size[1]:
                 self.image_tk.configure(size=tuple(num / self.scaling for num in
-                                              (self.image_frame.winfo_height(),
-                                               self.image_frame.winfo_height() / aspect_ratio)))
+                                                   (self.image_frame.winfo_height(),
+                                                    self.image_frame.winfo_height() / aspect_ratio)))
             else:
                 self.image_tk.configure(size=tuple(num / self.scaling for num in
-                                              (self.image_label.winfo_height() * aspect_ratio,
-                                               self.image_label.winfo_height())))
+                                                   (self.image_label.winfo_height() * aspect_ratio,
+                                                    self.image_label.winfo_height())))
             # display image
             self.image_label.configure(image=self.image_tk)
 
@@ -266,7 +264,7 @@ class App(Tk):
         return filedialog.askopenfilename(
             title='Select your image file',
             initialdir="/",
-            filetypes=(("PNG files", "*.png"), ("JPEG files", "*.jpg *jpeg"), ("WEBP files", "*.webp"))
+            filetypes=(("image files", "*.png *.jpg *jpeg *.webp"),)
         )
 
 
