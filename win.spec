@@ -5,11 +5,11 @@ block_cipher = None
 
 
 a = Analysis(
-    ['sd_prompt_reader/main.py', 'sd_prompt_reader/image_data_reader.py', 'sd_prompt_reader/__version__.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
     datas=[('resources', 'resources'), ('venv/lib/site-packages/customtkinter', 'customtkinter')],
-    hiddenimports=['collect_data_files'],
+    hiddenimports=['collect_data_files', 'sd_prompt_reader'],
     hookspath=['.'],
     hooksconfig={},
     runtime_hooks=[],

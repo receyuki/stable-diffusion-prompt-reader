@@ -35,7 +35,7 @@ elif platform.system() == "Darwin":
     import shutil
     import os
 
-    APP = ['sd_prompt_reader/main.py']
+    APP = ['main.py']
     DATA_FILES = ['resources']
     OPTIONS = {
         'iconfile': 'resources/icon.icns',
