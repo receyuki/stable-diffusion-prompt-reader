@@ -16,33 +16,28 @@ from importlib import resources
 from PIL import Image, ImageTk
 from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, BOTH, X, Canvas, DISABLED, NORMAL, \
     WORD, BOTTOM, CENTER, Label, ttk, PhotoImage, filedialog
-from tkinter.ttk import *
-from tkinterdnd2 import *
+# from tkinter.ttk import *
+from tkinterdnd2 import DND_FILES
 from customtkinter import *
 
 from sd_prompt_reader.image_data_reader import ImageDataReader
+from sd_prompt_reader.ctkdnd import Tk
 from sd_prompt_reader.__version__ import VERSION
 
-resource_dir = str(resources.files("resources"))
-release_url = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
-supported_formats = [".png", ".jpg", ".jpeg", ".webp"]
-info_file = Path(resource_dir, "info.png")
-error_file = Path(resource_dir, "error.png")
-box_important_file = Path(resource_dir, "box-important.png")
-ok_file = Path(resource_dir, "ok.png")
-available_updates_file = Path(resource_dir, "available-updates.png")
-drop_file = Path(resource_dir, "drag-and-drop.png")
-clipboard_file = Path(resource_dir, "copy-to-clipboard.png")
-remove_tag_file = Path(resource_dir, "remove-tag.png")
-icon_file = Path(resource_dir, "icon.png")
-ico_file = Path(resource_dir, "icon.ico")
 
-
-# Make dnd work with ctk
-class Tk(CTk, TkinterDnD.DnDWrapper):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.TkdndVersion = TkinterDnD._require(self)
+RESOURCE_DIR = str(resources.files("resources"))
+RELEASE_URL = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
+SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".webp"]
+INFO_FILE = Path(RESOURCE_DIR, "info.png")
+ERROR_FILE = Path(RESOURCE_DIR, "error.png")
+BOX_IMPORTANT_FILE = Path(RESOURCE_DIR, "box-important.png")
+OK_FILE = Path(RESOURCE_DIR, "ok.png")
+AVAILABLE_UPDATES_FILE = Path(RESOURCE_DIR, "available-updates.png")
+DROP_FILE = Path(RESOURCE_DIR, "drag-and-drop.png")
+CLIPBOARD_FILE = Path(RESOURCE_DIR, "copy-to-clipboard.png")
+REMOVE_TAG_FILE = Path(RESOURCE_DIR, "remove-tag.png")
+ICON_FILE = Path(RESOURCE_DIR, "icon.png")
+ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
 
 
 class App(Tk):
@@ -61,19 +56,19 @@ class App(Tk):
         self.info_font = CTkFont()
         self.scaling = ScalingTracker.get_window_dpi_scaling(self)
 
-        self.info_image = CTkImage(self.add_margin(Image.open(info_file), 0, 0, 0, 33), size=(40, 30))
-        self.error_image = CTkImage(self.add_margin(Image.open(error_file), 0, 0, 0, 33), size=(40, 30))
-        self.box_important_image = CTkImage(self.add_margin(Image.open(box_important_file), 0, 0, 0, 33), size=(40, 30))
-        self.ok_image = CTkImage(self.add_margin(Image.open(ok_file), 0, 0, 0, 33), size=(40, 30))
-        self.available_updates_image = CTkImage(self.add_margin(Image.open(available_updates_file), 0, 0, 0, 33),
+        self.info_image = CTkImage(self.add_margin(Image.open(INFO_FILE), 0, 0, 0, 33), size=(40, 30))
+        self.error_image = CTkImage(self.add_margin(Image.open(ERROR_FILE), 0, 0, 0, 33), size=(40, 30))
+        self.box_important_image = CTkImage(self.add_margin(Image.open(BOX_IMPORTANT_FILE), 0, 0, 0, 33), size=(40, 30))
+        self.ok_image = CTkImage(self.add_margin(Image.open(OK_FILE), 0, 0, 0, 33), size=(40, 30))
+        self.available_updates_image = CTkImage(self.add_margin(Image.open(AVAILABLE_UPDATES_FILE), 0, 0, 0, 33),
                                                 size=(40, 30))
-        self.drop_image = CTkImage(Image.open(drop_file), size=(100, 100))
-        self.clipboard_image = CTkImage(Image.open(clipboard_file), size=(50, 50))
-        self.remove_tag_image = CTkImage(Image.open(remove_tag_file), size=(50, 50))
-        self.icon_image = PhotoImage(file=icon_file)
+        self.drop_image = CTkImage(Image.open(DROP_FILE), size=(100, 100))
+        self.clipboard_image = CTkImage(Image.open(CLIPBOARD_FILE), size=(50, 50))
+        self.remove_tag_image = CTkImage(Image.open(REMOVE_TAG_FILE), size=(50, 50))
+        self.icon_image = PhotoImage(file=ICON_FILE)
         self.iconphoto(False, self.icon_image)
         if platform.system() == "Windows":
-            self.iconbitmap(ico_file)
+            self.iconbitmap(ICO_FILE)
 
         self.rowconfigure(tuple(range(4)), weight=1)
         self.columnconfigure(tuple(range(5)), weight=1)
@@ -171,7 +166,7 @@ class App(Tk):
             box.configure(state=NORMAL)
             box.delete("1.0", END)
 
-        if file_path.suffix in supported_formats:
+        if file_path.suffix in SUPPORTED_FORMATS:
             with open(file_path, "rb") as f:
                 self.image_data = ImageDataReader(f)
                 if not self.image_data.raw:
@@ -234,7 +229,7 @@ class App(Tk):
     # check update from github release
     def check_update(self):
         try:
-            response = requests.get(release_url, timeout=3).json()
+            response = requests.get(RELEASE_URL, timeout=3).json()
         except Exception:
             print("Github api connection error")
         else:
