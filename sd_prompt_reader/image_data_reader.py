@@ -5,6 +5,7 @@ __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 import json
+
 import piexif
 import piexif.helper
 from PIL import Image
@@ -61,7 +62,7 @@ class ImageDataReader:
         self._raw += self._positive
         comment = self._info.get("Comment") or {}
         comment_json = json.loads(comment)
-        self._raw += "\n"+comment
+        self._raw += "\n" + comment
         self._negative = comment_json.get("uc")
         self._setting = (
             f"Steps: {comment_json.get('steps')}"

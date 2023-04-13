@@ -5,28 +5,20 @@ __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 import platform
-import threading
-import requests
-import pyperclip as pyperclip
-from packaging import version
-import webbrowser
-from pathlib import Path
 from importlib import resources
+from pathlib import Path
+from tkinter import PhotoImage
 
-from PIL import Image, ImageTk
-from tkinter import TOP, END, Frame, Text, LEFT, Scrollbar, VERTICAL, RIGHT, Y, BOTH, X, Canvas, DISABLED, NORMAL, \
-    WORD, BOTTOM, CENTER, Label, ttk, PhotoImage, filedialog
-# from tkinter.ttk import *
-from tkinterdnd2 import DND_FILES
+import pyperclip as pyperclip
+from PIL import Image
 from customtkinter import *
+from tkinterdnd2 import DND_FILES
 
-from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.ctkdnd import Tk
-from sd_prompt_reader.__version__ import VERSION
-
+from sd_prompt_reader.image_data_reader import ImageDataReader
+from sd_prompt_reader.update_checker import UpdateChecker
 
 RESOURCE_DIR = str(resources.files("resources"))
-RELEASE_URL = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
 SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".webp"]
 INFO_FILE = Path(RESOURCE_DIR, "info.png")
 ERROR_FILE = Path(RESOURCE_DIR, "error.png")
@@ -38,6 +30,11 @@ CLIPBOARD_FILE = Path(RESOURCE_DIR, "copy-to-clipboard.png")
 REMOVE_TAG_FILE = Path(RESOURCE_DIR, "remove-tag.png")
 ICON_FILE = Path(RESOURCE_DIR, "icon.png")
 ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
+MESSAGE = {
+    "success": ["Voilà!"],
+    "format_error": ["No data", "No data detected or unsupported format"],
+    "suffix_error": ["Unsupported format"]
+}
 
 
 class App(Tk):
@@ -56,12 +53,11 @@ class App(Tk):
         self.info_font = CTkFont()
         self.scaling = ScalingTracker.get_window_dpi_scaling(self)
 
-        self.info_image = CTkImage(self.add_margin(Image.open(INFO_FILE), 0, 0, 0, 33), size=(40, 30))
-        self.error_image = CTkImage(self.add_margin(Image.open(ERROR_FILE), 0, 0, 0, 33), size=(40, 30))
-        self.box_important_image = CTkImage(self.add_margin(Image.open(BOX_IMPORTANT_FILE), 0, 0, 0, 33), size=(40, 30))
-        self.ok_image = CTkImage(self.add_margin(Image.open(OK_FILE), 0, 0, 0, 33), size=(40, 30))
-        self.available_updates_image = CTkImage(self.add_margin(Image.open(AVAILABLE_UPDATES_FILE), 0, 0, 0, 33),
-                                                size=(40, 30))
+        self.info_image = self.load_status_icon(INFO_FILE)
+        self.error_image = self.load_status_icon(ERROR_FILE)
+        self.box_important_image = self.load_status_icon(BOX_IMPORTANT_FILE)
+        self.ok_image = self.load_status_icon(OK_FILE)
+        self.available_updates_image = self.load_status_icon(AVAILABLE_UPDATES_FILE)
         self.drop_image = CTkImage(Image.open(DROP_FILE), size=(100, 100))
         self.clipboard_image = CTkImage(Image.open(CLIPBOARD_FILE), size=(50, 50))
         self.remove_tag_image = CTkImage(Image.open(REMOVE_TAG_FILE), size=(50, 50))
@@ -143,16 +139,11 @@ class App(Tk):
         self.dnd_bind("<<Drop>>", self.display_info)
         self.bind("<Configure>", self.resize_image)
 
-        self.update_check = True
-
-        self.update_thread = threading.Thread(target=self.check_update)
-        self.update_thread.start()
+        self.update_checker = UpdateChecker(self.status_label, self.available_updates_image)
 
     def display_info(self, event, is_selected=False):
         # stop update thread when reading first image
-        if self.update_check:
-            self.close_update_thread()
-
+        self.update_checker.close_thread()
         # select or drag and drop
         if is_selected:
             if event == "":
@@ -170,13 +161,7 @@ class App(Tk):
             with open(file_path, "rb") as f:
                 self.image_data = ImageDataReader(f)
                 if not self.image_data.raw:
-                    for box in self.boxes:
-                        box.insert(END, "No data")
-                        box.configure(state=DISABLED, text_color="gray")
-                    self.status_label.configure(image=self.box_important_image,
-                                                text="No data detected or unsupported format")
-                    for button in self.buttons:
-                        button.configure(state=DISABLED)
+                    self.unsupported_format(MESSAGE["format_error"])
                 else:
                     # insert prompt
                     self.positive_box.insert(END, self.image_data.positive)
@@ -184,27 +169,32 @@ class App(Tk):
                     self.setting_box.insert(END, self.image_data.setting)
                     for box in self.boxes:
                         box.configure(state=DISABLED, text_color=self.default_text_colour)
-                    self.status_label.configure(image=self.ok_image, text="Voilà!")
                     for button in self.buttons:
                         button.configure(state=NORMAL)
+                    self.status_label.configure(image=self.ok_image, text="Voilà!")
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
                 self.resize_image()
         else:
-            for box in self.boxes:
-                box.insert(END, "Unsupported format")
-                box.configure(state=DISABLED, text_color="gray")
-                self.image_label.configure(image=self.drop_image)
-                self.image = None
-                self.status_label.configure(image=self.box_important_image, text="Unsupported format")
-            for button in self.buttons:
-                button.configure(state=DISABLED)
+            self.unsupported_format(MESSAGE["suffix_error"], True)
+
+    def unsupported_format(self, message, reset_image=False):
+        for box in self.boxes:
+            box.insert(END, message[0])
+            box.configure(state=DISABLED, text_color="gray")
+        for button in self.buttons:
+            button.configure(state=DISABLED)
+        if reset_image:
+            self.image_label.configure(image=self.drop_image)
+            self.image = None
+        self.status_label.configure(image=self.box_important_image,
+                                    text=message[-1])
 
     def resize_image(self, event=None):
         # resize image to window size
         if self.image:
             aspect_ratio = self.image.size[0] / self.image.size[1]
-            # fix windows tiny font problem under hidpi
+            # fix windows huge image problem under hidpi
             self.scaling = ScalingTracker.get_window_dpi_scaling(self)
             # resize image to window size
             if self.image.size[0] > self.image.size[1]:
@@ -226,25 +216,8 @@ class App(Tk):
         else:
             self.status_label.configure(image=self.ok_image, text="Copied to clipboard")
 
-    # check update from github release
-    def check_update(self):
-        try:
-            response = requests.get(RELEASE_URL, timeout=3).json()
-        except Exception:
-            print("Github api connection error")
-        else:
-            latest = response["name"]
-            if version.parse(latest) > version.parse(VERSION):
-                download_url = response["html_url"]
-                self.status_label.configure(image=self.available_updates_image,
-                                            text="A new version is available, click here to download")
-                self.status_label.bind("<Button-1>", lambda e: webbrowser.open_new(download_url))
-
-    # clean up threads that are no longer in use
-    def close_update_thread(self):
-        self.update_check = False
-        self.status_label.unbind("<Button-1>")
-        self.update_thread.join()
+    def load_status_icon(self, file):
+        return CTkImage(self.add_margin(Image.open(file), 0, 0, 0, 33), size=(40, 30))
 
     @staticmethod
     def add_margin(img, top, bottom, left, right):

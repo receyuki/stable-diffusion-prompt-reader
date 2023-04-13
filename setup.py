@@ -7,10 +7,12 @@ Usage:
         python setup.py
 """
 import platform
+
 from sd_prompt_reader.__version__ import VERSION
 
 if platform.system() == "Windows":
     import pyinstaller_versionfile
+
     pyinstaller_versionfile.create_versionfile(
         output_file="file_version_info.txt",
         version=VERSION,
@@ -23,6 +25,7 @@ if platform.system() == "Windows":
     )
 
     import PyInstaller.__main__
+
     PyInstaller.__main__.run([
         "--clean",
         "win.spec"
