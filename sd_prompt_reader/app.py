@@ -5,8 +5,7 @@ __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 import platform
-from importlib import resources
-from pathlib import Path
+# from pathlib import Path
 from tkinter import PhotoImage
 
 import pyperclip as pyperclip
@@ -17,24 +16,7 @@ from tkinterdnd2 import DND_FILES
 from sd_prompt_reader.ctkdnd import Tk
 from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.update_checker import UpdateChecker
-
-RESOURCE_DIR = str(resources.files("resources"))
-SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".webp"]
-INFO_FILE = Path(RESOURCE_DIR, "info.png")
-ERROR_FILE = Path(RESOURCE_DIR, "error.png")
-BOX_IMPORTANT_FILE = Path(RESOURCE_DIR, "box-important.png")
-OK_FILE = Path(RESOURCE_DIR, "ok.png")
-AVAILABLE_UPDATES_FILE = Path(RESOURCE_DIR, "available-updates.png")
-DROP_FILE = Path(RESOURCE_DIR, "drag-and-drop.png")
-CLIPBOARD_FILE = Path(RESOURCE_DIR, "copy-to-clipboard.png")
-REMOVE_TAG_FILE = Path(RESOURCE_DIR, "remove-tag.png")
-ICON_FILE = Path(RESOURCE_DIR, "icon.png")
-ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
-MESSAGE = {
-    "success": ["Voilà!"],
-    "format_error": ["No data", "No data detected or unsupported format"],
-    "suffix_error": ["Unsupported format"]
-}
+from sd_prompt_reader.constants import *
 
 
 class App(Tk):
@@ -171,7 +153,7 @@ class App(Tk):
                         box.configure(state=DISABLED, text_color=self.default_text_colour)
                     for button in self.buttons:
                         button.configure(state=NORMAL)
-                    self.status_label.configure(image=self.ok_image, text="Voilà!")
+                    self.status_label.configure(image=self.ok_image, text=MESSAGE["success"])
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
                 self.resize_image()
@@ -244,3 +226,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+#TODO statusbar.py

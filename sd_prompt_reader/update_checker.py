@@ -11,9 +11,7 @@ import requests
 from packaging import version
 
 from sd_prompt_reader.__version__ import VERSION
-
-RELEASE_URL = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
-
+from sd_prompt_reader.constants import RELEASE_URL
 
 class UpdateChecker:
     def __init__(self, status_label, update_image):
