@@ -5,19 +5,19 @@ __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 import platform
-# from pathlib import Path
 from tkinter import PhotoImage
 
 import pyperclip as pyperclip
 from PIL import Image
-from customtkinter import *
+from customtkinter import CTkFont, ScalingTracker, CTkImage, CTkFrame, CTkLabel, CTkTextbox, ThemeManager, CTkButton, \
+    filedialog
 from tkinterdnd2 import DND_FILES
 
+from sd_prompt_reader.constants import *
 from sd_prompt_reader.ctkdnd import Tk
 from sd_prompt_reader.image_data_reader import ImageDataReader
-from sd_prompt_reader.update_checker import UpdateChecker
-from sd_prompt_reader.constants import *
 from sd_prompt_reader.status_bar import StatusBar
+from sd_prompt_reader.update_checker import UpdateChecker
 
 
 class App(Tk):
@@ -54,7 +54,7 @@ class App(Tk):
         self.image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
 
         self.image_label = CTkLabel(self.image_frame, text="", image=self.drop_image)
-        self.image_label.pack(fill=BOTH, expand=True)
+        self.image_label.pack(fill="both", expand=True)
         self.image_label.bind("<Button-1>", lambda e: self.display_info(self.select_image(), True))
 
         self.image = None
@@ -62,20 +62,20 @@ class App(Tk):
         self.image_data = None
         self.default_text_colour = ThemeManager.theme["CTkTextbox"]["text_color"]
 
-        self.positive_box = CTkTextbox(self, wrap=WORD)
+        self.positive_box = CTkTextbox(self, wrap="word")
         self.positive_box.grid(row=0, column=1, columnspan=4, sticky="news", pady=(20, 20))
-        self.positive_box.insert(END, "Prompt")
-        self.positive_box.configure(state=DISABLED, text_color="gray", font=self.info_font)
+        self.positive_box.insert("end", "Prompt")
+        self.positive_box.configure(state="disable", text_color="gray", font=self.info_font)
 
-        self.negative_box = CTkTextbox(self, wrap=WORD)
+        self.negative_box = CTkTextbox(self, wrap="word")
         self.negative_box.grid(row=1, column=1, columnspan=4, sticky="news", pady=(0, 20))
-        self.negative_box.insert(END, "Negative Prompt")
-        self.negative_box.configure(state=DISABLED, text_color="gray", font=self.info_font)
+        self.negative_box.insert("end", "Negative Prompt")
+        self.negative_box.configure(state="disable", text_color="gray", font=self.info_font)
 
-        self.setting_box = CTkTextbox(self, wrap=WORD, height=100)
+        self.setting_box = CTkTextbox(self, wrap="word", height=100)
         self.setting_box.grid(row=2, column=1, columnspan=4, sticky="news", pady=(0, 20))
-        self.setting_box.insert(END, "Setting")
-        self.setting_box.configure(state=DISABLED, text_color="gray", font=self.info_font)
+        self.setting_box.insert("end", "Setting")
+        self.setting_box.configure(state="disable", text_color="gray", font=self.info_font)
 
         self.button_positive = CTkButton(self, width=50, height=50, image=self.clipboard_image, text="",
                                          command=lambda: self.copy_to_clipboard(self.image_data.positive))
@@ -101,13 +101,14 @@ class App(Tk):
         # button_remove.grid(row=3, column=2, pady=(0, 20))
 
         self.status_bar = StatusBar(self)
-        self.status_bar.status_frame.grid(row=3, column=4, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5, ipady=5)
+        self.status_bar.status_frame.grid(row=3, column=4, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5,
+                                          ipady=5)
 
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
         self.buttons = [self.button_positive, self.button_negative, self.button_raw]
 
         for button in self.buttons:
-            button.configure(state=DISABLED)
+            button.configure(state="disable")
 
         self.drop_target_register(DND_FILES)
         self.dnd_bind("<<Drop>>", self.display_info)
@@ -128,8 +129,8 @@ class App(Tk):
 
         # clear text
         for box in self.boxes:
-            box.configure(state=NORMAL)
-            box.delete("1.0", END)
+            box.configure(state="normal")
+            box.delete("1.0", "end")
 
         if file_path.suffix in SUPPORTED_FORMATS:
             with open(file_path, "rb") as f:
@@ -138,13 +139,13 @@ class App(Tk):
                     self.unsupported_format(MESSAGE["format_error"])
                 else:
                     # insert prompt
-                    self.positive_box.insert(END, self.image_data.positive)
-                    self.negative_box.insert(END, self.image_data.negative)
-                    self.setting_box.insert(END, self.image_data.setting)
+                    self.positive_box.insert("end", self.image_data.positive)
+                    self.negative_box.insert("end", self.image_data.negative)
+                    self.setting_box.insert("end", self.image_data.setting)
                     for box in self.boxes:
-                        box.configure(state=DISABLED, text_color=self.default_text_colour)
+                        box.configure(state="disable", text_color=self.default_text_colour)
                     for button in self.buttons:
-                        button.configure(state=NORMAL)
+                        button.configure(state="normal")
                     self.status_bar.success()
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
@@ -154,10 +155,10 @@ class App(Tk):
 
     def unsupported_format(self, message, reset_image=False):
         for box in self.boxes:
-            box.insert(END, message[0])
-            box.configure(state=DISABLED, text_color="gray")
+            box.insert("end", message[0])
+            box.configure(state="disable", text_color="gray")
         for button in self.buttons:
-            button.configure(state=DISABLED)
+            button.configure(state="disable")
         if reset_image:
             self.image_label.configure(image=self.drop_image)
             self.image = None

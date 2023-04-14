@@ -7,7 +7,6 @@ __email__ = 'receyuki@gmail.com'
 import webbrowser
 
 from PIL import Image
-
 from customtkinter import CTkImage, CTkFrame, CTkLabel, LEFT
 
 from sd_prompt_reader.constants import *
@@ -22,7 +21,7 @@ class StatusBar:
         self.available_updates_image = self.load_status_icon(AVAILABLE_UPDATES_FILE)
 
         self.status_frame = CTkFrame(parent, height=50)
-        self.status_label = CTkLabel(self.status_frame, height=50, text=MESSAGE["default"], text_color="gray",
+        self.status_label = CTkLabel(self.status_frame, height=50, text=MESSAGE["default"][0], text_color="gray",
                                      wraplength=130, image=self.info_image, compound="left")
         self.status_label.pack(side=LEFT, expand=True)
 
@@ -35,14 +34,14 @@ class StatusBar:
 
     def success(self):
         self.status_label.configure(image=self.ok_image,
-                                    text=MESSAGE["success"])
+                                    text=MESSAGE["success"][0])
 
     def clipboard(self):
-        self.status_label.configure(image=self.ok_image, text=MESSAGE["clipboard"])
+        self.status_label.configure(image=self.ok_image, text=MESSAGE["clipboard"][0])
 
     def update(self, download_url):
         self.status_label.configure(image=self.available_updates_image,
-                                    text=MESSAGE["update"])
+                                    text=MESSAGE["update"][0])
         self.status_label.bind("<Button-1>", lambda e: webbrowser.open_new(download_url))
 
     def stop_update(self):
