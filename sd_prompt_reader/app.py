@@ -1,6 +1,6 @@
 # -*- encoding:utf-8 -*-
 __author__ = 'receyuki'
-__filename__ = 'main.py'
+__filename__ = 'app.py'
 __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
@@ -17,6 +17,7 @@ from sd_prompt_reader.ctkdnd import Tk
 from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.update_checker import UpdateChecker
 from sd_prompt_reader.constants import *
+from sd_prompt_reader.status_bar import StatusBar
 
 
 class App(Tk):
@@ -35,11 +36,6 @@ class App(Tk):
         self.info_font = CTkFont()
         self.scaling = ScalingTracker.get_window_dpi_scaling(self)
 
-        self.info_image = self.load_status_icon(INFO_FILE)
-        self.error_image = self.load_status_icon(ERROR_FILE)
-        self.box_important_image = self.load_status_icon(BOX_IMPORTANT_FILE)
-        self.ok_image = self.load_status_icon(OK_FILE)
-        self.available_updates_image = self.load_status_icon(AVAILABLE_UPDATES_FILE)
         self.drop_image = CTkImage(Image.open(DROP_FILE), size=(100, 100))
         self.clipboard_image = CTkImage(Image.open(CLIPBOARD_FILE), size=(50, 50))
         self.remove_tag_image = CTkImage(Image.open(REMOVE_TAG_FILE), size=(50, 50))
@@ -104,12 +100,8 @@ class App(Tk):
         #                           font=info_font, command=lambda: copy_to_clipboard(info[3]))
         # button_remove.grid(row=3, column=2, pady=(0, 20))
 
-        self.status = "Drag and drop your file into the window"
-        self.status_frame = CTkFrame(self, height=50)
-        self.status_frame.grid(row=3, column=4, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5, ipady=5)
-        self.status_label = CTkLabel(self.status_frame, height=50, text=self.status, text_color="gray", wraplength=130,
-                                     image=self.info_image, compound="left")
-        self.status_label.pack(side=LEFT, expand=True)
+        self.status_bar = StatusBar(self)
+        self.status_bar.status_frame.grid(row=3, column=4, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5, ipady=5)
 
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
         self.buttons = [self.button_positive, self.button_negative, self.button_raw]
@@ -121,7 +113,7 @@ class App(Tk):
         self.dnd_bind("<<Drop>>", self.display_info)
         self.bind("<Configure>", self.resize_image)
 
-        self.update_checker = UpdateChecker(self.status_label, self.available_updates_image)
+        self.update_checker = UpdateChecker(self.status_bar)
 
     def display_info(self, event, is_selected=False):
         # stop update thread when reading first image
@@ -153,7 +145,7 @@ class App(Tk):
                         box.configure(state=DISABLED, text_color=self.default_text_colour)
                     for button in self.buttons:
                         button.configure(state=NORMAL)
-                    self.status_label.configure(image=self.ok_image, text=MESSAGE["success"])
+                    self.status_bar.success()
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
                 self.resize_image()
@@ -169,8 +161,7 @@ class App(Tk):
         if reset_image:
             self.image_label.configure(image=self.drop_image)
             self.image = None
-        self.status_label.configure(image=self.box_important_image,
-                                    text=message[-1])
+        self.status_bar.warning(message[-1])
 
     def resize_image(self, event=None):
         # resize image to window size
@@ -196,19 +187,7 @@ class App(Tk):
         except:
             print("Copy error")
         else:
-            self.status_label.configure(image=self.ok_image, text="Copied to clipboard")
-
-    def load_status_icon(self, file):
-        return CTkImage(self.add_margin(Image.open(file), 0, 0, 0, 33), size=(40, 30))
-
-    @staticmethod
-    def add_margin(img, top, bottom, left, right):
-        width, height = img.size
-        new_width = width + right + left
-        new_height = height + top + bottom
-        result = Image.new(img.mode, (new_width, new_height))
-        result.paste(img, (left, top))
-        return result
+            self.status_bar.clipboard()
 
     @staticmethod
     def select_image():
@@ -226,6 +205,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-#TODO statusbar.py

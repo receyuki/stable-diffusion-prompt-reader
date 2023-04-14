@@ -21,7 +21,10 @@ REMOVE_TAG_FILE = Path(RESOURCE_DIR, "remove-tag.png")
 ICON_FILE = Path(RESOURCE_DIR, "icon.png")
 ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
 MESSAGE = {
+    "default": ["Drag and drop your file into the window"],
     "success": ["Voilà!"],
     "format_error": ["No data", "No data detected or unsupported format"],
-    "suffix_error": ["Unsupported format"]
+    "suffix_error": ["Unsupported format"],
+    "clipboard": ["Copied to clipboard"],
+    "update": ["A new version is available, click here to download"]
 }
