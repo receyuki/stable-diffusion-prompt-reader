@@ -37,12 +37,18 @@ class ImageDataReader:
             self._width = f.width
             self._height = f.height
             self._info = f.info
+            # a1111 png format
             if "parameters" in self._info and f.format == "PNG":
                 self._sd_png()
+            # a1111 jpeg and webp format
             elif "exif" in self._info and (f.format == "JPEG" or f.format == "WEBP"):
                 self._sd_jpg()
+            # novelai format
             elif self._info.get("Software") == "NovelAI" and f.format == "PNG":
                 self._nai_png()
+            # comfyui format
+            elif self._info.get("prompt") and f.format == "PNG":
+                self._comfy_png()
 
     def _sd_png(self):
         self._raw = self._info.get("parameters")
@@ -79,6 +85,20 @@ class ImageDataReader:
             self._setting += f", Scale: {comment_json.get('scale')}"
         if self._setting:
             self._setting += ", Clip skip: 2, ENSD: 31337"
+
+    def _comfy_png(self):
+        prompt = self._info.get("prompt") or {}
+        workflow = self._info.get("workflow") or {}
+        prompt_json = json.loads(prompt)
+        self._raw += str(prompt)
+        sampler_type = ["KSampler", "KSamplerAdvanced"]
+
+        if workflow:
+            self._raw += "\n" + workflow
+
+        ksampler = next(filter(lambda value: value.get("class_type") == "KSampler", prompt_json.values()), None)
+        print(ksampler)
+        print(prompt)
 
     @property
     def positive(self):
