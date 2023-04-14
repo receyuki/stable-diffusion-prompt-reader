@@ -65,5 +65,5 @@ e.g. `sudo apt-get install python3-tk` for Debian-based distributions
 ## Credits
 - Inspired by [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
 - Function icons from [Icons8](https://icons8.com/)
-- App icon generated using [IconsMI](https://huggingface.co/jvkape/IconsMI-AppIconsModelforSD)
+- App icon generated using Stable Diffusion with [IconsMI](https://huggingface.co/jvkape/IconsMI-AppIconsModelforSD)
 - Special thanks to [Azusachan](https://github.com/Azusachan) for providing SD server
