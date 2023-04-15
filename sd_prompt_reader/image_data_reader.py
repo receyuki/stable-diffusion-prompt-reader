@@ -91,14 +91,68 @@ class ImageDataReader:
         workflow = self._info.get("workflow") or {}
         prompt_json = json.loads(prompt)
         self._raw += str(prompt)
-        sampler_type = ["KSampler", "KSamplerAdvanced"]
 
         if workflow:
             self._raw += "\n" + workflow
+        # for value in prompt_json.values():
+        #     if value.get("class_type") in sampler_type and value.get("inputs").get("model"):
+        #         ksampler = value
 
-        ksampler = next(filter(lambda value: value.get("class_type") == "KSampler", prompt_json.values()), None)
-        print(ksampler)
-        print(prompt)
+        # ksampler = next(filter(lambda value: value.get("class_type") in sampler_type, prompt_json.values()), None)
+        # multi chain
+        end_nodes = list(filter(lambda item: item[-1].get("class_type") == "SaveImage", prompt_json.items()))
+        chains = []
+        # print(end_nodes)
+
+        for end_node in end_nodes:
+            chain = {}
+            chain = self._comfy_traverse(prompt_json, str(end_node[0]))
+            print(chain)
+            chains.append(chain)
+
+        # print(prompt)
+
+    def _comfy_traverse(self, prompt, end_node):
+        SAMPLES_SKIP_TYPES = ["VAEDecode", "LatentUpscale"]
+        KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
+        chain = {}
+        if prompt[end_node]["class_type"] == "SaveImage":
+            print(end_node)
+            chain.update(self._comfy_traverse(prompt, prompt[end_node]["inputs"]["images"][0]))
+        elif prompt[end_node]["class_type"] in KSAMPLER_TYPES:
+            print(end_node)
+            chain = prompt[end_node]["inputs"]
+            branch1 = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["model"][0]) or {}
+            branch2 = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["latent_image"][0]) or {}
+            chain.update(max([branch1, branch2], key=len))
+        elif prompt[end_node]["class_type"] == "LoraLoader":
+            print(end_node)
+            chain = prompt[end_node]["inputs"]
+            chain.update(self._comfy_traverse(prompt, prompt[end_node]["inputs"]["model"][0]))
+        elif prompt[end_node]["class_type"] == "CheckpointLoaderSimple":
+            print(end_node)
+            return prompt[end_node]["inputs"]
+        elif prompt[end_node]["class_type"] == "EmptyLatentImage":
+            print(end_node)
+            return
+        elif prompt[end_node]["class_type"] == "VAEEncode":
+            print(end_node)
+            chain.update(self._comfy_traverse(prompt, prompt[end_node]["inputs"]["pixels"][0]))
+        elif prompt[end_node]["class_type"] == "ImageScale":
+            print(end_node)
+            chain = prompt[end_node]["inputs"]
+            chain.update(self._comfy_traverse(prompt, prompt[end_node]["inputs"]["image"][0]))
+        elif prompt[end_node]["class_type"] == "ImageUpscaleWithModel":
+            print(end_node)
+            chain = prompt[end_node]["inputs"]
+            chain.update(self._comfy_traverse(prompt, prompt[end_node]["inputs"]["image"][0]))
+        elif prompt[end_node]["class_type"] in SAMPLES_SKIP_TYPES:
+            print(end_node)
+            chain.update(self._comfy_traverse(prompt, prompt[end_node]["inputs"]["samples"][0]))
+
+        print(chain)
+        return chain
+    #add latent image
 
     @property
     def positive(self):
