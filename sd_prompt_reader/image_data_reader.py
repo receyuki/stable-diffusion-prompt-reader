@@ -126,7 +126,8 @@ class ImageDataReader:
             # print(json.dumps(flow))
 
         print(longest_flow)
-
+        self._raw += self._positive
+        self._raw += self._negative
         self._setting = (
             f"Seed: {longest_flow.get('seed')}"
             f", Steps: {longest_flow.get('steps')}"
