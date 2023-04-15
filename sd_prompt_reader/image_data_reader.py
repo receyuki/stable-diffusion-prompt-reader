@@ -20,6 +20,7 @@ class ImageDataReader:
         self._negative = ""
         self._setting = ""
         self._raw = ""
+        self._tool = ""
         self.read_data(file)
 
     def _sd_format(self):
@@ -39,15 +40,19 @@ class ImageDataReader:
             self._info = f.info
             # a1111 png format
             if "parameters" in self._info and f.format == "PNG":
+                self._tool = "A1111 webUI"
                 self._sd_png()
             # a1111 jpeg and webp format
             elif "exif" in self._info and (f.format == "JPEG" or f.format == "WEBP"):
+                self._tool = "A1111 webUI"
                 self._sd_jpg()
             # novelai format
             elif self._info.get("Software") == "NovelAI" and f.format == "PNG":
+                self._tool = "NovelAI"
                 self._nai_png()
             # comfyui format
             elif self._info.get("prompt") and f.format == "PNG":
+                self._tool = "ComfyUI"
                 self._comfy_png()
 
     def _sd_png(self):
@@ -264,3 +269,7 @@ class ImageDataReader:
     @property
     def raw(self):
         return self._raw
+
+    @property
+    def tool(self):
+        return self._tool

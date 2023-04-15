@@ -146,7 +146,7 @@ class App(Tk):
                         box.configure(state="disable", text_color=self.default_text_colour)
                     for button in self.buttons:
                         button.configure(state="normal")
-                    self.status_bar.success()
+                    self.status_bar.success(self.image_data.tool)
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
                 self.resize_image()

@@ -32,9 +32,9 @@ class StatusBar:
         self.status_label.configure(image=self.box_important_image,
                                     text=message)
 
-    def success(self):
+    def success(self, message):
         self.status_label.configure(image=self.ok_image,
-                                    text=MESSAGE["success"][0])
+                                    text=message)
 
     def clipboard(self):
         self.status_label.configure(image=self.ok_image, text=MESSAGE["clipboard"][0])
