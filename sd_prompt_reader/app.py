@@ -6,7 +6,7 @@ __email__ = 'receyuki@gmail.com'
 
 import platform
 import sys
-from tkinter import PhotoImage
+from tkinter import PhotoImage, Menu
 
 import pyperclip as pyperclip
 from PIL import Image
@@ -36,6 +36,9 @@ class App(Tk):
         # info_font = CTkFont(size=20)
         self.info_font = CTkFont()
         self.scaling = ScalingTracker.get_window_dpi_scaling(self)
+
+        empty_menubar = Menu(self)
+        self.config(menu=empty_menubar)
 
         self.drop_image = CTkImage(Image.open(DROP_FILE), size=(100, 100))
         self.clipboard_image = CTkImage(Image.open(CLIPBOARD_FILE), size=(50, 50))
@@ -117,8 +120,14 @@ class App(Tk):
 
         self.update_checker = UpdateChecker(self.status_bar)
 
+        # open with in windows
         if len(sys.argv) > 1:
             self.display_info(sys.argv[1], True)
+        # open with in macOS
+        self.createcommand("::tk::mac::OpenDocument", self.open_document_handler)
+
+    def open_document_handler(self, *args):
+        self.display_info(args[0], True)
 
     def display_info(self, event, is_selected=False):
         # stop update thread when reading first image

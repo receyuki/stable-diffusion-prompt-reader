@@ -40,6 +40,12 @@ elif platform.system() == "Darwin":
 
     APP = ['main.py']
     DATA_FILES = []
+    CFBundleDocumentTypes = [
+        dict(
+            CFBundleTypeExtensions=["png", "jpg", "jpeg", "webp"],
+            CFBundleTypeName="Image File",
+            CFBundleTypeRole="Viewer",
+        ), ]
     OPTIONS = {
         'iconfile': 'resources/icon.icns',
         'plist': {
@@ -48,11 +54,12 @@ elif platform.system() == "Darwin":
             'CFBundleVersion': VERSION,
             'CFBundleIdentifier': 'com.receyuki.sd-prompt-reader',
             'NSHumanReadableCopyright': 'Copyright © 2023 receyuki All rights reserved.',
+            'CFBundleDocumentTypes': CFBundleDocumentTypes
         },
         'includes': ['pyperclip', 'PIL', 'tkinter', 'tkinterdnd2', 'os', 'customtkinter', 'plyer', 'pyobjus',
                      'plyer.platforms.macosx.notification', 'tcl8', 'tcl8.6', 'charset_normalizer.md__mypyc',
                      'PIL.WebPImagePlugin', 'sd_prompt_reader'],
-        'packages': ['resources']
+        'packages': ['resources'],
     }
 
     setup(
