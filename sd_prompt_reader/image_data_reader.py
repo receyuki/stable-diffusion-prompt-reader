@@ -98,7 +98,7 @@ class ImageDataReader:
         self._raw += str(prompt)
         print(str(prompt))
         if workflow:
-            self._raw += "\n" + workflow
+            self._raw += "\n" + str(workflow)
         # for value in prompt_json.values():
         #     if value.get("class_type") in sampler_type and value.get("inputs").get("model"):
         #         ksampler = value
@@ -134,58 +134,67 @@ class ImageDataReader:
             f", CFG scale: {longest_flow.get('cfg')}"
             f", Sampler: {self.remove_quotes(longest_flow.get('sampler_name'))}"
             f", Scheduler: {self.remove_quotes(longest_flow.get('scheduler'))}"
-            f", Denoise: {longest_flow.get('denoise')}"
             f", Size: {self._width}x{self._height}"
             f", Model: {self.remove_quotes(longest_flow.get('ckpt_name'))}"
-
         )
+        if "denoise" in longest_flow:
+            self._setting += f", Denoise: {longest_flow.get('denoise')}"
         if "upscale_method" in longest_flow:
             self._setting += f", Upscale method: {self.remove_quotes(longest_flow.get('upscale_method'))}"
         if "upscaler" in longest_flow:
             self._setting += f", Upscale model: {self.remove_quotes(longest_flow.get('upscaler'))}"
 
     def _comfy_traverse(self, prompt, end_node):
-        SAMPLES_SKIP_TYPES = ["VAEDecode", "LatentUpscale"]
         KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
+        VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
         flow = {}
         node = []
         match prompt[end_node]["class_type"]:
             case "SaveImage":
                 print(end_node)
                 node.append(end_node)
-                last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["images"][0])
-                print("aaaa")
-                print(last_flow)
-                flow = self.merge_dict(flow, last_flow)
-                node += last_node
-                print("aaaa")
-                print(end_node)
+                try:
+                    last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["images"][0])
+                    print("aaaa")
+                    print(last_flow)
+                    flow = self.merge_dict(flow, last_flow)
+                    node += last_node
+                    print("aaaa")
+                    print(end_node)
+                except:
+                    pass
             case node_type if node_type in KSAMPLER_TYPES:
                 print(end_node)
                 node.append(end_node)
-                flow = prompt[end_node]["inputs"]
-                last_flow1, last_node1 = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["model"][0])
-                last_flow2, last_node2 = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["latent_image"][0])
-                self._positive = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["positive"][0])
-                self._negative = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["negative"][0])
-                if len(last_node1 or []) >= len(last_node2 or []):
+                try:
+                    flow = prompt[end_node]["inputs"]
+                    last_flow1, last_node1 = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["model"][0])
+                    last_flow2, last_node2 = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["latent_image"][0])
+                    self._positive = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["positive"][0])
+                    self._negative = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["negative"][0])
                     flow = self.merge_dict(flow, last_flow1)
-                    node += last_node1
-                else:
                     flow = self.merge_dict(flow, last_flow2)
-                    node += last_node2
-                print(end_node)
+                    node += last_node1 + last_node2
+                    print(end_node)
+                except:
+                    pass
             case "CLIPTextEncode":
                 print(end_node)
-                return prompt[end_node]["inputs"]["text"]
+                try:
+                    return prompt[end_node]["inputs"]["text"]
+                except:
+                    pass
             case "LoraLoader":
                 print(end_node)
                 node.append(end_node)
-                flow = prompt[end_node]["inputs"]
-                last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["model"][0])
-                flow = self.merge_dict(flow, last_flow)
-                node += last_node
-                print(end_node)
+                try:
+                    flow = prompt[end_node]["inputs"]
+                    last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["model"][0])
+                    flow = self.merge_dict(flow, last_flow)
+                    node += last_node
+                    print(end_node)
+                except:
+                    pass
             case "CheckpointLoaderSimple":
                 print(end_node)
                 node.append(end_node)
@@ -196,45 +205,88 @@ class ImageDataReader:
                 node.append(end_node)
                 print(end_node)
                 return {}, node
-            case "VAEEncode":
+            case node_type if node_type in VAE_ENCODE_TYPE:
                 print(end_node)
                 node.append(end_node)
-                last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["pixels"][0])
-                flow = self.merge_dict(flow, last_flow)
-                node += last_node
-                print(end_node)
+                try:
+                    last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["pixels"][0])
+                    flow = self.merge_dict(flow, last_flow)
+                    node += last_node
+                    print(end_node)
+                except:
+                    pass
             case "ImageScale":
                 print(end_node)
                 node.append(end_node)
-                flow = prompt[end_node]["inputs"]
-                last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["image"][0])
-                flow = self.merge_dict(flow, last_flow)
-                node += last_node
-                print(end_node)
+                try:
+                    flow = prompt[end_node]["inputs"]
+                    last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["image"][0])
+                    flow = self.merge_dict(flow, last_flow)
+                    node += last_node
+                    print(end_node)
+                except:
+                    pass
             case "UpscaleModelLoader":
                 print(end_node)
                 node.append(end_node)
+                try:
+                    return {"upscaler": prompt[end_node]["inputs"]["model_name"]}
+                except:
+                    pass
                 print(end_node)
-                return {"upscaler": prompt[end_node]["inputs"]["model_name"]}
             case "ImageUpscaleWithModel":
                 print(end_node)
                 node.append(end_node)
-                flow = prompt[end_node]["inputs"]
-                last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["image"][0])
-                model = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["upscale_model"][0])
-                flow = self.merge_dict(flow, last_flow)
-                flow = self.merge_dict(flow, model)
-                node += last_node
-                print(end_node)
-            case node_type if node_type in SAMPLES_SKIP_TYPES:
+                try:
+                    flow = prompt[end_node]["inputs"]
+                    last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["image"][0])
+                    model = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["upscale_model"][0])
+                    flow = self.merge_dict(flow, last_flow)
+                    flow = self.merge_dict(flow, model)
+                    node += last_node
+                    print(end_node)
+                except:
+                    pass
+            case "ConditioningCombine":
                 print(end_node)
                 node.append(end_node)
-                last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["samples"][0])
-                print(flow)
-                print(last_flow)
-                flow = self.merge_dict(flow, last_flow)
-                node += last_node
+                try:
+                    last_flow1, last_node1 = self._comfy_traverse(prompt,
+                                                                  prompt[end_node]["inputs"]["conditioning_1"][0])
+                    last_flow2, last_node2 = self._comfy_traverse(prompt,
+                                                                  prompt[end_node]["inputs"]["conditioning_2"][0])
+                    flow = self.merge_dict(flow, last_flow1)
+                    flow = self.merge_dict(flow, last_flow2)
+                    node += last_node1 +last_node2
+                    print(end_node)
+                except:
+                    pass
+            case _:
                 print(end_node)
+                node.append(end_node)
+                try:
+                    last_flow, last_node = None, None
+                    if prompt[end_node]["inputs"].get("samples"):
+                        last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["samples"][0])
+                    elif prompt[end_node]["inputs"].get("image"):
+                        last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["image"][0])
+                    elif prompt[end_node]["inputs"].get("model"):
+                        last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["model"][0])
+                    elif prompt[end_node]["inputs"].get("clip"):
+                        last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["clip"][0])
+                    elif prompt[end_node]["inputs"].get("samples_from"):
+                        last_flow, last_node = self._comfy_traverse(prompt,
+                                                                    prompt[end_node]["inputs"]["samples_from"][0])
+                    elif prompt[end_node]["inputs"].get("conditioning"):
+                        last_flow, last_node = self._comfy_traverse(prompt,
+                                                                    prompt[end_node]["inputs"]["conditioning"][0])
+                    print(flow)
+                    print(last_flow)
+                    flow = self.merge_dict(flow, last_flow)
+                    node += last_node
+                    print(end_node)
+                except:
+                    pass
         return flow, node
 
     @staticmethod
