@@ -5,6 +5,7 @@ __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 import platform
+import sys
 from tkinter import PhotoImage
 
 import pyperclip as pyperclip
@@ -115,6 +116,9 @@ class App(Tk):
         self.bind("<Configure>", self.resize_image)
 
         self.update_checker = UpdateChecker(self.status_bar)
+
+        if len(sys.argv) > 1:
+            self.display_info(sys.argv[1], True)
 
     def display_info(self, event, is_selected=False):
         # stop update thread when reading first image
