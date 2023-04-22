@@ -147,6 +147,7 @@ class ImageDataReader:
     def _comfy_traverse(self, prompt, end_node):
         KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
         VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
+        CHECKPOINT_LOADER_TYPE = ["CheckpointLoader", "CheckpointLoaderSimple"]
         flow = {}
         node = []
         match prompt[end_node]["class_type"]:
@@ -195,18 +196,11 @@ class ImageDataReader:
                     print(end_node)
                 except:
                     pass
-            ## TODO other types of loader
-            case "CheckpointLoaderSimple":
+            case node_type if node_type in CHECKPOINT_LOADER_TYPE:
                 print(end_node)
                 node.append(end_node)
                 print(end_node)
                 return prompt[end_node]["inputs"], node
-            ## TODO remove 
-            case "EmptyLatentImage":
-                print(end_node)
-                node.append(end_node)
-                print(end_node)
-                return {}, node
             case node_type if node_type in VAE_ENCODE_TYPE:
                 print(end_node)
                 node.append(end_node)
@@ -259,7 +253,7 @@ class ImageDataReader:
                                                                   prompt[end_node]["inputs"]["conditioning_2"][0])
                     flow = self.merge_dict(flow, last_flow1)
                     flow = self.merge_dict(flow, last_flow2)
-                    node += last_node1 +last_node2
+                    node += last_node1 + last_node2
                     print(end_node)
                 except:
                     pass
