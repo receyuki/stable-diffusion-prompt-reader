@@ -96,7 +96,6 @@ class ImageDataReader:
         workflow = self._info.get("workflow") or {}
         prompt_json = json.loads(prompt)
         self._raw += str(prompt)
-        print(str(prompt))
         if workflow:
             self._raw += "\n" + str(workflow)
         # for value in prompt_json.values():
@@ -122,10 +121,8 @@ class ImageDataReader:
                 longest_flow = flow
                 longest_nodes = nodes
                 longest_flow_len = len(nodes)
-            print("node", nodes)
             # print(json.dumps(flow))
 
-        print(longest_flow)
         self._raw += self._positive
         self._raw += self._negative
         self._setting = (
@@ -145,28 +142,20 @@ class ImageDataReader:
             self._setting += f", Upscale model: {self.remove_quotes(longest_flow.get('upscaler'))}"
 
     def _comfy_traverse(self, prompt, end_node):
-        KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
-        VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
-        CHECKPOINT_LOADER_TYPE = ["CheckpointLoader", "CheckpointLoaderSimple"]
+        ksampler_types = ["KSampler", "KSamplerAdvanced"]
+        vae_encode_type = ["VAEEncode", "VAEEncodeForInpaint"]
+        checkpoint_loader_type = ["CheckpointLoader", "CheckpointLoaderSimple"]
         flow = {}
-        node = []
+        node = [end_node]
         match prompt[end_node]["class_type"]:
             case "SaveImage":
-                print(end_node)
-                node.append(end_node)
                 try:
                     last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["images"][0])
-                    print("aaaa")
-                    print(last_flow)
                     flow = self.merge_dict(flow, last_flow)
                     node += last_node
-                    print("aaaa")
-                    print(end_node)
                 except:
-                    pass
-            case node_type if node_type in KSAMPLER_TYPES:
-                print(end_node)
-                node.append(end_node)
+                    print("comfyUI SaveImage error")
+            case node_type if node_type in ksampler_types:
                 try:
                     flow = prompt[end_node]["inputs"]
                     last_flow1, last_node1 = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["model"][0])
@@ -176,63 +165,47 @@ class ImageDataReader:
                     flow = self.merge_dict(flow, last_flow1)
                     flow = self.merge_dict(flow, last_flow2)
                     node += last_node1 + last_node2
-                    print(end_node)
                 except:
-                    pass
+                    print("comfyUI KSampler error")
             case "CLIPTextEncode":
-                print(end_node)
                 try:
                     return prompt[end_node]["inputs"]["text"]
                 except:
-                    pass
+                    print("comfyUI CLIPText error")
             case "LoraLoader":
-                print(end_node)
-                node.append(end_node)
                 try:
                     flow = prompt[end_node]["inputs"]
                     last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["model"][0])
                     flow = self.merge_dict(flow, last_flow)
                     node += last_node
-                    print(end_node)
                 except:
-                    pass
-            case node_type if node_type in CHECKPOINT_LOADER_TYPE:
-                print(end_node)
-                node.append(end_node)
-                print(end_node)
-                return prompt[end_node]["inputs"], node
-            case node_type if node_type in VAE_ENCODE_TYPE:
-                print(end_node)
-                node.append(end_node)
+                    print("comfyUI LoraLoader error")
+            case node_type if node_type in checkpoint_loader_type:
+                try:
+                    return prompt[end_node]["inputs"], node
+                except:
+                    print("comfyUI CheckpointLoader error")
+            case node_type if node_type in vae_encode_type:
                 try:
                     last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["pixels"][0])
                     flow = self.merge_dict(flow, last_flow)
                     node += last_node
-                    print(end_node)
                 except:
-                    pass
+                    print("comfyUI VAE error")
             case "ImageScale":
-                print(end_node)
-                node.append(end_node)
                 try:
                     flow = prompt[end_node]["inputs"]
                     last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["image"][0])
                     flow = self.merge_dict(flow, last_flow)
                     node += last_node
-                    print(end_node)
                 except:
-                    pass
+                    print("comfyUI ImageScale error")
             case "UpscaleModelLoader":
-                print(end_node)
-                node.append(end_node)
                 try:
                     return {"upscaler": prompt[end_node]["inputs"]["model_name"]}
                 except:
-                    pass
-                print(end_node)
+                    print("comfyUI UpscaleLoader error")
             case "ImageUpscaleWithModel":
-                print(end_node)
-                node.append(end_node)
                 try:
                     flow = prompt[end_node]["inputs"]
                     last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["image"][0])
@@ -240,12 +213,9 @@ class ImageDataReader:
                     flow = self.merge_dict(flow, last_flow)
                     flow = self.merge_dict(flow, model)
                     node += last_node
-                    print(end_node)
                 except:
-                    pass
+                    print("comfyUI UpscaleModel error")
             case "ConditioningCombine":
-                print(end_node)
-                node.append(end_node)
                 try:
                     last_flow1, last_node1 = self._comfy_traverse(prompt,
                                                                   prompt[end_node]["inputs"]["conditioning_1"][0])
@@ -254,14 +224,12 @@ class ImageDataReader:
                     flow = self.merge_dict(flow, last_flow1)
                     flow = self.merge_dict(flow, last_flow2)
                     node += last_node1 + last_node2
-                    print(end_node)
                 except:
-                    pass
+                    print("comfyUI ConditioningCombine error")
             case _:
-                print(end_node)
-                node.append(end_node)
                 try:
-                    last_flow, last_node = None, None
+                    last_flow = {}
+                    last_node = []
                     if prompt[end_node]["inputs"].get("samples"):
                         last_flow, last_node = self._comfy_traverse(prompt, prompt[end_node]["inputs"]["samples"][0])
                     elif prompt[end_node]["inputs"].get("image"):
@@ -276,13 +244,10 @@ class ImageDataReader:
                     elif prompt[end_node]["inputs"].get("conditioning"):
                         last_flow, last_node = self._comfy_traverse(prompt,
                                                                     prompt[end_node]["inputs"]["conditioning"][0])
-                    print(flow)
-                    print(last_flow)
                     flow = self.merge_dict(flow, last_flow)
                     node += last_node
-                    print(end_node)
                 except:
-                    pass
+                    print("comfyUI bridging node error")
         return flow, node
 
     @staticmethod
