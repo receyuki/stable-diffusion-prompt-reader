@@ -43,6 +43,7 @@ class App(Tk):
         self.drop_image = CTkImage(Image.open(DROP_FILE), size=(100, 100))
         self.clipboard_image = CTkImage(Image.open(CLIPBOARD_FILE), size=(50, 50))
         self.remove_tag_image = CTkImage(Image.open(REMOVE_TAG_FILE), size=(50, 50))
+        self.document_image = CTkImage(Image.open(DOCUMENT_FILE), size=(50, 50))
         self.icon_image = PhotoImage(file=ICON_FILE)
         self.iconphoto(False, self.icon_image)
         if platform.system() == "Windows":
@@ -89,7 +90,7 @@ class App(Tk):
                                          command=lambda: self.copy_to_clipboard(self.image_data.negative))
         self.button_negative.grid(row=1, column=5, padx=20, pady=(0, 20))
 
-        self.button_raw = CTkButton(self, width=50, height=50, image=self.clipboard_image, text="Raw Data",
+        self.button_raw = CTkButton(self, width=150, height=50, image=self.clipboard_image, text="Raw Data",
                                     font=self.info_font, command=lambda: self.copy_to_clipboard(self.image_data.raw))
         self.button_raw.grid(row=3, column=3, pady=(0, 20))
 
@@ -104,12 +105,18 @@ class App(Tk):
         #                           font=info_font, command=lambda: copy_to_clipboard(info[3]))
         # button_remove.grid(row=3, column=2, pady=(0, 20))
 
+        self.button_export = CTkButton(self, width=150, height=50, image=self.document_image, text="Export to txt",
+                                  font=self.info_font, command=lambda: self.export_txt())
+        self.button_export.grid(row=3, column=2, pady=(0, 20))
+
         self.status_bar = StatusBar(self)
         self.status_bar.status_frame.grid(row=3, column=4, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5,
                                           ipady=5)
 
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
         self.buttons = [self.button_positive, self.button_negative, self.button_raw]
+
+        self.file_path = None
 
         for button in self.buttons:
             button.configure(state="disable")
@@ -136,17 +143,17 @@ class App(Tk):
         if is_selected:
             if event == "":
                 return
-            file_path = Path(event)
+            self.file_path = Path(event)
         else:
-            file_path = Path(event.data.replace("}", "").replace("{", ""))
+            self.file_path = Path(event.data.replace("}", "").replace("{", ""))
 
         # clear text
         for box in self.boxes:
             box.configure(state="normal")
             box.delete("1.0", "end")
 
-        if file_path.suffix in SUPPORTED_FORMATS:
-            with open(file_path, "rb") as f:
+        if self.file_path.suffix in SUPPORTED_FORMATS:
+            with open(self.file_path, "rb") as f:
                 self.image_data = ImageDataReader(f)
                 if not self.image_data.raw:
                     self.unsupported_format(MESSAGE["format_error"])
@@ -202,6 +209,10 @@ class App(Tk):
             print("Copy error")
         else:
             self.status_bar.clipboard()
+
+    def export_txt(self):
+        with open(self.file_path.with_suffix(".txt"), "w") as f:
+            f.write(self.image_data.raw)
 
     @staticmethod
     def select_image():

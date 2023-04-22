@@ -18,6 +18,7 @@ AVAILABLE_UPDATES_FILE = Path(RESOURCE_DIR, "available-updates.png")
 DROP_FILE = Path(RESOURCE_DIR, "drag-and-drop.png")
 CLIPBOARD_FILE = Path(RESOURCE_DIR, "copy-to-clipboard.png")
 REMOVE_TAG_FILE = Path(RESOURCE_DIR, "remove-tag.png")
+DOCUMENT_FILE = Path(RESOURCE_DIR, "document.png")
 ICON_FILE = Path(RESOURCE_DIR, "icon.png")
 ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
 MESSAGE = {
