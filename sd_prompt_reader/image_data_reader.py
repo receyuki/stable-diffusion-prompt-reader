@@ -24,9 +24,13 @@ class ImageDataReader:
         self.read_data(file)
 
     def _sd_format(self):
-        if self._raw and "Negative prompt:" in self._raw and "\nSteps:" in self._raw:
-            prompt_index = [self._raw.index("\nNegative prompt:"),
-                            self._raw.index("\nSteps:")]
+        if self._raw and "\nSteps:" in self._raw:
+            if "Negative prompt:" in self._raw:
+                prompt_index = [self._raw.index("\nNegative prompt:"),
+                                self._raw.index("\nSteps:")]
+            else:
+                prompt_index = [self._raw.index("\nSteps:"),
+                                self._raw.index("\nSteps:")]
             self._positive = self._raw[:prompt_index[0]]
             self._negative = self._raw[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
             self._setting = self._raw[prompt_index[1] + 1:]
@@ -73,8 +77,9 @@ class ImageDataReader:
         self._raw += self._positive
         comment = self._info.get("Comment") or {}
         comment_json = json.loads(comment)
-        self._raw += "\n" + comment
         self._negative = comment_json.get("uc")
+        self._raw += "\n" + self.negative
+        self._raw += "\n" + comment
         self._setting = (
             f"Steps: {comment_json.get('steps')}"
             f", Sampler: {comment_json.get('sampler')}"
@@ -95,9 +100,7 @@ class ImageDataReader:
         prompt = self._info.get("prompt") or {}
         workflow = self._info.get("workflow") or {}
         prompt_json = json.loads(prompt)
-        self._raw += str(prompt)
-        if workflow:
-            self._raw += "\n" + str(workflow)
+
         # for value in prompt_json.values():
         #     if value.get("class_type") in sampler_type and value.get("inputs").get("model"):
         #         ksampler = value
@@ -114,17 +117,18 @@ class ImageDataReader:
         for end_node in end_nodes:
             chain = {}
             flow, nodes = self._comfy_traverse(prompt_json, str(end_node[0]))
-            # print(chain)
             # flows.append(chain)
             # node_flows.append(nodes)
             if len(nodes) > longest_flow_len:
                 longest_flow = flow
                 longest_nodes = nodes
                 longest_flow_len = len(nodes)
-            # print(json.dumps(flow))
 
         self._raw += self._positive
-        self._raw += self._negative
+        self._raw += "\n" + self._negative
+        self._raw += "\n" + str(prompt)
+        if workflow:
+            self._raw += "\n" + str(workflow)
         self._setting = (
             f"Seed: {longest_flow.get('seed')}"
             f", Steps: {longest_flow.get('steps')}"
