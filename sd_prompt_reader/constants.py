@@ -27,5 +27,6 @@ MESSAGE = {
     "format_error": ["No data", "No data detected or unsupported format"],
     "suffix_error": ["Unsupported format"],
     "clipboard": ["Copied to clipboard"],
-    "update": ["A new version is available, click here to download"]
+    "update": ["A new version is available, click here to download"],
+    "export": ["TXT file has been created"],
 }

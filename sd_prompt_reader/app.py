@@ -11,7 +11,7 @@ from tkinter import PhotoImage, Menu
 import pyperclip as pyperclip
 from PIL import Image
 from customtkinter import CTkFont, ScalingTracker, CTkImage, CTkFrame, CTkLabel, CTkTextbox, ThemeManager, CTkButton, \
-    filedialog
+    filedialog, CTkOptionMenu
 from tkinterdnd2 import DND_FILES
 
 from sd_prompt_reader.constants import *
@@ -70,17 +70,17 @@ class App(Tk):
         self.positive_box = CTkTextbox(self, wrap="word")
         self.positive_box.grid(row=0, column=1, columnspan=4, sticky="news", pady=(20, 20))
         self.positive_box.insert("end", "Prompt")
-        self.positive_box.configure(state="disable", text_color="gray", font=self.info_font)
+        self.positive_box.configure(state="disabled", text_color="gray", font=self.info_font)
 
         self.negative_box = CTkTextbox(self, wrap="word")
         self.negative_box.grid(row=1, column=1, columnspan=4, sticky="news", pady=(0, 20))
         self.negative_box.insert("end", "Negative Prompt")
-        self.negative_box.configure(state="disable", text_color="gray", font=self.info_font)
+        self.negative_box.configure(state="disabled", text_color="gray", font=self.info_font)
 
         self.setting_box = CTkTextbox(self, wrap="word", height=100)
         self.setting_box.grid(row=2, column=1, columnspan=4, sticky="news", pady=(0, 20))
         self.setting_box.insert("end", "Setting")
-        self.setting_box.configure(state="disable", text_color="gray", font=self.info_font)
+        self.setting_box.configure(state="disabled", text_color="gray", font=self.info_font)
 
         self.button_positive = CTkButton(self, width=50, height=50, image=self.clipboard_image, text="",
                                          command=lambda: self.copy_to_clipboard(self.image_data.positive))
@@ -96,7 +96,8 @@ class App(Tk):
 
         # switch_setting_frame = CTkFrame(window, fg_color="transparent")
         # switch_setting_frame.grid(row=2, column=5, pady=(0, 20))
-        # switch_setting = CTkSwitch(switch_setting_frame, switch_width=50, switch_height=25, width=50, text="", font=info_font)
+        # switch_setting = CTkSwitch(switch_setting_frame, switch_width=50, switch_height=25, width=50, text="",
+        # font=info_font)
         # switch_setting.pack(side=TOP)
         # switch_setting_text = CTkLabel(switch_setting_frame, text="Display\nMode")
         # switch_setting_text.pack(side=TOP)
@@ -105,21 +106,33 @@ class App(Tk):
         #                           font=info_font, command=lambda: copy_to_clipboard(info[3]))
         # button_remove.grid(row=3, column=2, pady=(0, 20))
 
-        self.button_export = CTkButton(self, width=150, height=50, image=self.document_image, text="Export to txt",
-                                  font=self.info_font, command=lambda: self.export_txt())
-        self.button_export.grid(row=3, column=2, pady=(0, 20))
+        self.button_export_option = CTkOptionMenu(self, width=60, height=60,
+                                                  font=self.info_font, dynamic_resizing=False,
+                                                  values=["along with the image file", "select directory"])
+        # self.button_export_option.grid(row=3, column=2, pady=(0, 20), padx=(100, 0))
+
+        self.button_export = CTkButton(self, width=100, height=60, image=self.document_image, text="Export\nto txt",
+                                       font=self.info_font, command=lambda: self.export_txt())
+        self.button_export.grid(row=3, column=2, pady=(0, 20), padx=(0, 60))
+
+        self.button_export_option_arrow = CTkButton(self, width=20, height=60, text="⌄",
+                                                    font=CTkFont(size=20, weight="bold"),
+                                                    command=lambda: self.button_export_option_open())
+        # self.button_export_option_arrow._fg_color = ThemeManager.theme["CTkOptionMenu"]["button_color"]
+        # self.button_export_option_arrow._hover_color = ThemeManager.theme["CTkOptionMenu"]["button_hover_color"]
+        self.button_export_option_arrow.grid(row=3, column=2, pady=(0, 20), padx=(80, 0))
 
         self.status_bar = StatusBar(self)
         self.status_bar.status_frame.grid(row=3, column=4, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5,
                                           ipady=5)
 
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
-        self.buttons = [self.button_positive, self.button_negative, self.button_raw]
+        self.buttons = [self.button_positive, self.button_negative, self.button_raw, self.button_export]
 
         self.file_path = None
 
         for button in self.buttons:
-            button.configure(state="disable")
+            button.configure(state="disabled")
 
         self.drop_target_register(DND_FILES)
         self.dnd_bind("<<Drop>>", self.display_info)
@@ -163,7 +176,7 @@ class App(Tk):
                     self.negative_box.insert("end", self.image_data.negative)
                     self.setting_box.insert("end", self.image_data.setting)
                     for box in self.boxes:
-                        box.configure(state="disable", text_color=self.default_text_colour)
+                        box.configure(state="disabled", text_color=self.default_text_colour)
                     for button in self.buttons:
                         button.configure(state="normal")
                     self.status_bar.success(self.image_data.tool)
@@ -176,9 +189,9 @@ class App(Tk):
     def unsupported_format(self, message, reset_image=False):
         for box in self.boxes:
             box.insert("end", message[0])
-            box.configure(state="disable", text_color="gray")
+            box.configure(state="disabled", text_color="gray")
         for button in self.buttons:
-            button.configure(state="disable")
+            button.configure(state="disabled")
         if reset_image:
             self.image_label.configure(image=self.drop_image)
             self.image = None
@@ -210,9 +223,28 @@ class App(Tk):
         else:
             self.status_bar.clipboard()
 
+    def button_export_option_open(self):
+        self.button_export_option._dropdown_menu.open(
+        self.button_export.winfo_rootx(),
+        self.button_export.winfo_rooty() +
+        self.button_export._apply_widget_scaling(self.button_export._current_height + 0))
+
     def export_txt(self):
-        with open(self.file_path.with_suffix(".txt"), "w") as f:
-            f.write(self.image_data.raw)
+        match self.button_export_option.get():
+            case "along with the image file":
+                with open(self.file_path.with_suffix(".txt"), "w") as f:
+                    f.write(self.image_data.raw)
+                    self.status_bar.success(MESSAGE["export"][0])
+            case "select directory":
+                path = filedialog.asksaveasfilename(
+                    title='Select directory',
+                    initialdir=self.file_path.parent,
+                    initialfile=self.file_path.with_suffix("").name,
+                    filetypes=(("text file", "*.txt"),))
+                if path:
+                    with open(Path(path).with_suffix(".txt"), "w") as f:
+                        f.write(self.image_data.raw)
+                        self.status_bar.success(MESSAGE["export"][0])
 
     @staticmethod
     def select_image():

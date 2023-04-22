@@ -21,8 +21,8 @@ class StatusBar:
         self.available_updates_image = self.load_status_icon(AVAILABLE_UPDATES_FILE)
 
         self.status_frame = CTkFrame(parent, height=50)
-        self.status_label = CTkLabel(self.status_frame, height=50, text=MESSAGE["default"][0], text_color="gray",
-                                     wraplength=130, image=self.info_image, compound="left")
+        self.status_label = CTkLabel(self.status_frame, width=200, height=50, text=MESSAGE["default"][0],
+                                     text_color="gray", wraplength=130, image=self.info_image, compound="left")
         self.status_label.pack(side=LEFT, expand=True)
 
     def load_status_icon(self, file):
