@@ -195,11 +195,13 @@ class ImageDataReader:
                     print(end_node)
                 except:
                     pass
+            ## TODO other types of loader
             case "CheckpointLoaderSimple":
                 print(end_node)
                 node.append(end_node)
                 print(end_node)
                 return prompt[end_node]["inputs"], node
+            ## TODO remove 
             case "EmptyLatentImage":
                 print(end_node)
                 node.append(end_node)
