@@ -32,8 +32,8 @@ MESSAGE = {
     "export":           ["TXT file has been generated"],
     "alongside":        ["The TXT file will be generated alongside the image file"],
     "txt_select":       ["The TXT file will be generated in the selected directory"],
-    "remove":           ["A new image file has been generated"],
-    "suffix":           ["A new image file will be generated with suffix"],
-    "overwrite":        ["A new image file will overwrite the original image file"],
-    "remove_select":    ["A new image file will be generated in the selected directory"],
+    "remove":           ["The new image file has been generated"],
+    "suffix":           ["The new image file will be generated with suffix"],
+    "overwrite":        ["The new image file will overwrite the original image file"],
+    "remove_select":    ["The new image file will be generated in the selected directory"],
 }

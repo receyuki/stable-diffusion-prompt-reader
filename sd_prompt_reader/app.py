@@ -28,7 +28,7 @@ class App(Tk):
         # window = TkinterDnD.Tk()
         # window = Tk()
         self.title("SD Prompt Reader")
-        self.geometry("1350x600")
+        self.geometry("1280x600")
         # set_appearance_mode("Light")
         # deactivate_automatic_dpi_awareness()
         # set_widget_scaling(1)
@@ -41,10 +41,10 @@ class App(Tk):
         self.config(menu=empty_menubar)
 
         self.drop_image = CTkImage(Image.open(DROP_FILE), size=(100, 100))
-        self.clipboard_image = CTkImage(Image.open(CLIPBOARD_FILE), size=(45, 45))
-        self.remove_tag_image = CTkImage(Image.open(REMOVE_TAG_FILE), size=(45, 45))
-        self.document_image = CTkImage(Image.open(DOCUMENT_FILE), size=(45, 45))
-        self.expand_arrow_image = CTkImage(Image.open(EXPAND_ARROW_FILE), size=(10, 10))
+        self.clipboard_image = CTkImage(Image.open(CLIPBOARD_FILE), size=(30, 30))
+        self.remove_tag_image = CTkImage(Image.open(REMOVE_TAG_FILE), size=(30, 30))
+        self.document_image = CTkImage(Image.open(DOCUMENT_FILE), size=(30, 30))
+        self.expand_arrow_image = CTkImage(Image.open(EXPAND_ARROW_FILE), size=(8, 8))
         self.icon_image = PhotoImage(file=ICON_FILE)
         self.iconphoto(False, self.icon_image)
         if platform.system() == "Windows":
@@ -59,7 +59,7 @@ class App(Tk):
         self.image_frame = CTkFrame(self)
         self.image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
 
-        self.image_label = CTkLabel(self.image_frame, width=600, text="", image=self.drop_image)
+        self.image_label = CTkLabel(self.image_frame, width=560, text="", image=self.drop_image)
         self.image_label.pack(fill="both", expand=True)
         self.image_label.bind("<Button-1>", lambda e: self.display_info(self.select_image(), True))
 
@@ -95,7 +95,7 @@ class App(Tk):
                                          command=lambda: self.copy_to_clipboard(self.image_data.negative))
         self.button_negative.grid(row=1, column=6, padx=20, pady=(0, 20))
 
-        self.button_raw = CTkButton(self, width=130, height=50, image=self.clipboard_image, text="Raw Data",
+        self.button_raw = CTkButton(self, width=120, height=50, image=self.clipboard_image, text="Raw Data",
                                     font=self.info_font, command=lambda: self.copy_to_clipboard(self.image_data.raw))
         self.button_raw.grid(row=3, column=4, pady=(0, 20))
 
@@ -112,25 +112,25 @@ class App(Tk):
                                                           "select directory",
                                                           "overwrite the original image"],
                                                   command=self.status_bar.remove)
-        self.button_remove = CTkButton(self, width=128, height=50, image=self.remove_tag_image, text="Remove\n Data",
+        self.button_remove = CTkButton(self, width=108, height=50, image=self.remove_tag_image, text="Remove\n Data",
                                        font=self.info_font, command=lambda: self.remove_data())
-        self.button_remove.grid(row=3, column=2, pady=(0, 20), padx=(0, 20), sticky="w")
-        self.button_remove_option_arrow = CTkButton(self, width=20, height=50, text="", image=self.expand_arrow_image,
+        self.button_remove.grid(row=3, column=2, pady=(0, 20), padx=(0, 15), sticky="w")
+        self.button_remove_option_arrow = CTkButton(self, width=10, height=50, text="", image=self.expand_arrow_image,
                                                     font=CTkFont(size=20, weight="bold"),
                                                     command=lambda: self.button_remove_option_open())
-        self.button_remove_option_arrow.grid(row=3, column=2, pady=(0, 20), padx=(130, 20), sticky="w")
+        self.button_remove_option_arrow.grid(row=3, column=2, pady=(0, 20), padx=(110, 15), sticky="w")
 
         self.button_export_option = CTkOptionMenu(self, width=50, height=50,
                                                   font=self.info_font, dynamic_resizing=False,
                                                   values=["alongside the image file", "select directory"],
                                                   command=self.status_bar.export)
-        self.button_export = CTkButton(self, width=128, height=50, image=self.document_image, text="Export\nto txt",
+        self.button_export = CTkButton(self, width=108, height=50, image=self.document_image, text="Export\nto txt",
                                        font=self.info_font, command=lambda: self.export_txt())
-        self.button_export.grid(row=3, column=3, pady=(0, 20), padx=(0, 20), sticky="w")
-        self.button_export_option_arrow = CTkButton(self, width=20, height=50, text="", image=self.expand_arrow_image,
+        self.button_export.grid(row=3, column=3, pady=(0, 20), padx=(0, 15), sticky="w")
+        self.button_export_option_arrow = CTkButton(self, width=10, height=50, text="", image=self.expand_arrow_image,
                                                     font=CTkFont(size=20, weight="bold"),
                                                     command=lambda: self.button_export_option_open())
-        self.button_export_option_arrow.grid(row=3, column=3, pady=(0, 20), padx=(130, 20), sticky="w")
+        self.button_export_option_arrow.grid(row=3, column=3, pady=(0, 20), padx=(110, 15), sticky="w")
 
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
         self.buttons = [self.button_positive, self.button_negative, self.button_raw,
