@@ -19,14 +19,21 @@ DROP_FILE = Path(RESOURCE_DIR, "drag-and-drop.png")
 CLIPBOARD_FILE = Path(RESOURCE_DIR, "copy-to-clipboard.png")
 REMOVE_TAG_FILE = Path(RESOURCE_DIR, "remove-tag.png")
 DOCUMENT_FILE = Path(RESOURCE_DIR, "document.png")
+EXPAND_ARROW_FILE = Path(RESOURCE_DIR, "expand-arrow.png")
 ICON_FILE = Path(RESOURCE_DIR, "icon.png")
 ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
 MESSAGE = {
-    "default": ["Drag and drop your file into the window"],
-    "success": ["Voilà!"],
-    "format_error": ["No data", "No data detected or unsupported format"],
-    "suffix_error": ["Unsupported format"],
-    "clipboard": ["Copied to clipboard"],
-    "update": ["A new version is available, click here to download"],
-    "export": ["TXT file has been created"],
+    "default":          ["Drag and drop your image file into the window"],
+    "success":          ["Voilà!"],
+    "format_error":     ["No data", "No data detected or unsupported format"],
+    "suffix_error":     ["Unsupported format"],
+    "clipboard":        ["Copied to clipboard"],
+    "update":           ["A new version is available, click here to download"],
+    "export":           ["TXT file has been generated"],
+    "alongside":        ["The TXT file will be generated alongside the image file"],
+    "txt_select":       ["The TXT file will be generated in the selected directory"],
+    "remove":           ["A new image file has been generated"],
+    "suffix":           ["A new image file will be generated with suffix"],
+    "overwrite":        ["A new image file will overwrite the original image file"],
+    "remove_select":    ["A new image file will be generated in the selected directory"],
 }

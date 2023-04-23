@@ -21,7 +21,7 @@ class StatusBar:
         self.available_updates_image = self.load_status_icon(AVAILABLE_UPDATES_FILE)
 
         self.status_frame = CTkFrame(parent, height=50)
-        self.status_label = CTkLabel(self.status_frame, width=200, height=50, text=MESSAGE["default"][0],
+        self.status_label = CTkLabel(self.status_frame, width=180, height=50, text=MESSAGE["default"][0],
                                      text_color="gray", wraplength=130, image=self.info_image, compound="left")
         self.status_label.pack(side=LEFT, expand=True)
 
@@ -36,8 +36,28 @@ class StatusBar:
         self.status_label.configure(image=self.ok_image,
                                     text=message)
 
+    def info(self, message):
+        self.status_label.configure(image=self.info_image,
+                                    text=message)
+
     def clipboard(self):
         self.status_label.configure(image=self.ok_image, text=MESSAGE["clipboard"][0])
+
+    def export(self, export_mode: str):
+        match export_mode:
+            case "alongside the image file":
+                self.info(MESSAGE["alongside"][0])
+            case "select directory":
+                self.info(MESSAGE["txt_select"][0])
+
+    def remove(self, remove_mode: str):
+        match remove_mode:
+            case "add suffix":
+                self.info(MESSAGE["suffix"][0])
+            case "overwrite the original image":
+                self.info(MESSAGE["overwrite"][0])
+            case "select directory":
+                self.info(MESSAGE["remove_select"][0])
 
     def update(self, download_url):
         self.status_label.configure(image=self.available_updates_image,

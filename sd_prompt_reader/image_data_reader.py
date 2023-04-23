@@ -255,6 +255,14 @@ class ImageDataReader:
         return flow, node
 
     @staticmethod
+    def remove_data(image_file):
+        with Image.open(image_file) as f:
+            image_data = list(f.getdata())
+            image_without_exif = Image.new(f.mode, f.size)
+            image_without_exif.putdata(image_data)
+            return image_without_exif
+
+    @staticmethod
     def merge_str_to_tuple(item1, item2):
         if not isinstance(item1, tuple):
             item1 = (item1,)
