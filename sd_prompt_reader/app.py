@@ -106,6 +106,7 @@ class App(Tk):
         # switch_setting.pack(side=TOP)
         # switch_setting_text = CTkLabel(switch_setting_frame, text="Display\nMode")
         # switch_setting_text.pack(side=TOP)
+
         self.button_remove_option = CTkOptionMenu(self, width=50, height=50,
                                                   font=self.info_font, dynamic_resizing=False,
                                                   values=["add suffix",
