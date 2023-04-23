@@ -109,10 +109,9 @@ class App(Tk):
 
         self.button_remove_option = CTkOptionMenu(self, width=50, height=50,
                                                   font=self.info_font, dynamic_resizing=False,
-                                                  values=["add suffix",
-                                                          "select directory",
+                                                  values=["select directory",
                                                           "overwrite the original image"],
-                                                  command=self.status_bar.remove)
+                                                  command=self.remove_data)
         self.button_remove = CTkButton(self, width=108, height=50, image=self.remove_tag_image, text="Remove\n Data",
                                        font=self.info_font, command=lambda: self.remove_data())
         self.button_remove.grid(row=3, column=2, pady=(0, 20), padx=(0, 15), sticky="w")
@@ -123,8 +122,8 @@ class App(Tk):
 
         self.button_export_option = CTkOptionMenu(self, width=50, height=50,
                                                   font=self.info_font, dynamic_resizing=False,
-                                                  values=["alongside the image file", "select directory"],
-                                                  command=self.status_bar.export)
+                                                  values=["select directory"],
+                                                  command=self.export_txt)
         self.button_export = CTkButton(self, width=108, height=50, image=self.document_image, text="Export\nto txt",
                                        font=self.info_font, command=lambda: self.export_txt())
         self.button_export.grid(row=3, column=3, pady=(0, 20), padx=(0, 15), sticky="w")
@@ -135,7 +134,8 @@ class App(Tk):
 
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
         self.buttons = [self.button_positive, self.button_negative, self.button_raw,
-                        self.button_export, self.button_remove]
+                        self.button_export, self.button_export_option_arrow,
+                        self.button_remove, self.button_remove_option_arrow]
 
         self.file_path = None
 
@@ -233,58 +233,64 @@ class App(Tk):
 
     def button_export_option_open(self):
         self.button_export_option._dropdown_menu.open(
-        self.button_export.winfo_rootx(),
-        self.button_export.winfo_rooty() +
-        self.button_export._apply_widget_scaling(self.button_export._current_height + 0))
+            self.button_export.winfo_rootx(),
+            self.button_export.winfo_rooty() +
+            self.button_export._apply_widget_scaling(self.button_export._current_height + 0))
 
     def button_remove_option_open(self):
         self.button_remove_option._dropdown_menu.open(
-        self.button_remove.winfo_rootx(),
-        self.button_remove.winfo_rooty() +
-        self.button_remove._apply_widget_scaling(self.button_remove._current_height + 0))
+            self.button_remove.winfo_rootx(),
+            self.button_remove.winfo_rooty() +
+            self.button_remove._apply_widget_scaling(self.button_remove._current_height + 0))
 
-    def export_txt(self):
-        match self.button_export_option.get():
-            case "alongside the image file":
-                with open(self.file_path.with_suffix(".txt"), "w") as f:
-                    f.write(self.image_data.raw)
-                    self.status_bar.success(MESSAGE["export"][0])
-            case "select directory":
-                path = filedialog.asksaveasfilename(
-                    title='Select directory',
-                    initialdir=self.file_path.parent,
-                    initialfile=self.file_path.stem,
-                    filetypes=(("text file", "*.txt"),))
-                if path:
-                    with open(Path(path).with_suffix(".txt"), "w") as f:
-                        f.write(self.image_data.raw)
-                        self.status_bar.success(MESSAGE["export"][0])
+    def export_txt(self, export_mode: str = None):
+        if not export_mode:
+            with open(self.file_path.with_suffix(".txt"), "w") as f:
+                f.write(self.image_data.raw)
+                self.status_bar.success(MESSAGE["alongside"][0])
+        else:
+            match export_mode:
+                # case "alongside the image file":
+                #
+                case "select directory":
+                    path = filedialog.asksaveasfilename(
+                        title='Select directory',
+                        initialdir=self.file_path.parent,
+                        initialfile=self.file_path.stem,
+                        filetypes=(("text file", "*.txt"),))
+                    if path:
+                        with open(Path(path).with_suffix(".txt"), "w") as f:
+                            f.write(self.image_data.raw)
+                            self.status_bar.success(MESSAGE["txt_select"][0])
 
-    def remove_data(self):
+    def remove_data(self, remove_mode: str = None):
         image_without_exif = self.image_data.remove_data(self.file_path)
         new_stem = self.file_path.stem + "_data_removed"
         new_path = self.file_path.with_stem(new_stem)
-        match self.button_remove_option.get():
-            case "add suffix":
-                try:
-                    image_without_exif.save(new_path)
-                    self.status_bar.success(MESSAGE["remove"][0])
-                except:
-                    print("Remove error")
-            case "overwrite the original image":
-                try:
-                    image_without_exif.save(self.file_path)
-                    self.status_bar.success(MESSAGE["remove"][0])
-                except:
-                    print("Remove error")
-            case "select directory":
-                path = filedialog.asksaveasfilename(
-                    title='Select directory',
-                    initialdir=self.file_path.parent,
-                    initialfile=new_path.name,)
-                if path:
-                    image_without_exif.save(path)
-                    self.status_bar.success(MESSAGE["remove"][0])
+        if not remove_mode:
+            try:
+                image_without_exif.save(new_path)
+                self.status_bar.success(MESSAGE["suffix"][0])
+            except:
+                print("Remove error")
+        else:
+            match remove_mode:
+                # case "add suffix":
+                #
+                case "overwrite the original image":
+                    try:
+                        image_without_exif.save(self.file_path)
+                        self.status_bar.success(MESSAGE["overwrite"][0])
+                    except:
+                        print("Remove error")
+                case "select directory":
+                    path = filedialog.asksaveasfilename(
+                        title='Select directory',
+                        initialdir=self.file_path.parent,
+                        initialfile=new_path.name, )
+                    if path:
+                        image_without_exif.save(path)
+                        self.status_bar.success(MESSAGE["remove_select"][0])
 
     @staticmethod
     def select_image():
