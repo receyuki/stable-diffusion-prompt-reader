@@ -25,6 +25,7 @@ class StatusBar:
                                      text_color="gray", wraplength=130, image=self.info_image, compound="left")
         self.status_label.pack(side=LEFT, expand=True)
 
+    # append space to the right of status icon
     def load_status_icon(self, file):
         return CTkImage(self.add_margin(Image.open(file), 0, 0, 0, 33), size=(40, 30))
 

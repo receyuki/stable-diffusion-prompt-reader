@@ -37,9 +37,11 @@ class App(Tk):
         self.info_font = CTkFont()
         self.scaling = ScalingTracker.get_window_dpi_scaling(self)
 
+        # remove menubar on macos
         empty_menubar = Menu(self)
         self.config(menu=empty_menubar)
 
+        # load icon images
         self.drop_image = CTkImage(Image.open(DROP_FILE), size=(100, 100))
         self.clipboard_image = CTkImage(Image.open(CLIPBOARD_FILE), size=(30, 30))
         self.remove_tag_image = CTkImage(Image.open(REMOVE_TAG_FILE), size=(30, 30))
@@ -50,28 +52,32 @@ class App(Tk):
         if platform.system() == "Windows":
             self.iconbitmap(ICO_FILE)
 
+        # configure layout
         self.rowconfigure(tuple(range(4)), weight=1)
         self.columnconfigure(tuple(range(6)), weight=1)
         self.columnconfigure(0, weight=5)
         self.rowconfigure(0, weight=2)
         self.rowconfigure(1, weight=2)
 
+        # image display
         self.image_frame = CTkFrame(self)
         self.image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
 
         self.image_label = CTkLabel(self.image_frame, width=560, text="", image=self.drop_image)
         self.image_label.pack(fill="both", expand=True)
-        self.image_label.bind("<Button-1>", lambda e: self.display_info(self.select_image(), True))
+        self.image_label.bind("<Button-1>", lambda e: self.display_info(self.select_image(), is_selected=True))
 
         self.image = None
         self.image_tk = None
         self.image_data = None
         self.default_text_colour = ThemeManager.theme["CTkTextbox"]["text_color"]
 
+        # status bar
         self.status_bar = StatusBar(self)
         self.status_bar.status_frame.grid(row=3, column=5, columnspan=2, sticky="ew", padx=20, pady=(0, 20), ipadx=5,
                                           ipady=5)
 
+        # text box
         self.positive_box = CTkTextbox(self, wrap="word")
         self.positive_box.grid(row=0, column=1, columnspan=5, sticky="news", pady=(20, 20))
         self.positive_box.insert("end", "Prompt")
@@ -87,6 +93,7 @@ class App(Tk):
         self.setting_box.insert("end", "Setting")
         self.setting_box.configure(state="disabled", text_color="gray", font=self.info_font)
 
+        # copy buttons
         self.button_positive = CTkButton(self, width=50, height=50, image=self.clipboard_image, text="",
                                          command=lambda: self.copy_to_clipboard(self.image_data.positive))
         self.button_positive.grid(row=0, column=6, padx=20, pady=(20, 20))
@@ -99,6 +106,7 @@ class App(Tk):
                                     font=self.info_font, command=lambda: self.copy_to_clipboard(self.image_data.raw))
         self.button_raw.grid(row=3, column=4, pady=(0, 20))
 
+        # setting switch
         # switch_setting_frame = CTkFrame(window, fg_color="transparent")
         # switch_setting_frame.grid(row=2, column=5, pady=(0, 20))
         # switch_setting = CTkSwitch(switch_setting_frame, switch_width=50, switch_height=25, width=50, text="",
@@ -107,6 +115,7 @@ class App(Tk):
         # switch_setting_text = CTkLabel(switch_setting_frame, text="Display\nMode")
         # switch_setting_text.pack(side=TOP)
 
+        # function buttons
         self.button_remove_option = CTkOptionMenu(self, width=50, height=50,
                                                   font=self.info_font, dynamic_resizing=False,
                                                   values=["select directory",
@@ -132,35 +141,38 @@ class App(Tk):
                                                     command=lambda: self.button_export_option_open())
         self.button_export_option_arrow.grid(row=3, column=3, pady=(0, 20), padx=(110, 15), sticky="w")
 
+        # text boxes and buttons
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
         self.buttons = [self.button_positive, self.button_negative, self.button_raw,
                         self.button_export, self.button_export_option_arrow,
                         self.button_remove, self.button_remove_option_arrow]
 
-        self.file_path = None
-
         for button in self.buttons:
             button.configure(state="disabled")
 
+        self.file_path = None
+
+        # bind dnd and resize
         self.drop_target_register(DND_FILES)
         self.dnd_bind("<<Drop>>", self.display_info)
         self.bind("<Configure>", self.resize_image)
 
+        # update checker
         self.update_checker = UpdateChecker(self.status_bar)
 
         # open with in windows
         if len(sys.argv) > 1:
-            self.display_info(sys.argv[1], True)
+            self.display_info(sys.argv[1], is_selected=True)
         # open with in macOS
         self.createcommand("::tk::mac::OpenDocument", self.open_document_handler)
 
     def open_document_handler(self, *args):
-        self.display_info(args[0], True)
+        self.display_info(args[0], is_selected=True)
 
     def display_info(self, event, is_selected=False):
         # stop update thread when reading first image
         self.update_checker.close_thread()
-        # select or drag and drop
+        # selected or drag and drop
         if is_selected:
             if event == "":
                 return
@@ -173,6 +185,7 @@ class App(Tk):
             box.configure(state="normal")
             box.delete("1.0", "end")
 
+        # detect suffix and read
         if self.file_path.suffix in SUPPORTED_FORMATS:
             with open(self.file_path, "rb") as f:
                 self.image_data = ImageDataReader(f)
