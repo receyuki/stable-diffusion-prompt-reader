@@ -258,7 +258,7 @@ class App(Tk):
 
     def export_txt(self, export_mode: str = None):
         if not export_mode:
-            with open(self.file_path.with_suffix(".txt"), "w") as f:
+            with open(self.file_path.with_suffix(".txt"), "w", encoding="utf-8") as f:
                 f.write(self.image_data.raw)
                 self.status_bar.success(MESSAGE["alongside"][0])
         else:
@@ -272,7 +272,7 @@ class App(Tk):
                         initialfile=self.file_path.stem,
                         filetypes=(("text file", "*.txt"),))
                     if path:
-                        with open(Path(path).with_suffix(".txt"), "w") as f:
+                        with open(Path(path).with_suffix(".txt"), "w", encoding="utf-8") as f:
                             f.write(self.image_data.raw)
                             self.status_bar.success(MESSAGE["txt_select"][0])
 
