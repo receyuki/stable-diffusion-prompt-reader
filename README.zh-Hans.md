@@ -74,13 +74,13 @@ e.g. `sudo apt-get install python3-tk` (基于 Debian 的发行版)
 
 ### 导出 prompt 到 txt 文件
 - 点击 "Export to txt" 将在图像文件旁生成一个txt文件.
-- 要保存到另一个位置，点击展开的箭头并点击 "select directory".
+- 要保存到另一个位置，点击展开的箭头并点击 "select directory".  
 ![export](/images/export.png)
 
 ### 去除图片中的 prompt
 - 点击 "Remove Data" 将在原图像文件旁生成一个后缀为"_data_removed"的图像文件。
 - 要保存到另一个位置，点击展开的箭头并点击 "select directory".
-- 要覆盖原始图像文件，点击展开的箭头并点击 "overwrite the original image".
+- 要覆盖原始图像文件，点击展开的箭头并点击 "overwrite the original image".  
 ![export](/images/remove.png)
 
 ## 格式限制

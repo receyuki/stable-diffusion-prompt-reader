@@ -74,13 +74,13 @@ OR
 - Drag and drop the image directly onto executable (.exe or .app).
 ### Export prompt to text file
 - Click "Export to txt" will generate a txt file alongside the image file.
-- To save to another location, click the expand arrow and click "select directory".
+- To save to another location, click the expand arrow and click "select directory".  
 ![export](/images/export.png)
 
 ### Remove prompt from image
 - Click "Remove Data" will generate a new image file with suffix "_data_removed" alongside the original image file.
 - To save to another location, click the expand arrow and click "select directory".
-- To overwrite the original image file, click the expand arrow and click "overwrite the original image".
+- To overwrite the original image file, click the expand arrow and click "overwrite the original image".  
 ![export](/images/remove.png)
 
 ## Format Limitations
