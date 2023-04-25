@@ -86,8 +86,8 @@ e.g. `sudo apt-get install python3-tk` (基于 Debian 的发行版)
 ## 格式限制
 ### ComfyUI
 ***对comfyUI的支持需要更多测试。如果你认为你的图片不能正常显示，请将ComfyUI生成的原始文件以压缩文件的形式上传到issues.***
-
-由于ComfyUI的特性，workflow中的所有节点和流程都存储在图像中，包括没有被使用的。并且一个流程可以有多个分支，多个输入和输出。
+1. 如果设置框中有多组数据(seed, steps, CFG, etc.)，这意味着流程中有多个KSampler节点
+2. 由于ComfyUI的特性，workflow中的所有节点和流程都存储在图像中，包括没有被使用的。并且一个流程可以有多个分支，多个输入和输出。
 (e.g. 在一个流程中同时生成原图和hires. fix后的图像)
 SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输入和输出的最长分支。
 
