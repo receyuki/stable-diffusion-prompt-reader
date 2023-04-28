@@ -94,6 +94,8 @@ SD Prompt Reader will traverse all flowcharts and branches and display the longe
 ## TODO
 - Add Support for more tools
 - Better settings display UI
+- Ability to edit and write prompt back to PNG
+- Batch image processing tool
 
 ## Credits
 - Inspired by [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
