@@ -94,6 +94,8 @@ SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输
 ## 待办
 - 添加更多格式支持
 - 优化设置显示框
+- prompt 编辑回写功能
+- 图像批处理功能
 
 ## Credits
 - Inspired by [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
