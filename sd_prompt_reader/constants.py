@@ -10,6 +10,7 @@ from pathlib import Path
 RELEASE_URL = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
 RESOURCE_DIR = str(resources.files("resources"))
 SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".webp"]
+COLOR_THEME = Path(RESOURCE_DIR, "gray.json")
 INFO_FILE = Path(RESOURCE_DIR, "info.png")
 ERROR_FILE = Path(RESOURCE_DIR, "error.png")
 BOX_IMPORTANT_FILE = Path(RESOURCE_DIR, "box-important.png")
@@ -37,3 +38,6 @@ MESSAGE = {
     "overwrite":        ["A new image file has overwritten the original image"],
     "remove_select":    ["A new image file has been generated in the selected directory"],
 }
+DEFAULT_GRAY = "#8E8E93"
+ACCESSIBLE_GRAY = ("#6C6C70", "#AEAEB2")
+TOOLTIP_DELAY = 1.5

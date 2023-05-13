@@ -11,7 +11,7 @@ from tkinter import PhotoImage, Menu
 import pyperclip as pyperclip
 from PIL import Image
 from customtkinter import CTkFont, ScalingTracker, CTkImage, CTkFrame, CTkLabel, CTkTextbox, ThemeManager, CTkButton, \
-    filedialog, CTkOptionMenu
+    filedialog, CTkOptionMenu, set_default_color_theme
 from tkinterdnd2 import DND_FILES
 
 from sd_prompt_reader.constants import *
@@ -36,6 +36,7 @@ class App(Tk):
         # info_font = CTkFont(size=20)
         self.info_font = CTkFont()
         self.scaling = ScalingTracker.get_window_dpi_scaling(self)
+        set_default_color_theme(COLOR_THEME)
 
         # remove menubar on macos
         empty_menubar = Menu(self)
@@ -81,17 +82,17 @@ class App(Tk):
         self.positive_box = CTkTextbox(self, wrap="word")
         self.positive_box.grid(row=0, column=1, columnspan=5, sticky="news", pady=(20, 20))
         self.positive_box.insert("end", "Prompt")
-        self.positive_box.configure(state="disabled", text_color="gray", font=self.info_font)
+        self.positive_box.configure(state="disabled", text_color=ACCESSIBLE_GRAY, font=self.info_font)
 
         self.negative_box = CTkTextbox(self, wrap="word")
         self.negative_box.grid(row=1, column=1, columnspan=5, sticky="news", pady=(0, 20))
         self.negative_box.insert("end", "Negative Prompt")
-        self.negative_box.configure(state="disabled", text_color="gray", font=self.info_font)
+        self.negative_box.configure(state="disabled", text_color=ACCESSIBLE_GRAY, font=self.info_font)
 
         self.setting_box = CTkTextbox(self, wrap="word", height=100)
         self.setting_box.grid(row=2, column=1, columnspan=5, sticky="news", pady=(0, 20))
         self.setting_box.insert("end", "Setting")
-        self.setting_box.configure(state="disabled", text_color="gray", font=self.info_font)
+        self.setting_box.configure(state="disabled", text_color=ACCESSIBLE_GRAY, font=self.info_font)
 
         # copy buttons
         self.button_positive = CTkButton(self, width=50, height=50, image=self.clipboard_image, text="",
