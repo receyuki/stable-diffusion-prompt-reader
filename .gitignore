@@ -6,3 +6,5 @@
 /pyinstaller-5.9.0/
 tmp.txt
 upx.exe
+/symbols/
+/.idea/
