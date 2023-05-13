@@ -19,6 +19,7 @@ from sd_prompt_reader.ctkdnd import Tk
 from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.status_bar import StatusBar
 from sd_prompt_reader.update_checker import UpdateChecker
+from sd_prompt_reader.ctk_tooltip import CTkToolTip
 
 
 class App(Tk):
@@ -43,11 +44,11 @@ class App(Tk):
         self.config(menu=empty_menubar)
 
         # load icon images
-        self.drop_image = CTkImage(Image.open(DROP_FILE), size=(100, 100))
-        self.clipboard_image = CTkImage(Image.open(CLIPBOARD_FILE), size=(30, 30))
-        self.remove_tag_image = CTkImage(Image.open(REMOVE_TAG_FILE), size=(30, 30))
+        self.drop_image = CTkImage(Image.open(DROP_FILE), size=(48, 48))
+        self.clipboard_image = CTkImage(Image.open(COPY_FILE_L), size=(30, 30))
+        self.remove_tag_image = CTkImage(Image.open(CLEAR_FILE), size=(24, 24))
         self.document_image = CTkImage(Image.open(DOCUMENT_FILE), size=(30, 30))
-        self.expand_arrow_image = CTkImage(Image.open(EXPAND_ARROW_FILE), size=(8, 8))
+        self.expand_arrow_image = CTkImage(Image.open(EXPAND_FILE), size=(8, 8))
         self.icon_image = PhotoImage(file=ICON_FILE)
         self.iconphoto(False, self.icon_image)
         if platform.system() == "Windows":
@@ -64,7 +65,8 @@ class App(Tk):
         self.image_frame = CTkFrame(self)
         self.image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
 
-        self.image_label = CTkLabel(self.image_frame, width=560, text="", image=self.drop_image)
+        # text = "Drop image here or click to select"
+        self.image_label = CTkLabel(self.image_frame, width=560, text="", image=self.drop_image, compound="top", text_color="gray")
         self.image_label.pack(fill="both", expand=True)
         self.image_label.bind("<Button-1>", lambda e: self.display_info(self.select_image(), is_selected=True))
 
@@ -166,6 +168,13 @@ class App(Tk):
             self.display_info(sys.argv[1], is_selected=True)
         # open with in macOS
         self.createcommand("::tk::mac::OpenDocument", self.open_document_handler)
+        # tmp
+        self.button_tmp = CTkButton(self.positive_box, width=30, height=30, image=self.document_image, text="",
+                                       bg_color="transparent")
+        self.button_tmp.grid(row=0, column=1, pady=(0, 15), padx=(15, 15), sticky="se")
+
+        tooltip_1 = CTkToolTip(self.button_remove, delay=TOOLTIP_DELAY, message="test test test")
+
 
     def open_document_handler(self, *args):
         self.display_info(args[0], is_selected=True)

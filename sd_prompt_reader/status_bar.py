@@ -16,9 +16,9 @@ class StatusBar:
     def __init__(self, parent):
         self.info_image = self.load_status_icon(INFO_FILE)
         self.error_image = self.load_status_icon(ERROR_FILE)
-        self.box_important_image = self.load_status_icon(BOX_IMPORTANT_FILE)
+        self.box_important_image = self.load_status_icon(WARNING_FILE)
         self.ok_image = self.load_status_icon(OK_FILE)
-        self.available_updates_image = self.load_status_icon(AVAILABLE_UPDATES_FILE)
+        self.available_updates_image = self.load_status_icon(UPDATE_FILE)
 
         self.status_frame = CTkFrame(parent, height=50)
         self.status_label = CTkLabel(self.status_frame, width=180, height=50, text=MESSAGE["default"][0],
