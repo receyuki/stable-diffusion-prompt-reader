@@ -20,14 +20,16 @@ class StatusBar:
         self.ok_image = self.load_status_icon(OK_FILE)
         self.available_updates_image = self.load_status_icon(UPDATE_FILE)
 
-        self.status_frame = CTkFrame(parent, height=50)
-        self.status_label = CTkLabel(self.status_frame, width=180, height=50, text=MESSAGE["default"][0],
-                                     text_color=ACCESSIBLE_GRAY, wraplength=130, image=self.info_image, compound="left")
+        self.status_frame = CTkFrame(parent)
+        self.status_label = CTkLabel(self.status_frame, width=230,
+                                     height=STATUS_BAR_HEIGHT, text=MESSAGE["default"][0],
+                                     text_color=ACCESSIBLE_GRAY, wraplength=200, image=self.info_image, compound="left")
         self.status_label.pack(side=LEFT, expand=True)
 
     # append space to the right of status icon
     def load_status_icon(self, file):
-        return CTkImage(self.add_margin(Image.open(file), 0, 0, 0, 33), size=(40, 30))
+        # margin right 35/24*96-96=30
+        return CTkImage(self.add_margin(Image.open(file), 0, 0, 0, 44), size=(35, 24))
 
     def warning(self, message):
         self.status_label.configure(image=self.box_important_image,
