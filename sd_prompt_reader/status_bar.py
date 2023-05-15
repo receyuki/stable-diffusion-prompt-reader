@@ -23,7 +23,7 @@ class StatusBar:
         self.status_frame = CTkFrame(parent)
         self.status_label = CTkLabel(self.status_frame, width=230,
                                      height=STATUS_BAR_HEIGHT, text=MESSAGE["default"][0],
-                                     text_color=ACCESSIBLE_GRAY, wraplength=200, image=self.info_image, compound="left")
+                                     text_color=ACCESSIBLE_GRAY, wraplength=190, image=self.info_image, compound="left")
         self.status_label.pack(side=LEFT, expand=True)
 
     # append space to the right of status icon
