@@ -8,3 +8,4 @@ tmp.txt
 upx.exe
 /symbols/
 /.idea/
+/pyinstaller/

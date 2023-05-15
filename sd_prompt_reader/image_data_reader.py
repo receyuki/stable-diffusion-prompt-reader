@@ -41,6 +41,14 @@ class ImageDataReader:
             elif "exif" in self._info and (f.format == "JPEG" or f.format == "WEBP"):
                 self._tool = "A1111 webUI"
                 self._sd_jpg()
+            # invokeai metadata format
+            elif "sd-metadata" in self._info and f.format == "PNG":
+                self._tool = "InvokeAI"
+                self._invoke_metadata()
+            # invokeai legacy dream format
+            elif "Dream" in self._info and f.format == "PNG":
+                self._tool = "InvokeAI"
+                self._invoke_dream()
             # novelai format
             elif self._info.get("Software") == "NovelAI" and f.format == "PNG":
                 self._tool = "NovelAI"
@@ -65,9 +73,11 @@ class ImageDataReader:
 
     def _sd_format(self):
         if self._raw and "\nSteps:" in self._raw:
+            # w/ neg
             if "Negative prompt:" in self._raw:
                 prompt_index = [self._raw.index("\nNegative prompt:"),
                                 self._raw.index("\nSteps:")]
+            # w/o neg
             else:
                 prompt_index = [self._raw.index("\nSteps:"),
                                 self._raw.index("\nSteps:")]
@@ -76,6 +86,71 @@ class ImageDataReader:
             self._setting = self._raw[prompt_index[1] + 1:]
         else:
             self._raw = ""
+
+    def _invoke_metadata(self):
+        metadata = json.loads(self._info.get("sd-metadata"))
+        image = metadata.get("image")
+        prompt = image.get("prompt")
+        prompt_index = [prompt.rfind("["), prompt.rfind("]")]
+
+        # w/ neg
+        if -1 not in prompt_index:
+            self._positive = prompt[:prompt_index[0]]
+            self._negative = prompt[prompt_index[0]+1:prompt_index[1]]
+        # w/o neg
+        else:
+            self._positive = prompt
+
+        self._raw += self._positive
+        self._raw += "\n" + self.negative
+        self._raw += "\n" + self._info.get("Dream") + "\n" + self._info.get("sd-metadata")
+        self._setting = (
+            f"Steps: {image.get('steps')}"
+            f", Sampler: {image.get('sampler')}"
+            f", CFG scale: {image.get('cfg_scale')}"
+            f", Seed: {image.get('seed')}"
+            f", Size: {self._width}x{self._height}"
+            f", Model hash: {metadata.get('model_hash')}"
+            f", Model: {metadata.get('model_weights')}"
+            f", Threshold: {image.get('threshold')}"
+            f", Perlin: {image.get('perlin')}"
+            f", Hires fix: {image.get('hires_fix')}"
+            f", Seamless: {image.get('seamless')}"
+            f", Type: {image.get('type')}"
+            f", Postprocessing: {self.remove_quotes(image.get('postprocessing'))}"
+            f", Variations: {image.get('variations')}"
+        )
+
+    def _invoke_dream(self):
+        dream = self._info.get("Dream")
+        prompt_index = dream.rfind('"')
+        neg_index = [dream.rfind("["), dream.rfind("]")]
+
+        # w/ neg
+        if -1 not in neg_index:
+            self._positive = dream[1:neg_index[0]]
+            self._negative = dream[neg_index[0]+1:neg_index[1]]
+        # w/o neg
+        else:
+            self._positive = dream[1:prompt_index]
+
+        self._raw += self._positive
+        self._raw += "\n" + self.negative
+        self._raw += "\n" + self._info.get("Dream")
+
+        setting_index = [dream.rfind("-s"),
+                         dream.rfind("-S"),
+                         dream.rfind("-W"),
+                         dream.rfind("-H"),
+                         dream.rfind("-C"),
+                         dream.rfind("-A")]
+        self._setting = (
+            f"Steps: {dream[setting_index[0]+3:setting_index[1]-1]}"
+            f", Sampler: {dream[setting_index[5]+3:].split()[0]}"
+            f", CFG scale: {dream[setting_index[4]+3:setting_index[5]-1]}"
+            f", Seed: {dream[setting_index[1]+3:setting_index[2]-1]}"
+            f", Size: {self._width}x{self._height}"
+        )
 
     def _nai_png(self):
         self._positive = self._info.get("Description")
