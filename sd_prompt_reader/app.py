@@ -20,6 +20,7 @@ from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.status_bar import StatusBar
 from sd_prompt_reader.update_checker import UpdateChecker
 from sd_prompt_reader.ctk_tooltip import CTkToolTip
+from sd_prompt_reader.button import STkButton
 
 
 class App(Tk):
@@ -45,15 +46,15 @@ class App(Tk):
 
         # load icon images
         self.drop_image = CTkImage(Image.open(DROP_FILE), size=(48, 48))
-        self.clipboard_image = CTkImage(Image.open(COPY_FILE_L), size=(24, 24))
-        self.clipboard_image_s = CTkImage(Image.open(COPY_FILE_S), size=(20, 20))
-        self.clear_image = CTkImage(Image.open(CLEAR_FILE), size=(24, 24))
-        self.document_image = CTkImage(Image.open(DOCUMENT_FILE), size=(24, 24))
-        self.edit_image = CTkImage(Image.open(EDIT_FILE), size=(24, 24))
-        self.save_image = CTkImage(Image.open(SAVE_FILE), size=(24, 24))
-        self.expand_image = CTkImage(Image.open(EXPAND_FILE), size=(12, 24))
-        self.sort_image = CTkImage(Image.open(SORT_FILE), size=(20, 20))
-        self.mode_image = CTkImage(Image.open(LIGHTBULB_FILE), size=(20, 20))
+        self.clipboard_image = self.load_icon(COPY_FILE_L, (24, 24))
+        self.clipboard_image_s = self.load_icon(COPY_FILE_S, (20, 20))
+        self.clear_image = self.load_icon(CLEAR_FILE, (24, 24))
+        self.document_image = self.load_icon(DOCUMENT_FILE, (24, 24))
+        self.edit_image = self.load_icon(EDIT_FILE, (24, 24))
+        self.save_image = self.load_icon(SAVE_FILE, (24, 24))
+        self.expand_image = self.load_icon(EXPAND_FILE, (12, 24))
+        self.sort_image = self.load_icon(SORT_FILE, (20, 20))
+        self.mode_image = self.load_icon(LIGHTBULB_FILE, (20, 20))
 
         self.icon_image = PhotoImage(file=ICON_FILE)
         self.iconphoto(False, self.icon_image)
@@ -107,74 +108,78 @@ class App(Tk):
         # textbox buttons
         self.button_positive_frame = CTkFrame(self.positive_box, fg_color="transparent")
         self.button_positive_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
-        self.button_copy_positive = CTkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+        self.button_copy_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.clipboard_image_s, text="",
                                               command=lambda: self.copy_to_clipboard(self.image_data.positive))
         self.button_copy_positive.pack(side="top")
-        self.button_sort_positive = CTkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+        self.button_sort_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.sort_image, text="",
                                               command=lambda: self.copy_to_clipboard(self.image_data.positive))
         self.button_sort_positive.pack(side="top", pady=10)
-        self.button_mode_positive = CTkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+        self.button_mode_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.mode_image, text="",
                                               command=lambda: self.copy_to_clipboard(self.image_data.positive))
         self.button_mode_positive.pack(side="top")
 
         self.button_negative_frame = CTkFrame(self.negative_box, fg_color="transparent")
         self.button_negative_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
-        self.button_copy_negative = CTkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+        self.button_copy_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.clipboard_image_s, text="",
                                               command=lambda: self.copy_to_clipboard(self.image_data.negative))
         self.button_copy_negative.pack(side="top")
-        self.button_sort_negative = CTkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+        self.button_sort_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.sort_image, text="",
                                               command=lambda: self.copy_to_clipboard(self.image_data.positive))
         self.button_sort_negative.pack(side="top", pady=10)
-        self.button_mode_negative = CTkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+        self.button_mode_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.mode_image, text="",
                                               command=lambda: self.copy_to_clipboard(self.image_data.positive))
         self.button_mode_negative.pack(side="top")
 
         self.button_setting_frame = CTkFrame(self.setting_box, fg_color="transparent")
         self.button_setting_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
-        self.button_copy_setting = CTkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.clipboard_image_s, text="")
+        self.button_copy_setting = STkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+                                             image=self.clipboard_image_s, text="",
+                                             command=lambda: self.copy_to_clipboard(self.image_data.setting))
         self.button_copy_setting.pack(side="top", pady=(0, 10))
-        self.button_mode_setting = CTkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+        self.button_mode_setting = STkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.mode_image, text="")
         self.button_mode_setting.pack(side="top")
 
         # function buttons
         self.button_edit_frame = CTkFrame(self, fg_color="transparent")
         self.button_edit_frame.grid(row=3, column=1, pady=(0, 20), padx=(0, 20), sticky="w")
-        self.button_edit = CTkButton(self.button_edit_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
+        self.button_edit = STkButton(self.button_edit_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                      image=self.edit_image, text="", font=self.info_font)
         self.button_edit.pack(side="top")
         self.button_edit_label = CTkLabel(self.button_edit_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                           text="Edit", font=self.info_font)
         self.button_edit_label.pack(side="bottom")
         self.button_edit_tooltip = CTkToolTip(self.button_edit, delay=TOOLTIP_DELAY, message="test")
+        self.button_edit.label = self.button_edit_label
 
         self.button_save_frame = CTkFrame(self, fg_color="transparent")
         self.button_save_frame.grid(row=3, column=2, pady=(0, 20), padx=(0, 20), sticky="w")
         self.button_save_option_frame = CTkFrame(self.button_save_frame, fg_color="transparent")
         self.button_save_option_frame.pack(side="top")
-        self.button_save = CTkButton(self.button_save_option_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
+        self.button_save = STkButton(self.button_save_option_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                      image=self.save_image, text="",
                                      font=self.info_font)
         self.button_save.pack(side="left")
-        self.button_save_option_arrow = CTkButton(self.button_save_option_frame, width=ARROW_WIDTH_L,
+        self.button_save_option_arrow = STkButton(self.button_save_option_frame, width=ARROW_WIDTH_L,
                                                   height=BUTTON_HEIGHT_L, text="", image=self.expand_image, )
         self.button_save_option_arrow.pack(side="right")
         self.button_save_label = CTkLabel(self.button_save_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                           text="Save", font=self.info_font)
         self.button_save_label.pack(side="left")
+        self.button_save.label = self.button_save_label
+        self.button_save.arrow = self.button_save_option_arrow
 
         self.button_remove_frame = CTkFrame(self, fg_color="transparent")
         self.button_remove_frame.grid(row=3, column=3, pady=(0, 20), padx=(0, 20), sticky="w")
         self.button_remove_option_frame = CTkFrame(self.button_remove_frame, fg_color="transparent")
         self.button_remove_option_frame.pack(side="top")
-        self.button_remove = CTkButton(self.button_remove_option_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
+        self.button_remove = STkButton(self.button_remove_option_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                        image=self.clear_image, text="",
                                        font=self.info_font, command=lambda: self.remove_data())
         self.button_remove.pack(side="left")
@@ -183,7 +188,7 @@ class App(Tk):
                                                   values=["select directory",
                                                           "overwrite the original image"],
                                                   command=self.remove_data)
-        self.button_remove_option_arrow = CTkButton(self.button_remove_option_frame, width=ARROW_WIDTH_L,
+        self.button_remove_option_arrow = STkButton(self.button_remove_option_frame, width=ARROW_WIDTH_L,
                                                     height=BUTTON_HEIGHT_L, text="",
                                                     image=self.expand_image,
                                                     command=lambda: self.button_remove_option_open())
@@ -191,12 +196,14 @@ class App(Tk):
         self.button_remove_label = CTkLabel(self.button_remove_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                             text="Clear", font=self.info_font)
         self.button_remove_label.pack(side="left")
+        self.button_remove.label = self.button_remove_label
+        self.button_remove.arrow = self.button_remove_option_arrow
 
         self.button_export_frame = CTkFrame(self, fg_color="transparent")
         self.button_export_frame.grid(row=3, column=4, pady=(0, 20), padx=(0, 20), sticky="w")
         self.button_remove_option_frame = CTkFrame(self.button_export_frame, fg_color="transparent")
         self.button_remove_option_frame.pack(side="top")
-        self.button_export = CTkButton(self.button_remove_option_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
+        self.button_export = STkButton(self.button_remove_option_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                        image=self.document_image, text="",
                                        font=self.info_font, command=lambda: self.export_txt())
         self.button_export.pack(side="left")
@@ -204,7 +211,7 @@ class App(Tk):
                                                   font=self.info_font, dynamic_resizing=False,
                                                   values=["select directory"],
                                                   command=self.export_txt)
-        self.button_export_option_arrow = CTkButton(self.button_remove_option_frame, width=ARROW_WIDTH_L,
+        self.button_export_option_arrow = STkButton(self.button_remove_option_frame, width=ARROW_WIDTH_L,
                                                     height=BUTTON_HEIGHT_L, text="",
                                                     image=self.expand_image,
                                                     command=lambda: self.button_export_option_open())
@@ -212,25 +219,30 @@ class App(Tk):
         self.button_export_label = CTkLabel(self.button_export_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                             text="Export", font=self.info_font)
         self.button_export_label.pack(side="left")
+        self.button_export.label = self.button_export_label
+        self.button_export.arrow = self.button_export_option_arrow
 
         self.button_copy_raw_frame = CTkFrame(self, fg_color="transparent")
         self.button_copy_raw_frame.grid(row=3, column=5, pady=(0, 20), sticky="w")
-        self.button_raw = CTkButton(self.button_copy_raw_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
+        self.button_raw = STkButton(self.button_copy_raw_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                     image=self.clipboard_image, text="",
                                     font=self.info_font, command=lambda: self.copy_to_clipboard(self.image_data.raw))
         self.button_raw.pack(side="top")
         self.button_raw_label = CTkLabel(self.button_copy_raw_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                          text="Copy", font=self.info_font)
         self.button_raw_label.pack(side="bottom")
+        self.button_raw.label = self.button_raw_label
 
         # text boxes and buttons
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
-        self.buttons = [self.button_copy_positive, self.button_copy_negative, self.button_raw,
-                        self.button_export, self.button_export_option_arrow,
-                        self.button_remove, self.button_remove_option_arrow]
 
-        # for button in self.buttons:
-        #     button.configure(state="disabled")
+        self.function_buttons = [self.button_copy_positive, self.button_sort_positive, self.button_mode_positive,
+                                 self.button_copy_negative, self.button_sort_negative, self.button_mode_negative,
+                                 self.button_raw, self.button_edit, self.button_save,
+                                 self.button_remove, self.button_export, self.button_remove]
+
+        for button in self.function_buttons:
+            button.disable()
 
         self.file_path = None
 
@@ -279,9 +291,13 @@ class App(Tk):
                     self.negative_box.insert("end", self.image_data.negative)
                     self.setting_box.insert("end", self.image_data.setting)
                     for box in self.boxes:
-                        box.configure(state="disabled", text_color=self.default_text_colour)
-                    for button in self.buttons:
-                        button.configure(state="normal")
+                        # box.configure(state="disabled", text_color=self.default_text_colour)
+                        box.configure(state="disabled")
+                    # for button in self.function_buttons:
+                    #     button.configure(state="normal")
+                    for button in [self.button_copy_positive, self.button_copy_negative, self.button_raw,
+                                   self.button_remove,self.button_export, self.button_remove]:
+                        button.enable()
                     self.status_bar.success(self.image_data.tool)
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
@@ -293,7 +309,7 @@ class App(Tk):
         for box in self.boxes:
             box.insert("end", message[0])
             box.configure(state="disabled", text_color="gray")
-        for button in self.buttons:
+        for button in self.function_buttons:
             button.configure(state="disabled")
         if reset_image:
             self.image_label.configure(image=self.drop_image, text="Drop image here or click to select")
@@ -394,6 +410,11 @@ class App(Tk):
             initialdir="/",
             filetypes=(("image files", "*.png *.jpg *jpeg *.webp"),)
         )
+
+    @staticmethod
+    def load_icon(icon_file, size):
+        return (CTkImage(Image.open(icon_file[0]), size=size),
+                CTkImage(Image.open(icon_file[1]), size=size))
 
 
 def main():
