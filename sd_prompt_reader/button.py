@@ -5,10 +5,12 @@ __copyright__ = 'Copyright 2023, '
 __email__ = 'receyuki@gmail.com'
 
 import tkinter
-from customtkinter import CTkButton, CTkImage, CTkFont, CTkLabel
+from enum import Enum
 from typing import Union, Tuple, Callable, Optional
 
-from sd_prompt_reader.constants import ACCESSIBLE_GRAY, INACCESSIBLE_GRAY
+from customtkinter import CTkButton, CTkImage, CTkFont, CTkLabel
+
+from sd_prompt_reader.constants import ACCESSIBLE_GRAY, INACCESSIBLE_GRAY, BUTTON_HOVER
 
 
 class STkButton(CTkButton):
@@ -42,11 +44,13 @@ class STkButton(CTkButton):
                  anchor: str = "center",
                  label: CTkLabel = None,
                  arrow=None,
+                 mode: Enum = None,
                  **kwargs):
 
         self.image = image
         self._label = label
         self._arrow = arrow
+        self._mode = mode
 
         super().__init__(master=master,
                          width=width,
@@ -93,6 +97,14 @@ class STkButton(CTkButton):
     def arrow(self, arrow):
         self._arrow = arrow
 
+    @property
+    def mode(self):
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode):
+        self._mode = mode
+
     def disable(self):
         self.configure(state="disabled")
         self.configure(image=self.image[1])
@@ -108,3 +120,20 @@ class STkButton(CTkButton):
             self._label.configure(text_color=ACCESSIBLE_GRAY)
         if self._arrow:
             self._arrow.enable()
+
+    def switch_on(self):
+        self.configure(fg_color=BUTTON_HOVER)
+
+    def switch_off(self):
+        self.configure(fg_color="transparent")
+
+
+class ViewMode(Enum):
+    NORMAL = 0
+    VERTICAL = 1
+
+
+class SortMode(Enum):
+    OFF = 0
+    ASC = 1
+    DES = 2
