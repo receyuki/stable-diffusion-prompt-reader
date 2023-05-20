@@ -20,7 +20,7 @@ from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.status_bar import StatusBar
 from sd_prompt_reader.update_checker import UpdateChecker
 from sd_prompt_reader.ctk_tooltip import CTkToolTip
-from sd_prompt_reader.button import STkButton
+from sd_prompt_reader.button import STkButton, ViewMode, SortMode
 
 
 class App(Tk):
@@ -54,7 +54,7 @@ class App(Tk):
         self.save_image = self.load_icon(SAVE_FILE, (24, 24))
         self.expand_image = self.load_icon(EXPAND_FILE, (12, 24))
         self.sort_image = self.load_icon(SORT_FILE, (20, 20))
-        self.mode_image = self.load_icon(LIGHTBULB_FILE, (20, 20))
+        self.view_image = self.load_icon(LIGHTBULB_FILE, (20, 20))
 
         self.icon_image = PhotoImage(file=ICON_FILE)
         self.iconphoto(False, self.icon_image)
@@ -114,12 +114,16 @@ class App(Tk):
         self.button_copy_positive.pack(side="top")
         self.button_sort_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.sort_image, text="",
-                                              command=lambda: self.copy_to_clipboard(self.image_data.positive))
+                                              command=lambda: self.mode_switch(self.button_sort_positive,
+                                                                               self.positive_box),
+                                              mode=SortMode.OFF)
         self.button_sort_positive.pack(side="top", pady=10)
-        self.button_mode_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.mode_image, text="",
-                                              command=lambda: self.copy_to_clipboard(self.image_data.positive))
-        self.button_mode_positive.pack(side="top")
+        self.button_view_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+                                              image=self.view_image, text="",
+                                              command=lambda: self.mode_switch(self.button_view_positive,
+                                                                               self.positive_box),
+                                              mode=ViewMode.NORMAL)
+        self.button_view_positive.pack(side="top")
 
         self.button_negative_frame = CTkFrame(self.negative_box, fg_color="transparent")
         self.button_negative_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
@@ -129,12 +133,16 @@ class App(Tk):
         self.button_copy_negative.pack(side="top")
         self.button_sort_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.sort_image, text="",
-                                              command=lambda: self.copy_to_clipboard(self.image_data.positive))
+                                              command=lambda: self.mode_switch(self.button_sort_negative,
+                                                                               self.negative_box),
+                                              mode=SortMode.OFF)
         self.button_sort_negative.pack(side="top", pady=10)
-        self.button_mode_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.mode_image, text="",
-                                              command=lambda: self.copy_to_clipboard(self.image_data.positive))
-        self.button_mode_negative.pack(side="top")
+        self.button_view_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+                                              image=self.view_image, text="",
+                                              command=lambda: self.mode_switch(self.button_view_negative,
+                                                                               self.negative_box),
+                                              mode=ViewMode.NORMAL)
+        self.button_view_negative.pack(side="top")
 
         self.button_setting_frame = CTkFrame(self.setting_box, fg_color="transparent")
         self.button_setting_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
@@ -142,9 +150,12 @@ class App(Tk):
                                              image=self.clipboard_image_s, text="",
                                              command=lambda: self.copy_to_clipboard(self.image_data.setting))
         self.button_copy_setting.pack(side="top", pady=(0, 10))
-        self.button_mode_setting = STkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.mode_image, text="")
-        self.button_mode_setting.pack(side="top")
+        self.button_view_setting = STkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+                                             image=self.view_image, text="",
+                                             command=lambda: self.mode_switch(self.button_view_setting,
+                                                                              self.setting_box),
+                                             mode=ViewMode.NORMAL)
+        self.button_view_setting.pack(side="top")
 
         # function buttons
         self.button_edit_frame = CTkFrame(self, fg_color="transparent")
@@ -236,8 +247,9 @@ class App(Tk):
         # text boxes and buttons
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
 
-        self.function_buttons = [self.button_copy_positive, self.button_sort_positive, self.button_mode_positive,
-                                 self.button_copy_negative, self.button_sort_negative, self.button_mode_negative,
+        self.function_buttons = [self.button_copy_positive, self.button_sort_positive, self.button_view_positive,
+                                 self.button_copy_negative, self.button_sort_negative, self.button_view_negative,
+                                 self.button_copy_setting, self.button_view_setting,
                                  self.button_raw, self.button_edit, self.button_save,
                                  self.button_remove, self.button_export, self.button_remove]
 
@@ -295,8 +307,7 @@ class App(Tk):
                         box.configure(state="disabled")
                     # for button in self.function_buttons:
                     #     button.configure(state="normal")
-                    for button in [self.button_copy_positive, self.button_copy_negative, self.button_raw,
-                                   self.button_remove,self.button_export, self.button_remove]:
+                    for button in self.function_buttons:
                         button.enable()
                     self.status_bar.success(self.image_data.tool)
                 self.image = Image.open(f)
@@ -308,9 +319,12 @@ class App(Tk):
     def unsupported_format(self, message, reset_image=False):
         for box in self.boxes:
             box.insert("end", message[0])
-            box.configure(state="disabled", text_color="gray")
+            # box.configure(state="disabled", text_color="gray")
+            box.configure(state="disabled")
+        # for button in self.function_buttons:
+        #     button.configure(state="disabled")
         for button in self.function_buttons:
-            button.configure(state="disabled")
+            button.disable()
         if reset_image:
             self.image_label.configure(image=self.drop_image, text="Drop image here or click to select")
             self.image = None
@@ -402,6 +416,28 @@ class App(Tk):
                     if path:
                         image_without_exif.save(path)
                         self.status_bar.success(MESSAGE["remove_select"][0])
+
+    @staticmethod
+    def mode_switch(button: STkButton, textbox: CTkTextbox):
+        if isinstance(button.mode, ViewMode):
+            match button.mode:
+                case ViewMode.NORMAL:
+                    button.switch_on()
+                    button.mode = ViewMode.VERTICAL
+                case ViewMode.VERTICAL:
+                    button.switch_off()
+                    button.mode = ViewMode.NORMAL
+        elif isinstance(button.mode, SortMode):
+            match button.mode:
+                case SortMode.OFF:
+                    button.switch_on()
+                    button.mode = SortMode.ASC
+                case SortMode.ASC:
+                    button.switch_on()
+                    button.mode = SortMode.DES
+                case SortMode.DES:
+                    button.switch_off()
+                    button.mode = SortMode.OFF
 
     @staticmethod
     def select_image():
