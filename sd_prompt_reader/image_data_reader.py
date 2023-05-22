@@ -9,6 +9,7 @@ import json
 import piexif
 import piexif.helper
 from PIL import Image
+from pathlib import PureWindowsPath, PurePosixPath
 
 # comfyui node types
 KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
@@ -35,43 +36,48 @@ class ImageDataReader:
             self._width = f.width
             self._height = f.height
             self._info = f.info
-            # a1111 png format
-            if "parameters" in self._info and f.format == "PNG":
-                self._tool = "A1111 webUI"
-                self._sd_png()
-            # a1111 jpeg and webp format
-            elif "exif" in self._info and (f.format == "JPEG" or f.format == "WEBP"):
-                self._tool = "A1111 webUI"
-                self._sd_jpg()
-            # invokeai metadata format
-            elif "sd-metadata" in self._info and f.format == "PNG":
-                self._tool = "InvokeAI"
-                self._invoke_metadata()
-            # invokeai legacy dream format
-            elif "Dream" in self._info and f.format == "PNG":
-                self._tool = "InvokeAI"
-                self._invoke_dream()
-            # novelai format
-            elif self._info.get("Software") == "NovelAI" and f.format == "PNG":
-                self._tool = "NovelAI"
-                self._nai_png()
-            # comfyui format
-            elif self._info.get("prompt") and f.format == "PNG":
-                self._tool = "ComfyUI"
-                self._comfy_png()
-
-    def _sd_png(self):
-        self._raw = self._info.get("parameters")
-        self._sd_format()
-
-    def _sd_jpg(self):
-        exif = piexif.load(self._info.get("exif")) or {}
-        try:
-            self._raw = piexif.helper.UserComment.load(exif.get("Exif").get(piexif.ExifIFD.UserComment))
-        except Exception:
-            pass
-        else:
-            self._sd_format()
+            if f.format == "PNG":
+                # a1111 png format
+                if "parameters" in self._info:
+                    self._tool = "A1111 webUI"
+                    self._raw = self._info.get("parameters")
+                    self._sd_format()
+                # easydiff png format
+                if self._info.get("negative_prompt"):
+                    self._tool = "Easy Diffusion"
+                    self._raw = str(self._info).replace("'", '"')
+                    self._ed_format()
+                # invokeai metadata format
+                elif "sd-metadata" in self._info:
+                    self._tool = "InvokeAI"
+                    self._invoke_metadata()
+                # invokeai legacy dream format
+                elif "Dream" in self._info:
+                    self._tool = "InvokeAI"
+                    self._invoke_dream()
+                # novelai format
+                elif self._info.get("Software") == "NovelAI":
+                    self._tool = "NovelAI"
+                    self._nai_png()
+                # comfyui format
+                elif self._info.get("prompt"):
+                    self._tool = "ComfyUI"
+                    self._comfy_png()
+            elif f.format == "JPEG" or f.format == "WEBP":
+                exif = piexif.load(self._info.get("exif")) or {}
+                try:
+                    self._raw = piexif.helper.UserComment.load(exif.get("Exif").get(piexif.ExifIFD.UserComment))
+                except Exception:
+                    pass
+                else:
+                    # easydiff jpeg and webp format
+                    if self._raw[0] == "{":
+                        self._tool = "Easy Diffusion"
+                        self._ed_format()
+                    # a1111 jpeg and webp format
+                    else:
+                        self._tool = "A1111 webUI"
+                        self._sd_format()
 
     def _sd_format(self):
         if self._raw and "\nSteps:" in self._raw:
@@ -102,10 +108,27 @@ class ImageDataReader:
             self._parameter["steps"] = self._setting[parameter_index[4]:self._setting.find(",", parameter_index[4])]
             self._parameter["size"] = self._setting[parameter_index[5]:self._setting.find(",", parameter_index[5])]
 
-
         else:
             self._raw = ""
 
+    def _ed_format(self):
+        data = json.loads(self._raw)
+        self._positive = data.get("prompt")
+        data.pop("prompt")
+        self._negative = data.get("negative_prompt")
+        data.pop("negative_prompt")
+        if PureWindowsPath(data.get('use_stable_diffusion_model')).drive:
+            file = PureWindowsPath(data.get('use_stable_diffusion_model')).name
+        else:
+            file = PurePosixPath(data.get('use_stable_diffusion_model')).name
+
+        self._setting = self.remove_quotes(data).replace("{", "").replace("}", "")
+        self._parameter["model"] = file
+        self._parameter["sampler"] = data.get('sampler_name')
+        self._parameter["seed"] = data.get('seed')
+        self._parameter["cfg"] = data.get('guidance_scale')
+        self._parameter["steps"] = data.get('num_inference_steps')
+        self._parameter["size"] = str(self._width) + "x" + str(self._height)
 
     def _invoke_metadata(self):
         metadata = json.loads(self._info.get("sd-metadata"))
