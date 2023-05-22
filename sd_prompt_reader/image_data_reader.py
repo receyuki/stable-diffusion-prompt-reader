@@ -26,6 +26,8 @@ class ImageDataReader:
         self._setting = ""
         self._raw = ""
         self._tool = ""
+        self.parameter_key = ["model", "sampler", "seed", "cfg", "steps", "size"]
+        self._parameter = dict.fromkeys(self.parameter_key, "")
         self.read_data(file)
 
     def read_data(self, file):
@@ -84,8 +86,26 @@ class ImageDataReader:
             self._positive = self._raw[:prompt_index[0]]
             self._negative = self._raw[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
             self._setting = self._raw[prompt_index[1] + 1:]
+
+            parameter_index = [
+                self._setting.find("Model: ")+len("Model: "),
+                self._setting.find("Sampler: ")+len("Sampler: "),
+                self._setting.find("Seed: ")+len("Seed: "),
+                self._setting.find("CFG scale: ")+len("CFG scale: "),
+                self._setting.find("Steps: ")+len("Steps: "),
+                self._setting.find("Size: ")+len("Size: "),
+            ]
+            self._parameter["model"] = self._setting[parameter_index[0]:self._setting.find(",", parameter_index[0])]
+            self._parameter["sampler"] = self._setting[parameter_index[1]:self._setting.find(",", parameter_index[1])]
+            self._parameter["seed"] = self._setting[parameter_index[2]:self._setting.find(",", parameter_index[2])]
+            self._parameter["cfg"] = self._setting[parameter_index[3]:self._setting.find(",", parameter_index[3])]
+            self._parameter["steps"] = self._setting[parameter_index[4]:self._setting.find(",", parameter_index[4])]
+            self._parameter["size"] = self._setting[parameter_index[5]:self._setting.find(",", parameter_index[5])]
+
+
         else:
             self._raw = ""
+
 
     def _invoke_metadata(self):
         metadata = json.loads(self._info.get("sd-metadata"))
@@ -121,6 +141,13 @@ class ImageDataReader:
             f", Variations: {image.get('variations')}"
         )
 
+        self._parameter["model"] = metadata.get('model_weights')
+        self._parameter["sampler"] = image.get('sampler')
+        self._parameter["seed"] = image.get('seed')
+        self._parameter["cfg"] = image.get('cfg_scale')
+        self._parameter["steps"] = image.get('steps')
+        self._parameter["size"] = str(self._width)+"x"+str(self._height)
+
     def _invoke_dream(self):
         dream = self._info.get("Dream")
         prompt_index = dream.rfind('"')
@@ -152,6 +179,12 @@ class ImageDataReader:
             f", Size: {self._width}x{self._height}"
         )
 
+        self._parameter["sampler"] = dream[setting_index[5]+3:].split()[0]
+        self._parameter["seed"] = dream[setting_index[1]+3:setting_index[2]-1]
+        self._parameter["cfg"] = dream[setting_index[4]+3:setting_index[5]-1]
+        self._parameter["steps"] = dream[setting_index[0]+3:setting_index[1]-1]
+        self._parameter["size"] = str(self._width)+"x"+str(self._height)
+
     def _nai_png(self):
         self._positive = self._info.get("Description")
         self._raw += self._positive
@@ -175,6 +208,12 @@ class ImageDataReader:
             self._setting += f", Scale: {comment_json.get('scale')}"
         if self._setting:
             self._setting += ", Clip skip: 2, ENSD: 31337"
+
+        self._parameter["sampler"] = comment_json.get('sampler')
+        self._parameter["seed"] = comment_json.get('seed')
+        self._parameter["cfg"] = comment_json.get('scale')
+        self._parameter["steps"] = comment_json.get('steps')
+        self._parameter["size"] = str(self._width)+"x"+str(self._height)
 
     def _comfy_png(self):
         prompt = self._info.get("prompt") or {}
@@ -215,6 +254,13 @@ class ImageDataReader:
             self._setting += f", Upscale method: {self.remove_quotes(longest_flow.get('upscale_method'))}"
         if "upscaler" in longest_flow:
             self._setting += f", Upscale model: {self.remove_quotes(longest_flow.get('upscaler'))}"
+
+        self._parameter["model"] = str(self.remove_quotes(longest_flow.get('ckpt_name')))
+        self._parameter["sampler"] = str(self.remove_quotes(longest_flow.get('sampler_name')))
+        self._parameter["seed"] = str(longest_flow.get('seed'))
+        self._parameter["cfg"] = str(longest_flow.get('cfg'))
+        self._parameter["steps"] = str(longest_flow.get('steps'))
+        self._parameter["size"] = str(self._width)+"x"+str(self._height)
 
     def _comfy_traverse(self, prompt, end_node):
         flow = {}
@@ -373,3 +419,7 @@ class ImageDataReader:
     @property
     def tool(self):
         return self._tool
+
+    @property
+    def parameter(self):
+        return self._parameter

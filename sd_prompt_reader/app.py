@@ -105,7 +105,7 @@ class App(Tk):
         self.setting_box.text = "Setting"
 
         self.setting_box_simple = CTkFrame(self, height=80, fg_color=self.textbox_fg_color)
-        self.setting_box_simple.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
+        # self.setting_box_simple.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
         self.setting_box_parameter = CTkFrame(self.setting_box_simple, fg_color="transparent")
         self.setting_box_parameter = ParameterViewer(self.setting_box_simple, self.status_bar)
         self.setting_box_parameter.setting_box_parameter.pack(side="left", padx=5)
@@ -269,7 +269,7 @@ class App(Tk):
 
         self.function_buttons = [self.button_copy_positive, self.button_sort_positive, self.button_view_positive,
                                  self.button_copy_negative, self.button_sort_negative, self.button_view_negative,
-                                 self.button_copy_setting, self.button_view_setting,
+                                 self.button_copy_setting, self.button_view_setting, self.button_copy_setting_simple,
                                  self.button_raw, self.button_edit, self.button_save,
                                  self.button_remove, self.button_export, self.button_remove]
 
@@ -322,6 +322,9 @@ class App(Tk):
                     self.positive_box.text = self.image_data.positive
                     self.negative_box.text = self.image_data.negative
                     self.setting_box.text = self.image_data.setting
+                    self.setting_box_parameter.update_text(self.image_data.parameter)
+                    self.mode_update(self.button_view_positive, self.positive_box, self.button_sort_positive)
+                    self.mode_update(self.button_view_negative, self.negative_box, self.button_sort_negative)
                     for button in self.function_buttons:
                         button.enable()
                     self.status_bar.success(self.image_data.tool)
@@ -336,6 +339,7 @@ class App(Tk):
             box.text = message[0]
         # for button in self.function_buttons:
         #     button.configure(state="disabled")
+        self.setting_box_parameter.reset_text()
         for button in self.function_buttons:
             button.disable()
         if reset_image:
@@ -479,6 +483,23 @@ class App(Tk):
                     button.switch_off()
                     button.mode = SortMode.OFF
                     textbox.sort_off()
+
+    @staticmethod
+    def mode_update(button: STkButton, textbox: STkTextbox, sort_button: STkButton):
+        match button.mode:
+            case ViewMode.NORMAL:
+                match sort_button.mode:
+                    case SortMode.ASC:
+                        textbox.sort_asc()
+                    case SortMode.DES:
+                        textbox.sort_des()
+            case ViewMode.VERTICAL:
+                textbox.view_vertical()
+                match sort_button.mode:
+                    case SortMode.ASC:
+                        textbox.sort_asc()
+                    case SortMode.DES:
+                        textbox.sort_des()
 
     @staticmethod
     def select_image():
