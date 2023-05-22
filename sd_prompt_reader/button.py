@@ -42,6 +42,7 @@ class STkButton(CTkButton):
                  command: Union[Callable[[], None], None] = None,
                  compound: str = "left",
                  anchor: str = "center",
+
                  label: CTkLabel = None,
                  arrow=None,
                  mode: Enum = None,

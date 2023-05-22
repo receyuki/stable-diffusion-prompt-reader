@@ -21,6 +21,7 @@ from sd_prompt_reader.status_bar import StatusBar
 from sd_prompt_reader.update_checker import UpdateChecker
 from sd_prompt_reader.ctk_tooltip import CTkToolTip
 from sd_prompt_reader.button import STkButton, ViewMode, SortMode
+from sd_prompt_reader.textbox import STkTextbox
 
 
 class App(Tk):
@@ -90,20 +91,17 @@ class App(Tk):
                                           ipady=STATUS_BAR_IPAD)
 
         # text box
-        self.positive_box = CTkTextbox(self, wrap="word", height=120)
+        self.positive_box = STkTextbox(self, wrap="word", height=120)
         self.positive_box.grid(row=0, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(20, 20))
-        self.positive_box.insert("end", "Prompt")
-        self.positive_box.configure(state="disabled", text_color=ACCESSIBLE_GRAY, font=self.info_font)
+        self.positive_box.text = "Prompt"
 
-        self.negative_box = CTkTextbox(self, wrap="word", height=120)
+        self.negative_box = STkTextbox(self, wrap="word", height=120)
         self.negative_box.grid(row=1, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
-        self.negative_box.insert("end", "Negative Prompt")
-        self.negative_box.configure(state="disabled", text_color=ACCESSIBLE_GRAY, font=self.info_font)
+        self.negative_box.text = "Negative Prompt"
 
-        self.setting_box = CTkTextbox(self, wrap="word", height=80)
+        self.setting_box = STkTextbox(self, wrap="word", height=80)
         self.setting_box.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
-        self.setting_box.insert("end", "Setting")
-        self.setting_box.configure(state="disabled", text_color=ACCESSIBLE_GRAY, font=self.info_font)
+        self.setting_box.text = "Setting"
 
         # textbox buttons
         self.button_positive_frame = CTkFrame(self.positive_box, fg_color="transparent")
@@ -121,7 +119,8 @@ class App(Tk):
         self.button_view_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.view_image, text="",
                                               command=lambda: self.mode_switch(self.button_view_positive,
-                                                                               self.positive_box),
+                                                                               self.positive_box,
+                                                                               sort_button=self.button_sort_positive),
                                               mode=ViewMode.NORMAL)
         self.button_view_positive.pack(side="top")
 
@@ -140,7 +139,8 @@ class App(Tk):
         self.button_view_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.view_image, text="",
                                               command=lambda: self.mode_switch(self.button_view_negative,
-                                                                               self.negative_box),
+                                                                               self.negative_box,
+                                                                               sort_button=self.button_sort_negative),
                                               mode=ViewMode.NORMAL)
         self.button_view_negative.pack(side="top")
 
@@ -287,9 +287,9 @@ class App(Tk):
             self.file_path = Path(event.data.replace("}", "").replace("{", ""))
 
         # clear text
-        for box in self.boxes:
-            box.configure(state="normal")
-            box.delete("1.0", "end")
+        # for box in self.boxes:
+        #     box.configure(state="normal")
+        #     box.delete("1.0", "end")
 
         # detect suffix and read
         if self.file_path.suffix in SUPPORTED_FORMATS:
@@ -299,14 +299,9 @@ class App(Tk):
                     self.unsupported_format(MESSAGE["format_error"])
                 else:
                     # insert prompt
-                    self.positive_box.insert("end", self.image_data.positive)
-                    self.negative_box.insert("end", self.image_data.negative)
-                    self.setting_box.insert("end", self.image_data.setting)
-                    for box in self.boxes:
-                        # box.configure(state="disabled", text_color=self.default_text_colour)
-                        box.configure(state="disabled")
-                    # for button in self.function_buttons:
-                    #     button.configure(state="normal")
+                    self.positive_box.text = self.image_data.positive
+                    self.negative_box.text = self.image_data.negative
+                    self.setting_box.text = self.image_data.setting
                     for button in self.function_buttons:
                         button.enable()
                     self.status_bar.success(self.image_data.tool)
@@ -418,26 +413,43 @@ class App(Tk):
                         self.status_bar.success(MESSAGE["remove_select"][0])
 
     @staticmethod
-    def mode_switch(button: STkButton, textbox: CTkTextbox):
+    def mode_switch(button: STkButton, textbox: STkTextbox, sort_button: STkButton = None):
         if isinstance(button.mode, ViewMode):
             match button.mode:
                 case ViewMode.NORMAL:
                     button.switch_on()
                     button.mode = ViewMode.VERTICAL
+                    textbox.view_vertical()
+                    if sort_button:
+                        match sort_button.mode:
+                            case SortMode.ASC:
+                                textbox.sort_asc()
+                            case SortMode.DES:
+                                textbox.sort_des()
                 case ViewMode.VERTICAL:
                     button.switch_off()
                     button.mode = ViewMode.NORMAL
+                    textbox.view_normal()
+                    if sort_button:
+                        match sort_button.mode:
+                            case SortMode.ASC:
+                                textbox.sort_asc()
+                            case SortMode.DES:
+                                textbox.sort_des()
         elif isinstance(button.mode, SortMode):
             match button.mode:
                 case SortMode.OFF:
                     button.switch_on()
                     button.mode = SortMode.ASC
+                    textbox.sort_asc()
                 case SortMode.ASC:
                     button.switch_on()
                     button.mode = SortMode.DES
+                    textbox.sort_des()
                 case SortMode.DES:
                     button.switch_off()
                     button.mode = SortMode.OFF
+                    textbox.sort_off()
 
     @staticmethod
     def select_image():
