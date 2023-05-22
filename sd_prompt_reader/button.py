@@ -138,3 +138,8 @@ class SortMode(Enum):
     OFF = 0
     ASC = 1
     DES = 2
+
+
+class SettingMode(Enum):
+    NORMAL = 0
+    SIMPLE = 1

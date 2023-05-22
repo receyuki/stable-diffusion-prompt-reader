@@ -20,8 +20,9 @@ from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.status_bar import StatusBar
 from sd_prompt_reader.update_checker import UpdateChecker
 from sd_prompt_reader.ctk_tooltip import CTkToolTip
-from sd_prompt_reader.button import STkButton, ViewMode, SortMode
+from sd_prompt_reader.button import STkButton, ViewMode, SortMode, SettingMode
 from sd_prompt_reader.textbox import STkTextbox
+from sd_prompt_reader.parameter_viewer import ParameterViewer
 
 
 class App(Tk):
@@ -83,14 +84,14 @@ class App(Tk):
         self.image = None
         self.image_tk = None
         self.image_data = None
-        self.default_text_colour = ThemeManager.theme["CTkTextbox"]["text_color"]
+        self.textbox_fg_color = ThemeManager.theme["CTkTextbox"]["fg_color"]
 
         # status bar
         self.status_bar = StatusBar(self)
         self.status_bar.status_frame.grid(row=3, column=6, sticky="ew", padx=20, pady=(0, 20), ipadx=STATUS_BAR_IPAD,
                                           ipady=STATUS_BAR_IPAD)
 
-        # text box
+        # textbox
         self.positive_box = STkTextbox(self, wrap="word", height=120)
         self.positive_box.grid(row=0, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(20, 20))
         self.positive_box.text = "Prompt"
@@ -102,6 +103,12 @@ class App(Tk):
         self.setting_box = STkTextbox(self, wrap="word", height=80)
         self.setting_box.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
         self.setting_box.text = "Setting"
+
+        self.setting_box_simple = CTkFrame(self, height=80, fg_color=self.textbox_fg_color)
+        self.setting_box_simple.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
+        self.setting_box_parameter = CTkFrame(self.setting_box_simple, fg_color="transparent")
+        self.setting_box_parameter = ParameterViewer(self.setting_box_simple, self.status_bar)
+        self.setting_box_parameter.setting_box_parameter.pack(side="left", padx=5)
 
         # textbox buttons
         self.button_positive_frame = CTkFrame(self.positive_box, fg_color="transparent")
@@ -152,10 +159,23 @@ class App(Tk):
         self.button_copy_setting.pack(side="top", pady=(0, 10))
         self.button_view_setting = STkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                              image=self.view_image, text="",
-                                             command=lambda: self.mode_switch(self.button_view_setting,
-                                                                              self.setting_box),
-                                             mode=ViewMode.NORMAL)
+                                             command=lambda: self.setting_mode_switch(),
+                                             mode=SettingMode.NORMAL)
         self.button_view_setting.pack(side="top")
+
+        self.button_setting_frame_simple = CTkFrame(self.setting_box_simple, fg_color="transparent")
+        self.button_setting_frame_simple.pack(side="right", padx=(20, 10), pady=(3, 5), anchor="center")
+        self.button_copy_setting_simple = STkButton(self.button_setting_frame_simple,
+                                                    width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+                                                    image=self.clipboard_image_s, text="",
+                                                    command=lambda: self.copy_to_clipboard(self.image_data.setting))
+        self.button_copy_setting_simple.pack(side="top", pady=(0, 10))
+        self.button_view_setting_simple = STkButton(self.button_setting_frame_simple,
+                                                    width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
+                                                    image=self.view_image, text="",
+                                                    command=lambda: self.setting_mode_switch())
+        self.button_view_setting_simple.switch_on()
+        self.button_view_setting_simple.pack(side="top")
 
         # function buttons
         self.button_edit_frame = CTkFrame(self, fg_color="transparent")
@@ -313,9 +333,7 @@ class App(Tk):
 
     def unsupported_format(self, message, reset_image=False):
         for box in self.boxes:
-            box.insert("end", message[0])
-            # box.configure(state="disabled", text_color="gray")
-            box.configure(state="disabled")
+            box.text = message[0]
         # for button in self.function_buttons:
         #     button.configure(state="disabled")
         for button in self.function_buttons:
@@ -411,6 +429,17 @@ class App(Tk):
                     if path:
                         image_without_exif.save(path)
                         self.status_bar.success(MESSAGE["remove_select"][0])
+
+    def setting_mode_switch(self):
+        match self.button_view_setting.mode:
+            case SettingMode.NORMAL:
+                self.button_view_setting.mode = SettingMode.SIMPLE
+                self.setting_box_simple.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
+                self.setting_box.grid_forget()
+            case SettingMode.SIMPLE:
+                self.button_view_setting.mode = SettingMode.NORMAL
+                self.setting_box.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
+                self.setting_box_simple.grid_forget()
 
     @staticmethod
     def mode_switch(button: STkButton, textbox: STkTextbox, sort_button: STkButton = None):
