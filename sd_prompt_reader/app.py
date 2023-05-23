@@ -108,7 +108,6 @@ class App(Tk):
         self.setting_box.text = "Setting"
 
         self.setting_box_simple = CTkFrame(self, height=80, fg_color=self.textbox_fg_color)
-        # self.setting_box_simple.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
         self.setting_box_parameter = CTkFrame(self.setting_box_simple, fg_color="transparent")
         self.setting_box_parameter = ParameterViewer(self.setting_box_simple, self.status_bar)
         self.setting_box_parameter.setting_box_parameter.pack(side="left", padx=5)
@@ -299,11 +298,14 @@ class App(Tk):
         # text boxes and buttons
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
 
+        # general button list
         self.function_buttons = [self.button_copy_positive, self.button_sort_positive, self.button_view_positive,
                                  self.button_copy_negative, self.button_sort_negative, self.button_view_negative,
                                  self.button_copy_setting, self.button_view_setting, self.button_copy_setting_simple,
                                  self.button_raw,
                                  self.button_remove, self.button_export, self.button_remove]
+
+        # button list for edit mode
         self.non_edit_buttons = [self.button_view_positive,
                                  self.button_view_negative,
                                  self.button_view_setting,
@@ -350,11 +352,6 @@ class App(Tk):
         else:
             new_path = Path(event.data.replace("}", "").replace("{", ""))
 
-        # clear text
-        # for box in self.boxes:
-        #     box.configure(state="normal")
-        #     box.delete("1.0", "end")
-
         # detect suffix and read
         if new_path.suffix in SUPPORTED_FORMATS:
             self.file_path = new_path
@@ -381,6 +378,7 @@ class App(Tk):
                 self.resize_image()
             if self.button_edit.mode == EditMode.ON:
                 self.edit_mode_update()
+
         elif new_path.suffix == ".txt":
             if self.button_edit.mode == EditMode.ON:
                 with open(new_path, "r") as f:
@@ -395,6 +393,7 @@ class App(Tk):
                         self.status_bar.warning(MESSAGE["txt_error"][-1])
             else:
                 self.status_bar.warning(MESSAGE["txt_error"][0])
+
         else:
             self.unsupported_format(MESSAGE["suffix_error"], True)
             if self.button_edit.mode == EditMode.ON:
@@ -406,8 +405,6 @@ class App(Tk):
         self.readable = False
         for box in self.boxes:
             box.text = message[0]
-        # for button in self.function_buttons:
-        #     button.configure(state="disabled")
         self.setting_box_parameter.reset_text()
         for button in self.function_buttons:
             button.disable()
@@ -444,6 +441,7 @@ class App(Tk):
         else:
             self.status_bar.clipboard()
 
+    # alt option menu button trigger for CTkOptionMenu
     @staticmethod
     def option_open(button: CTkButton, option_menu: CTkOptionMenu):
         option_menu._dropdown_menu.open(
@@ -458,8 +456,6 @@ class App(Tk):
                 self.status_bar.success(MESSAGE["alongside"][0])
         else:
             match export_mode:
-                # case "alongside the image file":
-                #
                 case "select directory":
                     path = filedialog.asksaveasfilename(
                         title='Select directory',
