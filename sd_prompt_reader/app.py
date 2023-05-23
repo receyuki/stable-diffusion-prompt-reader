@@ -502,7 +502,7 @@ class App(Tk):
         new_path = self.file_path.with_stem(new_stem)
         metadata = PngInfo()
         metadata.add_text("parameters", "\n".join([self.positive_box.ctext,
-                                                   "Negative prompt: "+self.negative_box.ctext,
+                                                   "Negative prompt: " + self.negative_box.ctext,
                                                    self.setting_box.ctext]))
         if not save_mode:
             try:

@@ -30,7 +30,6 @@ class STkTextbox(CTkTextbox):
 
                  text: str = "",
                  **kwargs):
-
         self._text = text
         self.current_text = text
 

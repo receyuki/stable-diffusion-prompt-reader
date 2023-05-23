@@ -100,12 +100,12 @@ class ImageDataReader:
             self._setting = self._raw[prompt_index[1] + 1:]
 
             parameter_index = [
-                self._setting.find("Model: ")+len("Model: "),
-                self._setting.find("Sampler: ")+len("Sampler: "),
-                self._setting.find("Seed: ")+len("Seed: "),
-                self._setting.find("CFG scale: ")+len("CFG scale: "),
-                self._setting.find("Steps: ")+len("Steps: "),
-                self._setting.find("Size: ")+len("Size: "),
+                self._setting.find("Model: ") + len("Model: "),
+                self._setting.find("Sampler: ") + len("Sampler: "),
+                self._setting.find("Seed: ") + len("Seed: "),
+                self._setting.find("CFG scale: ") + len("CFG scale: "),
+                self._setting.find("Steps: ") + len("Steps: "),
+                self._setting.find("Size: ") + len("Size: "),
             ]
             if self._setting.find("Model: ") != -1:
                 self._parameter["model"] = self._setting[parameter_index[0]:self._setting.find(",", parameter_index[0])]
@@ -146,7 +146,7 @@ class ImageDataReader:
         # w/ neg
         if -1 not in prompt_index:
             self._positive = prompt[:prompt_index[0]]
-            self._negative = prompt[prompt_index[0]+1:prompt_index[1]]
+            self._negative = prompt[prompt_index[0] + 1:prompt_index[1]]
         # w/o neg
         else:
             self._positive = prompt
@@ -176,7 +176,7 @@ class ImageDataReader:
         self._parameter["seed"] = image.get('seed')
         self._parameter["cfg"] = image.get('cfg_scale')
         self._parameter["steps"] = image.get('steps')
-        self._parameter["size"] = str(self._width)+"x"+str(self._height)
+        self._parameter["size"] = str(self._width) + "x" + str(self._height)
 
     def _invoke_dream(self):
         dream = self._info.get("Dream")
@@ -186,7 +186,7 @@ class ImageDataReader:
         # w/ neg
         if -1 not in neg_index:
             self._positive = dream[1:neg_index[0]]
-            self._negative = dream[neg_index[0]+1:neg_index[1]]
+            self._negative = dream[neg_index[0] + 1:neg_index[1]]
         # w/o neg
         else:
             self._positive = dream[1:prompt_index]
@@ -202,18 +202,18 @@ class ImageDataReader:
                          dream.rfind("-C"),
                          dream.rfind("-A")]
         self._setting = (
-            f"Steps: {dream[setting_index[0]+3:setting_index[1]-1]}"
-            f", Sampler: {dream[setting_index[5]+3:].split()[0]}"
-            f", CFG scale: {dream[setting_index[4]+3:setting_index[5]-1]}"
-            f", Seed: {dream[setting_index[1]+3:setting_index[2]-1]}"
+            f"Steps: {dream[setting_index[0] + 3:setting_index[1] - 1]}"
+            f", Sampler: {dream[setting_index[5] + 3:].split()[0]}"
+            f", CFG scale: {dream[setting_index[4] + 3:setting_index[5] - 1]}"
+            f", Seed: {dream[setting_index[1] + 3:setting_index[2] - 1]}"
             f", Size: {self._width}x{self._height}"
         )
 
-        self._parameter["sampler"] = dream[setting_index[5]+3:].split()[0]
-        self._parameter["seed"] = dream[setting_index[1]+3:setting_index[2]-1]
-        self._parameter["cfg"] = dream[setting_index[4]+3:setting_index[5]-1]
-        self._parameter["steps"] = dream[setting_index[0]+3:setting_index[1]-1]
-        self._parameter["size"] = str(self._width)+"x"+str(self._height)
+        self._parameter["sampler"] = dream[setting_index[5] + 3:].split()[0]
+        self._parameter["seed"] = dream[setting_index[1] + 3:setting_index[2] - 1]
+        self._parameter["cfg"] = dream[setting_index[4] + 3:setting_index[5] - 1]
+        self._parameter["steps"] = dream[setting_index[0] + 3:setting_index[1] - 1]
+        self._parameter["size"] = str(self._width) + "x" + str(self._height)
 
     def _nai_png(self):
         self._positive = self._info.get("Description")
@@ -243,7 +243,7 @@ class ImageDataReader:
         self._parameter["seed"] = comment_json.get('seed')
         self._parameter["cfg"] = comment_json.get('scale')
         self._parameter["steps"] = comment_json.get('steps')
-        self._parameter["size"] = str(self._width)+"x"+str(self._height)
+        self._parameter["size"] = str(self._width) + "x" + str(self._height)
 
     def _comfy_png(self):
         prompt = self._info.get("prompt") or {}
@@ -290,7 +290,7 @@ class ImageDataReader:
         self._parameter["seed"] = str(longest_flow.get('seed'))
         self._parameter["cfg"] = str(longest_flow.get('cfg'))
         self._parameter["steps"] = str(longest_flow.get('steps'))
-        self._parameter["size"] = str(self._width)+"x"+str(self._height)
+        self._parameter["size"] = str(self._width) + "x" + str(self._height)
 
     def _comfy_traverse(self, prompt, end_node):
         flow = {}

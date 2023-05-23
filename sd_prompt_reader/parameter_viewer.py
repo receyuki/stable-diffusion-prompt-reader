@@ -7,13 +7,14 @@ __email__ = 'receyuki@gmail.com'
 import pyperclip as pyperclip
 from customtkinter import CTkFrame, CTkLabel
 
-from sd_prompt_reader.constants import BUTTON_HOVER, PARAMETER_PLACEHOLDER
+from sd_prompt_reader.constants import BUTTON_HOVER, PARAMETER_PLACEHOLDER, PARAMETER_WIDTH
 
 
 class ParameterViewer:
     def __init__(self, parent, status_bar):
         self.status_bar = status_bar
         self.setting_box_parameter = CTkFrame(parent, fg_color="transparent")
+        self.setting_box_parameter.columnconfigure(0, minsize=PARAMETER_WIDTH)
 
         self.setting_model_frame = CTkFrame(self.setting_box_parameter, fg_color="transparent")
         self.setting_model_frame.grid(row=0, column=0, sticky="we", padx=10, pady=(1, 2))
