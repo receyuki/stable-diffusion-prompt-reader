@@ -361,14 +361,16 @@ class App(Tk):
             if self.button_edit.mode == EditMode.ON:
                 with open(new_path, "r") as f:
                     txt_data = ImageDataReader(f, is_txt=True)
-                    self.positive_box.text = txt_data.positive
-                    self.negative_box.text = txt_data.negative
-                    self.setting_box.text = txt_data.setting
-                    self.edit_mode_update()
-                    # TODO
+                    if txt_data.raw:
+                        self.positive_box.text = txt_data.positive
+                        self.negative_box.text = txt_data.negative
+                        self.setting_box.text = txt_data.setting
+                        self.edit_mode_update()
+                        self.status_bar.warning(MESSAGE["txt_imported"][0])
+                    else:
+                        self.status_bar.warning(MESSAGE["txt_error"][-1])
             else:
-                pass
-                # TODO
+                self.status_bar.warning(MESSAGE["txt_error"][0])
         else:
             self.unsupported_format(MESSAGE["suffix_error"], True)
             if self.button_edit.mode == EditMode.ON:
