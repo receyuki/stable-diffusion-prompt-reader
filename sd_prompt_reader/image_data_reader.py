@@ -10,6 +10,7 @@ import piexif
 import piexif.helper
 from PIL import Image
 from pathlib import PureWindowsPath, PurePosixPath
+from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
 
 # comfyui node types
 KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
@@ -28,7 +29,7 @@ class ImageDataReader:
         self._raw = ""
         self._tool = ""
         self.parameter_key = ["model", "sampler", "seed", "cfg", "steps", "size"]
-        self._parameter = dict.fromkeys(self.parameter_key, "")
+        self._parameter = dict.fromkeys(self.parameter_key, PARAMETER_PLACEHOLDER)
         self.read_data(file)
 
     def read_data(self, file):
@@ -101,7 +102,8 @@ class ImageDataReader:
                 self._setting.find("Steps: ")+len("Steps: "),
                 self._setting.find("Size: ")+len("Size: "),
             ]
-            self._parameter["model"] = self._setting[parameter_index[0]:self._setting.find(",", parameter_index[0])]
+            if self._setting.find("Model: ") != -1:
+                self._parameter["model"] = self._setting[parameter_index[0]:self._setting.find(",", parameter_index[0])]
             self._parameter["sampler"] = self._setting[parameter_index[1]:self._setting.find(",", parameter_index[1])]
             self._parameter["seed"] = self._setting[parameter_index[2]:self._setting.find(",", parameter_index[2])]
             self._parameter["cfg"] = self._setting[parameter_index[3]:self._setting.find(",", parameter_index[3])]
