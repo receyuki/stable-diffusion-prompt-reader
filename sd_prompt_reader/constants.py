@@ -32,7 +32,8 @@ ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
 MESSAGE = {
     "default":          ["Drag and drop your image file into the window"],
     "success":          ["Voilà!"],
-    "format_error":     ["No data", "No data detected or unsupported format"],
+    "format_error":     ["No data",
+                         "No data detected or unsupported format"],
     "suffix_error":     ["Unsupported format"],
     "clipboard":        ["Copied to clipboard"],
     "update":           ["A new version is available, click here to download"],
@@ -43,6 +44,21 @@ MESSAGE = {
     "suffix":           ["A new image file with suffix has been generated"],
     "overwrite":        ["A new image file has overwritten the original image"],
     "remove_select":    ["A new image file has been generated in the selected directory"],
+    "txt_error":        ["Importing TXT files is only allowed in edit mode",
+                         "unsupported TXT format"],
+    "txt_imported":     ["The TXT file has been successfully imported"]
+}
+TOOLTIP = {
+    "edit":             ["Edit image metadata"],
+    "save":             ["Save edited metadata to the image"],
+    "clear":            ["Remove metadata from the image"],
+    "export":           ["Export metadata to TXT file"],
+    "copy_raw":         ["Copy raw metadata to the clipboard"],
+    "copy_prompt":      ["Copy prompt to the clipboard"],
+    "copy_setting":     ["Copy setting to the clipboard"],
+    "sort":             ["Sort prompt lines in ascending or descending order"],
+    "view_prompt":      ["View prompt in vertical mode"],
+    "view_setting":     ["View setting in simple mode"]
 }
 DEFAULT_GRAY = "#8E8E93"
 ACCESSIBLE_GRAY = ("#6C6C70", "#AEAEB2")
