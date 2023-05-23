@@ -400,6 +400,7 @@ class App(Tk):
                 self.positive_box.edit_off()
                 self.negative_box.edit_off()
                 self.setting_box.edit_off()
+            self.button_edit.disable()
 
     def unsupported_format(self, message, reset_image=False):
         self.readable = False
