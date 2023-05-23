@@ -46,7 +46,16 @@ MESSAGE = {
     "remove_select":    ["A new image file has been generated in the selected directory"],
     "txt_error":        ["Importing TXT file is only allowed in edit mode",
                          "unsupported TXT format"],
-    "txt_imported":     ["The TXT file has been successfully imported"]
+    "txt_imported":     ["The TXT file has been successfully imported"],
+    "edit":             ["Edit mode",
+                         "View mode"],
+    "sort":             ["Ascending order",
+                         "Descending order",
+                         "Original order"],
+    "view_prompt":      ["Vertical orientation",
+                         "Vertical orientation off"],
+    "view_setting":     ["Simple mode",
+                         "Normal mode"]
 }
 TOOLTIP = {
     "edit":             "Edit image metadata",
@@ -57,7 +66,7 @@ TOOLTIP = {
     "copy_prompt":      "Copy prompt to the clipboard",
     "copy_setting":     "Copy setting to the clipboard",
     "sort":             "Sort prompt lines in ascending or descending order",
-    "view_prompt":      "View prompt in vertical mode",
+    "view_prompt":      "View prompt in vertical orientation",
     "view_setting":     "View setting in simple mode"
 }
 DEFAULT_GRAY = "#8E8E93"

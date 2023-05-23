@@ -542,6 +542,7 @@ class App(Tk):
                 for button in self.non_edit_buttons:
                     button.disable()
                 self.button_save.enable()
+                self.status_bar.info(MESSAGE["edit"][0])
             case EditMode.ON:
                 self.button_edit.mode = EditMode.OFF
                 self.button_edit.image = self.edit_image
@@ -553,6 +554,7 @@ class App(Tk):
                     for button in self.non_edit_buttons:
                         button.enable()
                 self.button_save.disable()
+                self.status_bar.info(MESSAGE["edit"][-1])
 
     def edit_mode_update(self):
         match self.button_edit.mode:
@@ -578,13 +580,14 @@ class App(Tk):
                 self.button_view_setting.mode = SettingMode.SIMPLE
                 self.setting_box_simple.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
                 self.setting_box.grid_forget()
+                self.status_bar.info(MESSAGE["view_setting"][0])
             case SettingMode.SIMPLE:
                 self.button_view_setting.mode = SettingMode.NORMAL
                 self.setting_box.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
                 self.setting_box_simple.grid_forget()
+                self.status_bar.info(MESSAGE["view_setting"][-1])
 
-    @staticmethod
-    def mode_switch(button: STkButton, textbox: STkTextbox, sort_button: STkButton = None):
+    def mode_switch(self, button: STkButton, textbox: STkTextbox, sort_button: STkButton = None):
         if isinstance(button.mode, ViewMode):
             match button.mode:
                 case ViewMode.NORMAL:
@@ -597,6 +600,7 @@ class App(Tk):
                                 textbox.sort_asc()
                             case SortMode.DES:
                                 textbox.sort_des()
+                    self.status_bar.info(MESSAGE["view_prompt"][0])
                 case ViewMode.VERTICAL:
                     button.switch_off()
                     button.mode = ViewMode.NORMAL
@@ -607,20 +611,24 @@ class App(Tk):
                                 textbox.sort_asc()
                             case SortMode.DES:
                                 textbox.sort_des()
+                    self.status_bar.info(MESSAGE["view_prompt"][-1])
         elif isinstance(button.mode, SortMode):
             match button.mode:
                 case SortMode.OFF:
                     button.switch_on()
                     button.mode = SortMode.ASC
                     textbox.sort_asc()
+                    self.status_bar.info(MESSAGE["sort"][0])
                 case SortMode.ASC:
                     button.switch_on()
                     button.mode = SortMode.DES
                     textbox.sort_des()
+                    self.status_bar.info(MESSAGE["sort"][1])
                 case SortMode.DES:
                     button.switch_off()
                     button.mode = SortMode.OFF
                     textbox.sort_off()
+                    self.status_bar.info(MESSAGE["sort"][-1])
 
     @staticmethod
     def mode_update(button: STkButton, textbox: STkTextbox, sort_button: STkButton):
