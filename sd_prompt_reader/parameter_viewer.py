@@ -40,7 +40,7 @@ class ParameterViewer:
         self.setting_seed = CTkLabel(self.setting_seed_frame, text=PARAMETER_PLACEHOLDER, fg_color=BUTTON_HOVER,
                                      corner_radius=5)
         self.setting_seed.pack(side="left")
-        self.setting_seed.bind("<Button-1>", lambda e: self.copy_to_clipboard(self.setting_cfg.cget("text")))
+        self.setting_seed.bind("<Button-1>", lambda e: self.copy_to_clipboard(self.setting_seed.cget("text")))
 
         self.setting_cfg_frame = CTkFrame(self.setting_box_parameter, fg_color="transparent")
         self.setting_cfg_frame.grid(row=0, column=1, sticky="we", padx=10)

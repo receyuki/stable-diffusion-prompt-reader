@@ -120,12 +120,16 @@ class App(Tk):
                                               image=self.clipboard_image_s, text="",
                                               command=lambda: self.copy_to_clipboard(self.image_data.positive))
         self.button_copy_positive.pack(side="top")
+        self.button_copy_positive_tooltip = CTkToolTip(self.button_copy_positive, delay=TOOLTIP_DELAY,
+                                                       message=TOOLTIP["copy_prompt"])
         self.button_sort_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.sort_image, text="",
                                               command=lambda: self.mode_switch(self.button_sort_positive,
                                                                                self.positive_box),
                                               mode=SortMode.OFF)
         self.button_sort_positive.pack(side="top", pady=10)
+        self.button_sort_positive_tooltip = CTkToolTip(self.button_sort_positive, delay=TOOLTIP_DELAY,
+                                                       message=TOOLTIP["sort"])
         self.button_view_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.view_image, text="",
                                               command=lambda: self.mode_switch(self.button_view_positive,
@@ -133,6 +137,8 @@ class App(Tk):
                                                                                sort_button=self.button_sort_positive),
                                               mode=ViewMode.NORMAL)
         self.button_view_positive.pack(side="top")
+        self.button_view_positive_tooltip = CTkToolTip(self.button_view_positive, delay=TOOLTIP_DELAY,
+                                                       message=TOOLTIP["view_prompt"])
 
         self.button_negative_frame = CTkFrame(self.negative_box, fg_color="transparent")
         self.button_negative_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
@@ -140,12 +146,16 @@ class App(Tk):
                                               image=self.clipboard_image_s, text="",
                                               command=lambda: self.copy_to_clipboard(self.image_data.negative))
         self.button_copy_negative.pack(side="top")
+        self.button_copy_negative_tooltip = CTkToolTip(self.button_copy_negative, delay=TOOLTIP_DELAY,
+                                                       message=TOOLTIP["copy_prompt"])
         self.button_sort_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.sort_image, text="",
                                               command=lambda: self.mode_switch(self.button_sort_negative,
                                                                                self.negative_box),
                                               mode=SortMode.OFF)
         self.button_sort_negative.pack(side="top", pady=10)
+        self.button_sort_negative_tooltip = CTkToolTip(self.button_sort_negative, delay=TOOLTIP_DELAY,
+                                                       message=TOOLTIP["sort"])
         self.button_view_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.view_image, text="",
                                               command=lambda: self.mode_switch(self.button_view_negative,
@@ -153,6 +163,8 @@ class App(Tk):
                                                                                sort_button=self.button_sort_negative),
                                               mode=ViewMode.NORMAL)
         self.button_view_negative.pack(side="top")
+        self.button_view_negative_tooltip = CTkToolTip(self.button_view_negative, delay=TOOLTIP_DELAY,
+                                                       message=TOOLTIP["view_prompt"])
 
         self.button_setting_frame = CTkFrame(self.setting_box, fg_color="transparent")
         self.button_setting_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
@@ -160,11 +172,15 @@ class App(Tk):
                                              image=self.clipboard_image_s, text="",
                                              command=lambda: self.copy_to_clipboard(self.image_data.setting))
         self.button_copy_setting.pack(side="top", pady=(0, 10))
+        self.button_copy_setting_tooltip = CTkToolTip(self.button_copy_setting, delay=TOOLTIP_DELAY,
+                                                      message=TOOLTIP["copy_setting"])
         self.button_view_setting = STkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                              image=self.view_image, text="",
                                              command=lambda: self.setting_mode_switch(),
                                              mode=SettingMode.NORMAL)
         self.button_view_setting.pack(side="top")
+        self.button_view_setting_tooltip = CTkToolTip(self.button_view_setting, delay=TOOLTIP_DELAY,
+                                                      message=TOOLTIP["view_setting"])
 
         self.button_setting_frame_simple = CTkFrame(self.setting_box_simple, fg_color="transparent")
         self.button_setting_frame_simple.pack(side="right", padx=(20, 10), pady=5)
@@ -173,12 +189,16 @@ class App(Tk):
                                                     image=self.clipboard_image_s, text="",
                                                     command=lambda: self.copy_to_clipboard(self.image_data.setting))
         self.button_copy_setting_simple.pack(side="top", pady=(0, 10))
+        self.button_copy_setting_simple_tooltip = CTkToolTip(self.button_copy_setting_simple, delay=TOOLTIP_DELAY,
+                                                             message=TOOLTIP["copy_setting"])
         self.button_view_setting_simple = STkButton(self.button_setting_frame_simple,
                                                     width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                                     image=self.view_image, text="",
                                                     command=lambda: self.setting_mode_switch())
         self.button_view_setting_simple.switch_on()
         self.button_view_setting_simple.pack(side="top")
+        self.button_view_setting_simple_tooltip = CTkToolTip(self.button_view_setting_simple, delay=TOOLTIP_DELAY,
+                                                             message=TOOLTIP["view_setting"])
 
         # function buttons
         self.button_edit_frame = CTkFrame(self, fg_color="transparent")
@@ -191,8 +211,8 @@ class App(Tk):
         self.button_edit_label = CTkLabel(self.button_edit_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                           text="Edit", font=self.info_font)
         self.button_edit_label.pack(side="bottom")
-        self.button_edit_tooltip = CTkToolTip(self.button_edit, delay=TOOLTIP_DELAY, message="test")
         self.button_edit.label = self.button_edit_label
+        self.button_edit_tooltip = CTkToolTip(self.button_edit, delay=TOOLTIP_DELAY, message=TOOLTIP["edit"])
 
         self.button_save_frame = CTkFrame(self, fg_color="transparent")
         self.button_save_frame.grid(row=3, column=2, pady=(0, 20), padx=(0, 20), sticky="w")
@@ -215,6 +235,7 @@ class App(Tk):
         self.button_save_label.grid(row=1, column=0, rowspan=2)
         self.button_save.label = self.button_save_label
         self.button_save.arrow = self.button_save_option_arrow
+        self.button_save_tooltip = CTkToolTip(self.button_save, delay=TOOLTIP_DELAY, message=TOOLTIP["save"])
 
         self.button_remove_frame = CTkFrame(self, fg_color="transparent")
         self.button_remove_frame.grid(row=3, column=3, pady=(0, 20), padx=(0, 20), sticky="w")
@@ -238,6 +259,7 @@ class App(Tk):
         self.button_remove_label.grid(row=1, column=0, rowspan=2)
         self.button_remove.label = self.button_remove_label
         self.button_remove.arrow = self.button_remove_option_arrow
+        self.button_remove_tooltip = CTkToolTip(self.button_remove, delay=TOOLTIP_DELAY, message=TOOLTIP["clear"])
 
         self.button_export_frame = CTkFrame(self, fg_color="transparent")
         self.button_export_frame.grid(row=3, column=4, pady=(0, 20), padx=(0, 20), sticky="w")
@@ -260,6 +282,7 @@ class App(Tk):
         self.button_export_label.grid(row=1, column=0, rowspan=2)
         self.button_export.label = self.button_export_label
         self.button_export.arrow = self.button_export_option_arrow
+        self.button_export_tooltip = CTkToolTip(self.button_export, delay=TOOLTIP_DELAY, message=TOOLTIP["export"])
 
         self.button_copy_raw_frame = CTkFrame(self, fg_color="transparent")
         self.button_copy_raw_frame.grid(row=3, column=5, pady=(0, 20), sticky="w")
@@ -271,6 +294,7 @@ class App(Tk):
                                          text="Copy", font=self.info_font)
         self.button_raw_label.pack(side="bottom")
         self.button_raw.label = self.button_raw_label
+        self.button_raw_tooltip = CTkToolTip(self.button_raw, delay=TOOLTIP_DELAY, message=TOOLTIP["copy_raw"])
 
         # text boxes and buttons
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
