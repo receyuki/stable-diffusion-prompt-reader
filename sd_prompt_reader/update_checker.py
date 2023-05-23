@@ -1,7 +1,7 @@
 # -*- encoding:utf-8 -*-
 __author__ = 'receyuki'
 __filename__ = 'update_checker.py'
-__copyright__ = 'Copyright 2023, '
+__copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 import threading
