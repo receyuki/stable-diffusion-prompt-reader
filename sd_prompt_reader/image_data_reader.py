@@ -19,7 +19,7 @@ CHECKPOINT_LOADER_TYPE = ["CheckpointLoader", "CheckpointLoaderSimple"]
 
 
 class ImageDataReader:
-    def __init__(self, file):
+    def __init__(self, file, is_txt: bool = False):
         self._height = None
         self._width = None
         self._info = {}
@@ -30,9 +30,14 @@ class ImageDataReader:
         self._tool = ""
         self.parameter_key = ["model", "sampler", "seed", "cfg", "steps", "size"]
         self._parameter = dict.fromkeys(self.parameter_key, PARAMETER_PLACEHOLDER)
+        self._is_txt = is_txt
         self.read_data(file)
 
     def read_data(self, file):
+        if self._is_txt:
+            self._raw = file.read()
+            self._sd_format()
+            return
         with Image.open(file) as f:
             self._width = f.width
             self._height = f.height

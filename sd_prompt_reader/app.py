@@ -10,6 +10,7 @@ from tkinter import PhotoImage, Menu
 
 import pyperclip as pyperclip
 from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 from customtkinter import CTkFont, ScalingTracker, CTkImage, CTkFrame, CTkLabel, CTkTextbox, ThemeManager, CTkButton, \
     filedialog, CTkOptionMenu, set_default_color_theme
 from tkinterdnd2 import DND_FILES
@@ -197,10 +198,17 @@ class App(Tk):
         self.button_save_frame.grid(row=3, column=2, pady=(0, 20), padx=(0, 20), sticky="w")
         self.button_save = STkButton(self.button_save_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                      image=self.save_image, text="",
-                                     font=self.info_font)
+                                     font=self.info_font, command=lambda: self.save_data())
         self.button_save.grid(row=0, column=0)
+        self.button_save_option = CTkOptionMenu(self.button_save_frame,
+                                                font=self.info_font, dynamic_resizing=False,
+                                                values=["select directory",
+                                                        "overwrite the original image"],
+                                                command=self.save_data)
         self.button_save_option_arrow = STkButton(self.button_save_frame, width=ARROW_WIDTH_L,
-                                                  height=BUTTON_HEIGHT_L, text="", image=self.expand_image, )
+                                                  height=BUTTON_HEIGHT_L, text="", image=self.expand_image,
+                                                  command=lambda: self.option_open(self.button_save,
+                                                                                   self.button_save_option))
         self.button_save_option_arrow.grid(row=0, column=1)
         self.button_save_label = CTkLabel(self.button_save_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                           text="Save", font=self.info_font)
@@ -222,7 +230,8 @@ class App(Tk):
         self.button_remove_option_arrow = STkButton(self.button_remove_frame, width=ARROW_WIDTH_L,
                                                     height=BUTTON_HEIGHT_L, text="",
                                                     image=self.expand_image,
-                                                    command=lambda: self.button_remove_option_open())
+                                                    command=lambda: self.option_open(self.button_remove,
+                                                                                     self.button_remove_option))
         self.button_remove_option_arrow.grid(row=0, column=1)
         self.button_remove_label = CTkLabel(self.button_remove_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                             text="Clear", font=self.info_font)
@@ -243,7 +252,8 @@ class App(Tk):
         self.button_export_option_arrow = STkButton(self.button_export_frame, width=ARROW_WIDTH_L,
                                                     height=BUTTON_HEIGHT_L, text="",
                                                     image=self.expand_image,
-                                                    command=lambda: self.button_export_option_open())
+                                                    command=lambda: self.option_open(self.button_export,
+                                                                                     self.button_export_option))
         self.button_export_option_arrow.grid(row=0, column=1)
         self.button_export_label = CTkLabel(self.button_export_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                             text="Export", font=self.info_font)
@@ -270,6 +280,17 @@ class App(Tk):
                                  self.button_copy_setting, self.button_view_setting, self.button_copy_setting_simple,
                                  self.button_raw,
                                  self.button_remove, self.button_export, self.button_remove]
+        self.non_edit_buttons = [self.button_view_positive,
+                                 self.button_view_negative,
+                                 self.button_view_setting,
+                                 self.button_sort_positive,
+                                 self.button_sort_negative,
+                                 self.button_view_negative,
+                                 self.button_copy_positive,
+                                 self.button_copy_negative,
+                                 self.button_copy_setting,
+                                 self.button_export,
+                                 self.button_raw]
 
         for button in self.function_buttons:
             button.disable()
@@ -301,9 +322,9 @@ class App(Tk):
         if is_selected:
             if event == "":
                 return
-            self.file_path = Path(event)
+            new_path = Path(event)
         else:
-            self.file_path = Path(event.data.replace("}", "").replace("{", ""))
+            new_path = Path(event.data.replace("}", "").replace("{", ""))
 
         # clear text
         # for box in self.boxes:
@@ -311,10 +332,11 @@ class App(Tk):
         #     box.delete("1.0", "end")
 
         # detect suffix and read
-        if self.file_path.suffix in SUPPORTED_FORMATS:
+        if new_path.suffix in SUPPORTED_FORMATS:
+            self.file_path = new_path
             with open(self.file_path, "rb") as f:
                 self.image_data = ImageDataReader(f)
-                if not self.image_data.raw:
+                if not self.image_data.tool:
                     self.unsupported_format(MESSAGE["format_error"])
                 else:
                     self.readable = True
@@ -325,15 +347,34 @@ class App(Tk):
                     self.setting_box_parameter.update_text(self.image_data.parameter)
                     self.mode_update(self.button_view_positive, self.positive_box, self.button_sort_positive)
                     self.mode_update(self.button_view_negative, self.negative_box, self.button_sort_negative)
-                    for button in self.function_buttons:
-                        button.enable()
+                    if self.button_edit.mode == EditMode.OFF:
+                        for button in self.function_buttons:
+                            button.enable()
                     self.button_edit.enable()
                     self.status_bar.success(self.image_data.tool)
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
                 self.resize_image()
+            if self.button_edit.mode == EditMode.ON:
+                self.edit_mode_update()
+        elif new_path.suffix == ".txt":
+            if self.button_edit.mode == EditMode.ON:
+                with open(new_path, "r") as f:
+                    txt_data = ImageDataReader(f, is_txt=True)
+                    self.positive_box.text = txt_data.positive
+                    self.negative_box.text = txt_data.negative
+                    self.setting_box.text = txt_data.setting
+                    self.edit_mode_update()
+                    # TODO
+            else:
+                pass
+                # TODO
         else:
             self.unsupported_format(MESSAGE["suffix_error"], True)
+            if self.button_edit.mode == EditMode.ON:
+                self.positive_box.edit_off()
+                self.negative_box.edit_off()
+                self.setting_box.edit_off()
 
     def unsupported_format(self, message, reset_image=False):
         self.readable = False
@@ -377,17 +418,12 @@ class App(Tk):
         else:
             self.status_bar.clipboard()
 
-    def button_export_option_open(self):
-        self.button_export_option._dropdown_menu.open(
-            self.button_export.winfo_rootx(),
-            self.button_export.winfo_rooty() +
-            self.button_export._apply_widget_scaling(self.button_export._current_height + 0))
-
-    def button_remove_option_open(self):
-        self.button_remove_option._dropdown_menu.open(
-            self.button_remove.winfo_rootx(),
-            self.button_remove.winfo_rooty() +
-            self.button_remove._apply_widget_scaling(self.button_remove._current_height + 0))
+    @staticmethod
+    def option_open(button: CTkButton, option_menu: CTkOptionMenu):
+        option_menu._dropdown_menu.open(
+            button.winfo_rootx(),
+            button.winfo_rooty() +
+            button._apply_widget_scaling(button._current_height + 0))
 
     def export_txt(self, export_mode: str = None):
         if not export_mode:
@@ -438,18 +474,38 @@ class App(Tk):
                         image_without_exif.save(path)
                         self.status_bar.success(MESSAGE["remove_select"][0])
 
+    def save_data(self, save_mode: str = None):
+        image_without_exif = self.image_data.remove_data(self.file_path)
+        new_stem = self.file_path.stem + "_edited"
+        new_path = self.file_path.with_stem(new_stem)
+        metadata = PngInfo()
+        metadata.add_text("parameters", "\n".join([self.positive_box.ctext,
+                                                   "Negative prompt: "+self.negative_box.ctext,
+                                                   self.setting_box.ctext]))
+        if not save_mode:
+            try:
+                image_without_exif.save(new_path, pnginfo=metadata)
+                self.status_bar.success(MESSAGE["suffix"][0])
+            except:
+                print("Save error")
+        else:
+            match save_mode:
+                case "overwrite the original image":
+                    try:
+                        image_without_exif.save(self.file_path, pnginfo=metadata)
+                        self.status_bar.success(MESSAGE["overwrite"][0])
+                    except:
+                        print("Remove error")
+                case "select directory":
+                    path = filedialog.asksaveasfilename(
+                        title='Select directory',
+                        initialdir=self.file_path.parent,
+                        initialfile=new_path.name, )
+                    if path:
+                        image_without_exif.save(path, pnginfo=metadata)
+                        self.status_bar.success(MESSAGE["remove_select"][0])
+
     def edit_mode_switch(self):
-        buttons = [self.button_view_positive,
-                   self.button_view_negative,
-                   self.button_view_setting,
-                   self.button_sort_positive,
-                   self.button_sort_negative,
-                   self.button_view_negative,
-                   self.button_copy_positive,
-                   self.button_copy_negative,
-                   self.button_copy_setting,
-                   self.button_export,
-                   self.button_raw]
         match self.button_edit.mode:
             case EditMode.OFF:
                 self.button_edit.mode = EditMode.ON
@@ -460,7 +516,7 @@ class App(Tk):
                 self.setting_box.edit_on()
                 if self.button_view_setting.mode == SettingMode.SIMPLE:
                     self.setting_mode_switch()
-                for button in buttons:
+                for button in self.non_edit_buttons:
                     button.disable()
                 self.button_save.enable()
             case EditMode.ON:
@@ -471,9 +527,27 @@ class App(Tk):
                 self.negative_box.edit_off()
                 self.setting_box.edit_off()
                 if self.readable:
-                    for button in buttons:
+                    for button in self.non_edit_buttons:
                         button.enable()
                 self.button_save.disable()
+
+    def edit_mode_update(self):
+        match self.button_edit.mode:
+            case EditMode.OFF:
+                self.positive_box.edit_off()
+                self.negative_box.edit_off()
+                self.setting_box.edit_off()
+                if self.readable:
+                    for button in self.non_edit_buttons:
+                        button.enable()
+                self.button_save.disable()
+            case EditMode.ON:
+                self.positive_box.edit_on()
+                self.negative_box.edit_on()
+                self.setting_box.edit_on()
+                for button in self.non_edit_buttons:
+                    button.disable()
+                self.button_save.enable()
 
     def setting_mode_switch(self):
         match self.button_view_setting.mode:

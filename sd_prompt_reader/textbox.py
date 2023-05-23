@@ -1,7 +1,7 @@
 # -*- encoding:utf-8 -*-
 __author__ = 'receyuki'
 __filename__ = 'textbox.py'
-__copyright__ = 'Copyright 2023, '
+__copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 from typing import Union, Tuple, Callable, Optional
@@ -55,6 +55,10 @@ class STkTextbox(CTkTextbox):
         if text:
             self.insert("end", text)
             self.configure(state="disabled")
+
+    @property
+    def ctext(self):
+        return self.get("1.0", "end")
 
     @property
     def text(self):
