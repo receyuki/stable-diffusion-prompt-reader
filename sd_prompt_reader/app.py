@@ -20,7 +20,7 @@ from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.status_bar import StatusBar
 from sd_prompt_reader.update_checker import UpdateChecker
 from sd_prompt_reader.ctk_tooltip import CTkToolTip
-from sd_prompt_reader.button import STkButton, ViewMode, SortMode, SettingMode
+from sd_prompt_reader.button import *
 from sd_prompt_reader.textbox import STkTextbox
 from sd_prompt_reader.parameter_viewer import ParameterViewer
 
@@ -53,6 +53,7 @@ class App(Tk):
         self.clear_image = self.load_icon(CLEAR_FILE, (24, 24))
         self.document_image = self.load_icon(DOCUMENT_FILE, (24, 24))
         self.edit_image = self.load_icon(EDIT_FILE, (24, 24))
+        self.edit_off_image = self.load_icon(EDIT_OFF_FILE, (24, 24))
         self.save_image = self.load_icon(SAVE_FILE, (24, 24))
         self.expand_image = self.load_icon(EXPAND_FILE, (12, 24))
         self.sort_image = self.load_icon(SORT_FILE, (20, 20))
@@ -85,6 +86,7 @@ class App(Tk):
         self.image_tk = None
         self.image_data = None
         self.textbox_fg_color = ThemeManager.theme["CTkTextbox"]["fg_color"]
+        self.readable = False
 
         # status bar
         self.status_bar = StatusBar(self)
@@ -164,7 +166,7 @@ class App(Tk):
         self.button_view_setting.pack(side="top")
 
         self.button_setting_frame_simple = CTkFrame(self.setting_box_simple, fg_color="transparent")
-        self.button_setting_frame_simple.pack(side="right", padx=(20, 10), pady=(3, 5), anchor="center")
+        self.button_setting_frame_simple.pack(side="right", padx=(20, 10), pady=5)
         self.button_copy_setting_simple = STkButton(self.button_setting_frame_simple,
                                                     width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                                     image=self.clipboard_image_s, text="",
@@ -181,7 +183,9 @@ class App(Tk):
         self.button_edit_frame = CTkFrame(self, fg_color="transparent")
         self.button_edit_frame.grid(row=3, column=1, pady=(0, 20), padx=(0, 20), sticky="w")
         self.button_edit = STkButton(self.button_edit_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
-                                     image=self.edit_image, text="", font=self.info_font)
+                                     image=self.edit_image, text="", font=self.info_font,
+                                     command=lambda: self.edit_mode_switch(),
+                                     mode=EditMode.OFF)
         self.button_edit.pack(side="top")
         self.button_edit_label = CTkLabel(self.button_edit_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                           text="Edit", font=self.info_font)
@@ -191,65 +195,59 @@ class App(Tk):
 
         self.button_save_frame = CTkFrame(self, fg_color="transparent")
         self.button_save_frame.grid(row=3, column=2, pady=(0, 20), padx=(0, 20), sticky="w")
-        self.button_save_option_frame = CTkFrame(self.button_save_frame, fg_color="transparent")
-        self.button_save_option_frame.pack(side="top")
-        self.button_save = STkButton(self.button_save_option_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
+        self.button_save = STkButton(self.button_save_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                      image=self.save_image, text="",
                                      font=self.info_font)
-        self.button_save.pack(side="left")
-        self.button_save_option_arrow = STkButton(self.button_save_option_frame, width=ARROW_WIDTH_L,
+        self.button_save.grid(row=0, column=0)
+        self.button_save_option_arrow = STkButton(self.button_save_frame, width=ARROW_WIDTH_L,
                                                   height=BUTTON_HEIGHT_L, text="", image=self.expand_image, )
-        self.button_save_option_arrow.pack(side="right")
+        self.button_save_option_arrow.grid(row=0, column=1)
         self.button_save_label = CTkLabel(self.button_save_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                           text="Save", font=self.info_font)
-        self.button_save_label.pack(side="left")
+        self.button_save_label.grid(row=1, column=0, rowspan=2)
         self.button_save.label = self.button_save_label
         self.button_save.arrow = self.button_save_option_arrow
 
         self.button_remove_frame = CTkFrame(self, fg_color="transparent")
         self.button_remove_frame.grid(row=3, column=3, pady=(0, 20), padx=(0, 20), sticky="w")
-        self.button_remove_option_frame = CTkFrame(self.button_remove_frame, fg_color="transparent")
-        self.button_remove_option_frame.pack(side="top")
-        self.button_remove = STkButton(self.button_remove_option_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
+        self.button_remove = STkButton(self.button_remove_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                        image=self.clear_image, text="",
                                        font=self.info_font, command=lambda: self.remove_data())
-        self.button_remove.pack(side="left")
+        self.button_remove.grid(row=0, column=0)
         self.button_remove_option = CTkOptionMenu(self.button_remove_frame,
                                                   font=self.info_font, dynamic_resizing=False,
                                                   values=["select directory",
                                                           "overwrite the original image"],
                                                   command=self.remove_data)
-        self.button_remove_option_arrow = STkButton(self.button_remove_option_frame, width=ARROW_WIDTH_L,
+        self.button_remove_option_arrow = STkButton(self.button_remove_frame, width=ARROW_WIDTH_L,
                                                     height=BUTTON_HEIGHT_L, text="",
                                                     image=self.expand_image,
                                                     command=lambda: self.button_remove_option_open())
-        self.button_remove_option_arrow.pack(side="right")
+        self.button_remove_option_arrow.grid(row=0, column=1)
         self.button_remove_label = CTkLabel(self.button_remove_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                             text="Clear", font=self.info_font)
-        self.button_remove_label.pack(side="left")
+        self.button_remove_label.grid(row=1, column=0, rowspan=2)
         self.button_remove.label = self.button_remove_label
         self.button_remove.arrow = self.button_remove_option_arrow
 
         self.button_export_frame = CTkFrame(self, fg_color="transparent")
         self.button_export_frame.grid(row=3, column=4, pady=(0, 20), padx=(0, 20), sticky="w")
-        self.button_remove_option_frame = CTkFrame(self.button_export_frame, fg_color="transparent")
-        self.button_remove_option_frame.pack(side="top")
-        self.button_export = STkButton(self.button_remove_option_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
+        self.button_export = STkButton(self.button_export_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                        image=self.document_image, text="",
                                        font=self.info_font, command=lambda: self.export_txt())
-        self.button_export.pack(side="left")
+        self.button_export.grid(row=0, column=0)
         self.button_export_option = CTkOptionMenu(self,
                                                   font=self.info_font, dynamic_resizing=False,
                                                   values=["select directory"],
                                                   command=self.export_txt)
-        self.button_export_option_arrow = STkButton(self.button_remove_option_frame, width=ARROW_WIDTH_L,
+        self.button_export_option_arrow = STkButton(self.button_export_frame, width=ARROW_WIDTH_L,
                                                     height=BUTTON_HEIGHT_L, text="",
                                                     image=self.expand_image,
                                                     command=lambda: self.button_export_option_open())
-        self.button_export_option_arrow.pack(side="right")
+        self.button_export_option_arrow.grid(row=0, column=1)
         self.button_export_label = CTkLabel(self.button_export_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                             text="Export", font=self.info_font)
-        self.button_export_label.pack(side="left")
+        self.button_export_label.grid(row=1, column=0, rowspan=2)
         self.button_export.label = self.button_export_label
         self.button_export.arrow = self.button_export_option_arrow
 
@@ -270,12 +268,13 @@ class App(Tk):
         self.function_buttons = [self.button_copy_positive, self.button_sort_positive, self.button_view_positive,
                                  self.button_copy_negative, self.button_sort_negative, self.button_view_negative,
                                  self.button_copy_setting, self.button_view_setting, self.button_copy_setting_simple,
-                                 self.button_raw, self.button_edit, self.button_save,
+                                 self.button_raw,
                                  self.button_remove, self.button_export, self.button_remove]
 
         for button in self.function_buttons:
             button.disable()
-
+        self.button_save.disable()
+        self.button_edit.disable()
         self.file_path = None
 
         # bind dnd and resize
@@ -318,6 +317,7 @@ class App(Tk):
                 if not self.image_data.raw:
                     self.unsupported_format(MESSAGE["format_error"])
                 else:
+                    self.readable = True
                     # insert prompt
                     self.positive_box.text = self.image_data.positive
                     self.negative_box.text = self.image_data.negative
@@ -327,6 +327,7 @@ class App(Tk):
                     self.mode_update(self.button_view_negative, self.negative_box, self.button_sort_negative)
                     for button in self.function_buttons:
                         button.enable()
+                    self.button_edit.enable()
                     self.status_bar.success(self.image_data.tool)
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
@@ -335,6 +336,7 @@ class App(Tk):
             self.unsupported_format(MESSAGE["suffix_error"], True)
 
     def unsupported_format(self, message, reset_image=False):
+        self.readable = False
         for box in self.boxes:
             box.text = message[0]
         # for button in self.function_buttons:
@@ -345,6 +347,8 @@ class App(Tk):
         if reset_image:
             self.image_label.configure(image=self.drop_image, text="Drop image here or click to select")
             self.image = None
+        else:
+            self.button_edit.enable()
         self.status_bar.warning(message[-1])
 
     def resize_image(self, event=None):
@@ -433,6 +437,43 @@ class App(Tk):
                     if path:
                         image_without_exif.save(path)
                         self.status_bar.success(MESSAGE["remove_select"][0])
+
+    def edit_mode_switch(self):
+        buttons = [self.button_view_positive,
+                   self.button_view_negative,
+                   self.button_view_setting,
+                   self.button_sort_positive,
+                   self.button_sort_negative,
+                   self.button_view_negative,
+                   self.button_copy_positive,
+                   self.button_copy_negative,
+                   self.button_copy_setting,
+                   self.button_export,
+                   self.button_raw]
+        match self.button_edit.mode:
+            case EditMode.OFF:
+                self.button_edit.mode = EditMode.ON
+                self.button_edit.image = self.edit_off_image
+                self.button_edit.switch_on()
+                self.positive_box.edit_on()
+                self.negative_box.edit_on()
+                self.setting_box.edit_on()
+                if self.button_view_setting.mode == SettingMode.SIMPLE:
+                    self.setting_mode_switch()
+                for button in buttons:
+                    button.disable()
+                self.button_save.enable()
+            case EditMode.ON:
+                self.button_edit.mode = EditMode.OFF
+                self.button_edit.image = self.edit_image
+                self.button_edit.switch_off()
+                self.positive_box.edit_off()
+                self.negative_box.edit_off()
+                self.setting_box.edit_off()
+                if self.readable:
+                    for button in buttons:
+                        button.enable()
+                self.button_save.disable()
 
     def setting_mode_switch(self):
         match self.button_view_setting.mode:

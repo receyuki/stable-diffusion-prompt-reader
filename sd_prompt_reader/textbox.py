@@ -6,6 +6,7 @@ __email__ = 'receyuki@gmail.com'
 
 from typing import Union, Tuple, Callable, Optional
 from customtkinter import CTkTextbox, CTkFont
+from sd_prompt_reader.constants import EDITABLE, ACCESSIBLE_GRAY
 
 
 class STkTextbox(CTkTextbox):
@@ -103,3 +104,11 @@ class STkTextbox(CTkTextbox):
         self.delete("1.0", "end")
         self.insert("end", self.current_text)
         self.configure(state="disabled")
+
+    def edit_on(self):
+        self.configure(state="normal")
+        self.configure(text_color=EDITABLE)
+
+    def edit_off(self):
+        self.configure(state="disabled")
+        self.configure(text_color=ACCESSIBLE_GRAY)

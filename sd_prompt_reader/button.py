@@ -48,7 +48,7 @@ class STkButton(CTkButton):
                  mode: Enum = None,
                  **kwargs):
 
-        self.image = image
+        self._simage = image
         self._label = label
         self._arrow = arrow
         self._mode = mode
@@ -74,7 +74,7 @@ class STkButton(CTkButton):
                          text=text,
                          font=font,
                          textvariable=textvariable,
-                         image=self.image[0],
+                         image=self._simage[0],
                          state=state,
                          hover=hover,
                          command=command,
@@ -106,9 +106,18 @@ class STkButton(CTkButton):
     def mode(self, mode):
         self._mode = mode
 
+    @property
+    def image(self):
+        return self._simage
+
+    @image.setter
+    def image(self, image):
+        self._simage = image
+        self.enable()
+
     def disable(self):
         self.configure(state="disabled")
-        self.configure(image=self.image[1])
+        self.configure(image=self._simage[1])
         if self._label:
             self._label.configure(text_color=INACCESSIBLE_GRAY)
         if self._arrow:
@@ -116,7 +125,7 @@ class STkButton(CTkButton):
 
     def enable(self):
         self.configure(state="normal")
-        self.configure(image=self.image[0])
+        self.configure(image=self._simage[0])
         if self._label:
             self._label.configure(text_color=ACCESSIBLE_GRAY)
         if self._arrow:
@@ -143,3 +152,8 @@ class SortMode(Enum):
 class SettingMode(Enum):
     NORMAL = 0
     SIMPLE = 1
+
+
+class EditMode(Enum):
+    OFF = 0
+    ON = 1
