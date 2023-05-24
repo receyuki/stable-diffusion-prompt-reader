@@ -118,7 +118,7 @@ class App(Tk):
         self.button_positive_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
         self.button_copy_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.clipboard_image_s, text="",
-                                              command=lambda: self.copy_to_clipboard(self.image_data.positive))
+                                              command=lambda: self.copy_to_clipboard(self.positive_box.ctext))
         self.button_copy_positive.pack(side="top")
         self.button_copy_positive_tooltip = CTkToolTip(self.button_copy_positive, delay=TOOLTIP_DELAY,
                                                        message=TOOLTIP["copy_prompt"])
@@ -144,7 +144,7 @@ class App(Tk):
         self.button_negative_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
         self.button_copy_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                               image=self.clipboard_image_s, text="",
-                                              command=lambda: self.copy_to_clipboard(self.image_data.negative))
+                                              command=lambda: self.copy_to_clipboard(self.negative_box.ctext))
         self.button_copy_negative.pack(side="top")
         self.button_copy_negative_tooltip = CTkToolTip(self.button_copy_negative, delay=TOOLTIP_DELAY,
                                                        message=TOOLTIP["copy_prompt"])
@@ -170,7 +170,7 @@ class App(Tk):
         self.button_setting_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
         self.button_copy_setting = STkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
                                              image=self.clipboard_image_s, text="",
-                                             command=lambda: self.copy_to_clipboard(self.image_data.setting))
+                                             command=lambda: self.copy_to_clipboard(self.setting_box.ctext))
         self.button_copy_setting.pack(side="top", pady=(0, 10))
         self.button_copy_setting_tooltip = CTkToolTip(self.button_copy_setting, delay=TOOLTIP_DELAY,
                                                       message=TOOLTIP["copy_setting"])
@@ -313,9 +313,6 @@ class App(Tk):
                                  self.button_sort_positive,
                                  self.button_sort_negative,
                                  self.button_view_negative,
-                                 self.button_copy_positive,
-                                 self.button_copy_negative,
-                                 self.button_copy_setting,
                                  self.button_export,
                                  self.button_raw]
 
