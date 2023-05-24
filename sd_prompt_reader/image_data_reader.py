@@ -117,7 +117,15 @@ class ImageDataReader:
             self._parameter["cfg"] = self._setting[parameter_index[3]:self._setting.find(",", parameter_index[3])]
             self._parameter["steps"] = self._setting[parameter_index[4]:self._setting.find(",", parameter_index[4])]
             self._parameter["size"] = self._setting[parameter_index[5]:self._setting.find(",", parameter_index[5])]
-
+        elif self._raw:
+            # w/ neg
+            if "Negative prompt:" in self._raw:
+                prompt_index = [self._raw.index("\nNegative prompt:")]
+                self._negative = self._raw[prompt_index[0] + 1 + len("Negative prompt: "):]
+            # w/o neg
+            else:
+                prompt_index = [len(self._raw)]
+            self._positive = self._raw[:prompt_index[0]]
         else:
             self._raw = ""
 
