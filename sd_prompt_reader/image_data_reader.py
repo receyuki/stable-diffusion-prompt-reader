@@ -9,6 +9,7 @@ import json
 import piexif
 import piexif.helper
 from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 from pathlib import PureWindowsPath, PurePosixPath
 from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
 
@@ -31,6 +32,7 @@ class ImageDataReader:
         self.parameter_key = ["model", "sampler", "seed", "cfg", "steps", "size"]
         self._parameter = dict.fromkeys(self.parameter_key, PARAMETER_PLACEHOLDER)
         self._is_txt = is_txt
+        self._format = ""
         self.read_data(file)
 
     def read_data(self, file):
@@ -42,6 +44,7 @@ class ImageDataReader:
             self._width = f.width
             self._height = f.height
             self._info = f.info
+            self._format = f.format
             if f.format == "PNG":
                 # a1111 png format
                 if "parameters" in self._info:
@@ -413,6 +416,40 @@ class ImageDataReader:
             return image_without_exif
 
     @staticmethod
+    def save_image(image_path, new_path, image_format, data=None):
+        metadata = None
+        if data:
+            match image_format:
+                case "PNG":
+                    metadata = PngInfo()
+                    metadata.add_text("parameters", data)
+                case "JPEG" | "WEBP":
+                    metadata = piexif.dump({
+                        "Exif": {
+                            piexif.ExifIFD.UserComment: piexif.helper.UserComment.dump(data, encoding="unicode")
+                        },
+                    })
+
+        with Image.open(image_path) as f:
+            try:
+                match image_format:
+                    case "PNG":
+                        if data:
+                            f.save(new_path, pnginfo=metadata)
+                        else:
+                            f.save(new_path)
+                    case "JPEG":
+                        f.save(new_path, quality="keep")
+                        if data:
+                            piexif.insert(metadata, str(new_path))
+                    case "WEBP":
+                        f.save(new_path, quality=100, lossless=True)
+                        if data:
+                            piexif.insert(metadata, str(new_path))
+            except:
+                print("Save error")
+
+    @staticmethod
     def merge_str_to_tuple(item1, item2):
         if not isinstance(item1, tuple):
             item1 = (item1,)
@@ -453,3 +490,7 @@ class ImageDataReader:
     @property
     def parameter(self):
         return self._parameter
+
+    @property
+    def format(self):
+        return self._format

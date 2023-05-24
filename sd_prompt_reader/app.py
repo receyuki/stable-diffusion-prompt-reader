@@ -10,7 +10,8 @@ from tkinter import PhotoImage, Menu
 
 import pyperclip as pyperclip
 from PIL import Image
-from PIL.PngImagePlugin import PngInfo
+import piexif
+import piexif.helper
 from customtkinter import CTkFont, ScalingTracker, CTkImage, CTkFrame, CTkLabel, CTkTextbox, ThemeManager, CTkButton, \
     filedialog, CTkOptionMenu, set_default_color_theme
 from tkinterdnd2 import DND_FILES
@@ -371,6 +372,7 @@ class App(Tk):
                     if self.button_edit.mode == EditMode.OFF:
                         for button in self.function_buttons:
                             button.enable()
+                    self.button_remove.enable()
                     self.button_edit.enable()
                     self.status_bar.success(self.image_data.tool)
                 self.image = Image.open(f)
@@ -474,59 +476,68 @@ class App(Tk):
         new_path = self.file_path.with_stem(new_stem)
         if not remove_mode:
             try:
-                image_without_exif.save(new_path)
-                self.status_bar.success(MESSAGE["suffix"][0])
+                self.image_data.save_image(self.file_path, new_path, self.image_data.format)
             except:
                 print("Remove error")
+            else:
+                self.status_bar.success(MESSAGE["suffix"][0])
         else:
             match remove_mode:
                 # case "add suffix":
                 #
                 case "overwrite the original image":
                     try:
-                        image_without_exif.save(self.file_path)
-                        self.status_bar.success(MESSAGE["overwrite"][0])
+                        self.image_data.save_image(self.file_path, self.file_path, self.image_data.format)
                     except:
                         print("Remove error")
+                    else:
+                        self.status_bar.success(MESSAGE["overwrite"][0])
                 case "select directory":
                     path = filedialog.asksaveasfilename(
                         title='Select directory',
                         initialdir=self.file_path.parent,
                         initialfile=new_path.name, )
                     if path:
-                        image_without_exif.save(path)
-                        self.status_bar.success(MESSAGE["remove_select"][0])
+                        try:
+                            self.image_data.save_image(self.file_path, path, self.image_data.format)
+                        except:
+                            print("Remove error")
+                        else:
+                            self.status_bar.success(MESSAGE["remove_select"][0])
 
     def save_data(self, save_mode: str = None):
-        image_without_exif = self.image_data.remove_data(self.file_path)
-        new_stem = self.file_path.stem + "_edited"
-        new_path = self.file_path.with_stem(new_stem)
-        metadata = PngInfo()
-        metadata.add_text("parameters", "\n".join([self.positive_box.ctext,
-                                                   "Negative prompt: " + self.negative_box.ctext,
-                                                   self.setting_box.ctext]))
-        if not save_mode:
-            try:
-                image_without_exif.save(new_path, pnginfo=metadata)
-                self.status_bar.success(MESSAGE["suffix"][0])
-            except:
-                print("Save error")
-        else:
-            match save_mode:
-                case "overwrite the original image":
-                    try:
-                        image_without_exif.save(self.file_path, pnginfo=metadata)
-                        self.status_bar.success(MESSAGE["overwrite"][0])
-                    except:
-                        print("Remove error")
-                case "select directory":
-                    path = filedialog.asksaveasfilename(
-                        title='Select directory',
-                        initialdir=self.file_path.parent,
-                        initialfile=new_path.name, )
-                    if path:
-                        image_without_exif.save(path, pnginfo=metadata)
-                        self.status_bar.success(MESSAGE["remove_select"][0])
+        with Image.open(self.file_path) as image:
+            new_stem = self.file_path.stem + "_edited"
+            new_path = self.file_path.with_stem(new_stem)
+            data = self.positive_box.ctext + "Negative prompt: " + self.negative_box.ctext + self.setting_box.ctext
+            if not save_mode:
+                try:
+                    self.image_data.save_image(self.file_path, new_path, self.image_data.format, data)
+                except:
+                    print("Save error")
+                else:
+                    self.status_bar.success(MESSAGE["suffix"][0])
+            else:
+                match save_mode:
+                    case "overwrite the original image":
+                        try:
+                            self.image_data.save_image(self.file_path, self.file_path, self.image_data.format, data)
+                        except:
+                            print("Save error")
+                        else:
+                            self.status_bar.success(MESSAGE["overwrite"][0])
+                    case "select directory":
+                        path = filedialog.asksaveasfilename(
+                            title='Select directory',
+                            initialdir=self.file_path.parent,
+                            initialfile=new_path.name, )
+                        if path:
+                            try:
+                                self.image_data.save_image(self.file_path, path, self.image_data.format, data)
+                            except:
+                                print("Save error")
+                            else:
+                                self.status_bar.success(MESSAGE["remove_select"][0])
 
     def edit_mode_switch(self):
         match self.button_edit.mode:
