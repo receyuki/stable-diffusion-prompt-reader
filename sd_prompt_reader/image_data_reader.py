@@ -138,7 +138,7 @@ class ImageDataReader:
         self._parameter["seed"] = data.get('seed')
         self._parameter["cfg"] = data.get('guidance_scale')
         self._parameter["steps"] = data.get('num_inference_steps')
-        self._parameter["size"] = str(self._width) + "x" + str(self._height)
+        self._parameter["size"] = str(data.get('width')) + "x" + str(data.get('height'))
 
     def _invoke_metadata(self):
         metadata = json.loads(self._info.get("sd-metadata"))
@@ -162,7 +162,7 @@ class ImageDataReader:
             f", Sampler: {image.get('sampler')}"
             f", CFG scale: {image.get('cfg_scale')}"
             f", Seed: {image.get('seed')}"
-            f", Size: {self._width}x{self._height}"
+            f", Size: {image.get('width')}x{image.get('height')}"
             f", Model hash: {metadata.get('model_hash')}"
             f", Model: {metadata.get('model_weights')}"
             f", Threshold: {image.get('threshold')}"
@@ -179,7 +179,7 @@ class ImageDataReader:
         self._parameter["seed"] = image.get('seed')
         self._parameter["cfg"] = image.get('cfg_scale')
         self._parameter["steps"] = image.get('steps')
-        self._parameter["size"] = str(self._width) + "x" + str(self._height)
+        self._parameter["size"] = str(image.get('width')) + "x" + str(image.get('height'))
 
     def _invoke_dream(self):
         dream = self._info.get("Dream")
@@ -209,14 +209,16 @@ class ImageDataReader:
             f", Sampler: {dream[setting_index[5] + 3:].split()[0]}"
             f", CFG scale: {dream[setting_index[4] + 3:setting_index[5] - 1]}"
             f", Seed: {dream[setting_index[1] + 3:setting_index[2] - 1]}"
-            f", Size: {self._width}x{self._height}"
+            f", Size: {dream[setting_index[2] + 3:setting_index[3] - 1]}"
+            f"x{dream[setting_index[3] + 3:setting_index[4] - 1]}"
         )
 
         self._parameter["sampler"] = dream[setting_index[5] + 3:].split()[0]
         self._parameter["seed"] = dream[setting_index[1] + 3:setting_index[2] - 1]
         self._parameter["cfg"] = dream[setting_index[4] + 3:setting_index[5] - 1]
         self._parameter["steps"] = dream[setting_index[0] + 3:setting_index[1] - 1]
-        self._parameter["size"] = str(self._width) + "x" + str(self._height)
+        self._parameter["size"] = str(dream[setting_index[2] + 3:setting_index[3] - 1]) + "x" \
+                                  + str(dream[setting_index[3] + 3:setting_index[4] - 1])
 
     def _nai_png(self):
         self._positive = self._info.get("Description")
@@ -273,13 +275,13 @@ class ImageDataReader:
         if workflow:
             self._raw += "\n" + str(workflow)
         self._setting = (
-            f"Seed: {longest_flow.get('seed')}"
-            f", Steps: {longest_flow.get('steps')}"
-            f", CFG scale: {longest_flow.get('cfg')}"
+            f"Steps: {longest_flow.get('steps')}"
             f", Sampler: {self.remove_quotes(longest_flow.get('sampler_name'))}"
-            f", Scheduler: {self.remove_quotes(longest_flow.get('scheduler'))}"
+            f", CFG scale: {longest_flow.get('cfg')}"
+            f", Seed: {longest_flow.get('seed')}"
             f", Size: {self._width}x{self._height}"
             f", Model: {self.remove_quotes(longest_flow.get('ckpt_name'))}"
+            f", Scheduler: {self.remove_quotes(longest_flow.get('scheduler'))}"
         )
         if "denoise" in longest_flow:
             self._setting += f", Denoise: {longest_flow.get('denoise')}"
