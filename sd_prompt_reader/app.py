@@ -409,7 +409,7 @@ class App(Tk):
         for button in self.function_buttons:
             button.disable()
         if reset_image:
-            self.image_label.configure(image=self.drop_image, text="Drop image here or click to select")
+            self.image_label.configure(image=self.drop_image, text=MESSAGE["drop"])
             self.image = None
         else:
             self.button_edit.enable()

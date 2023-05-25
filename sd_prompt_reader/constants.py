@@ -30,6 +30,7 @@ SORT_FILE = (Path(RESOURCE_DIR, "sort_by_alpha_20.png"), Path(RESOURCE_DIR, "sor
 ICON_FILE = Path(RESOURCE_DIR, "icon.png")
 ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
 MESSAGE = {
+    "drop":             ["Drop image here or click to select"],
     "default":          ["Drag and drop your image file into the window"],
     "success":          ["Voilà!"],
     "format_error":     ["No data",
@@ -53,13 +54,13 @@ MESSAGE = {
                          "Descending order",
                          "Original order"],
     "view_prompt":      ["Vertical orientation",
-                         "Vertical orientation off"],
+                         "Horizontal orientation"],
     "view_setting":     ["Simple mode",
                          "Normal mode"]
 }
 TOOLTIP = {
     "edit":             "Edit image metadata",
-    "save":             "Save edited metadata to the image",
+    "save":             "Save edited image",
     "clear":            "Remove metadata from the image",
     "export":           "Export metadata to a TXT file",
     "copy_raw":         "Copy raw metadata to the clipboard",
