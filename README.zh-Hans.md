@@ -89,6 +89,7 @@ e.g. `sudo apt-get install python3-tk` (基于 Debian 的发行版)
 ![remove](./images/remove.png)
 
 ### 编辑图片
+***请注意，编辑后的图片将以 A1111 格式进行写入，这意味着任何格式的图片在编辑后都将变为 A1111 格式.***
 - 点击 "Edit" 进入编辑模式
 - 直接在文本框中编辑 prompt，或者导入txt格式的prompt数据.
 - 点击 "Save" 将在原图像文件旁生成一个后缀为"_edited"的编辑后图像文件.

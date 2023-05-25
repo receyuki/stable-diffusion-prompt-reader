@@ -90,6 +90,7 @@ OR
 ![remove](./images/remove.png)
 
 ### Edit image
+***Please note that the edited image will be written in A1111 format, it meaning that image in any format will become A1111 format after editing.***
 - Click "Edit" to enter edit mode.
 - Edit the prompt directly in the textbox or import a metadata file in txt format.
 - Click "Save" will generate a edited image file with suffix "_edited" alongside the original image file.
