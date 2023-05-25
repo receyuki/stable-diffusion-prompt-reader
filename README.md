@@ -110,6 +110,27 @@ SD Prompt Reader will traverse all flowcharts and branches and display the longe
 ### Easy Diffusion
 By default, Easy Diffusion does not write metadata to images. Please change the _Metadata format_ in settings to _embed_ to write the metadata to images
 
+## Common Issues
+### Malware Alert
+The false positive reported by some anti-malwares is caused by the packaging tool _pyinstaller_ which is a common issue for _pyinstaller_ users. 
+I spent a lot of time trying to fix the Windows Defender false positive before, but I couldn't do it for every antivirus software. 
+So, you can either trust Windows Defender or use the instruction for Linux users to use this app.
+### "SD Prompt Reader.app" is damaged and can't be opend. You should move it to the Trash
+This is a very common macOS issue when you run non appstore apps, 
+and developers must pay $99 per year to Apple to eliminate this issue. 
+You can choose to **Allow Apps from Anywhere** in **security & privacy** settings which can be dangerous. 
+The way I prefer is to remove the quarantine attributes. 
+1. Open Terminal from the Applications folder. 
+2. Type in the following command and hit Enter. 
+
+    `xattr -r -d com.apple.quarantine /path/to/app.app`
+
+    In my case it's
+
+    `xattr -r -d com.apple.quarantine /Applications/SD\ Prompt\ Reader.app`
+
+If you are still concerned about the security of the app you can use the instruction for Linux users to use this app.
+
 ## TODO
 - Batch image processing tool
 

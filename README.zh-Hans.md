@@ -109,6 +109,26 @@ SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输
 ### Easy Diffusion
 默认设置下, Easy Diffusion 不会将 prompt 写入图片. 请更改设置中的 _Metadata format_ 为 _embed_ 来写入 prompt 到图片中.
 
+## 常见问题
+### 病毒警告
+错误的病毒警报是由我使用的打包工具 _pyinstaller_ 造成的, 这对 _pyinstaller_ 用户是一个常见的问题. 
+我花费了许多时间来解决 Windows Defender 的错误警报, 但我没法对每个杀毒软件单独解决问题. 
+因此, 你可以选择相信 Windows Defender 或者使用 Linux 用户的使用说明来使用 app.
+### "SD Prompt Reader.app" 已损坏，无法打开。您应该将它移到废纸篓。
+这是一个使用非 appstore 软件时常见的 macOS 问题, 开发者需要付给苹果每年 $99 来避免这个问题. 
+你可以在设置中**隐私与安全性**的**安全性**中选择**允许任何来源**, 但这可能造成危险. 
+我推荐的方式是移除 quarantine attributes.
+1. 在应用程序中打开终端. 
+2. 输入以下命令并按回车. 
+
+    `xattr -r -d com.apple.quarantine app的路径`
+
+    比如:
+
+    `xattr -r -d com.apple.quarantine /Applications/SD\ Prompt\ Reader.app`
+
+如果你仍然担心安全性可以选择使用 Linux 用户的使用说明来使用 app.
+
 ## 待办
 - 图像批处理功能
 
