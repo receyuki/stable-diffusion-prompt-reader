@@ -14,7 +14,7 @@
 
 A simple standalone viewer for reading prompt from Stable Diffusion generated image outside the webui.
     <br>
-    <img src="./images/screenshot_v130.png" width=80% height=80%>
+    <img src="./images/screenshot_v130.png">
 </div>
 
 ## Features
