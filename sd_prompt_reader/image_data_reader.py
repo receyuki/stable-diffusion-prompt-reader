@@ -96,11 +96,10 @@ class ImageDataReader:
                                 self._raw.index("\nSteps:")]
             # w/o neg
             else:
-                prompt_index = [self._raw.index("\nSteps:"),
-                                self._raw.index("\nSteps:")]
+                prompt_index = [self._raw.index("\nSteps:")]
             self._positive = self._raw[:prompt_index[0]]
-            self._negative = self._raw[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[1]]
-            self._setting = self._raw[prompt_index[1] + 1:]
+            self._negative = self._raw[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[-1]]
+            self._setting = self._raw[prompt_index[-1] + 1:]
 
             parameter_index = [
                 self._setting.find("Model: ") + len("Model: "),

@@ -33,7 +33,7 @@ MESSAGE = {
     "drop":             ["Drop image here or click to select"],
     "default":          ["Drag and drop your image file into the window"],
     "success":          ["Voilà!"],
-    "format_error":     ["No data",
+    "format_error":     ["",
                          "No data detected or unsupported format"],
     "suffix_error":     ["Unsupported format"],
     "clipboard":        ["Copied to the clipboard"],
