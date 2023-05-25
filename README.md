@@ -115,6 +115,5 @@ By default, Easy Diffusion does not write metadata to images. Please change the 
 
 ## Credits
 - Inspired by [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
-- Function icons from [Icons8](https://icons8.com/)
 - App icon generated using Stable Diffusion with [IconsMI](https://huggingface.co/jvkape/IconsMI-AppIconsModelforSD)
 - Special thanks to [Azusachan](https://github.com/Azusachan) for providing SD server

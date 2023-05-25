@@ -114,6 +114,5 @@ SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输
 
 ## Credits
 - Inspired by [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
-- Function icons from [Icons8](https://icons8.com/)
 - App icon generated using Stable Diffusion with [IconsMI](https://huggingface.co/jvkape/IconsMI-AppIconsModelforSD)
 - Special thanks to [Azusachan](https://github.com/Azusachan) for providing SD server
