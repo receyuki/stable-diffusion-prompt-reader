@@ -5,12 +5,13 @@ __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 import json
+from pathlib import PureWindowsPath, PurePosixPath
 
 import piexif
 import piexif.helper
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
-from pathlib import PureWindowsPath, PurePosixPath
+
 from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
 
 # comfyui node types

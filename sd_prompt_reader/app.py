@@ -10,8 +10,6 @@ from tkinter import PhotoImage, Menu
 
 import pyperclip as pyperclip
 from PIL import Image
-import piexif
-import piexif.helper
 from customtkinter import CTkFont, ScalingTracker, CTkImage, CTkFrame, CTkLabel, CTkTextbox, ThemeManager, CTkButton, \
     filedialog, CTkOptionMenu, set_default_color_theme
 from tkinterdnd2 import DND_FILES
@@ -79,7 +77,7 @@ class App(Tk):
         self.image_frame = CTkFrame(self)
         self.image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
 
-        self.image_label = CTkLabel(self.image_frame, width=560, text="Drop image here or click to select",
+        self.image_label = CTkLabel(self.image_frame, width=560, text=MESSAGE["drop"][0],
                                     image=self.drop_image, compound="top", text_color=ACCESSIBLE_GRAY)
         self.image_label.pack(fill="both", expand=True)
         self.image_label.bind("<Button-1>", lambda e: self.display_info(self.select_image(), is_selected=True))
@@ -108,12 +106,14 @@ class App(Tk):
         self.setting_box.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
         self.setting_box.text = "Setting"
 
+        # textbox simple mode
         self.setting_box_simple = CTkFrame(self, height=80, fg_color=self.textbox_fg_color)
         self.setting_box_parameter = CTkFrame(self.setting_box_simple, fg_color="transparent")
         self.setting_box_parameter = ParameterViewer(self.setting_box_simple, self.status_bar)
         self.setting_box_parameter.setting_box_parameter.pack(side="left", padx=5)
 
         # textbox buttons
+        # positive box
         self.button_positive_frame = CTkFrame(self.positive_box, fg_color="transparent")
         self.button_positive_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
         self.button_copy_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
@@ -140,6 +140,7 @@ class App(Tk):
         self.button_view_positive_tooltip = CTkToolTip(self.button_view_positive, delay=TOOLTIP_DELAY,
                                                        message=TOOLTIP["view_prompt"])
 
+        # negative box
         self.button_negative_frame = CTkFrame(self.negative_box, fg_color="transparent")
         self.button_negative_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
         self.button_copy_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
@@ -166,6 +167,7 @@ class App(Tk):
         self.button_view_negative_tooltip = CTkToolTip(self.button_view_negative, delay=TOOLTIP_DELAY,
                                                        message=TOOLTIP["view_prompt"])
 
+        # setting box
         self.button_setting_frame = CTkFrame(self.setting_box, fg_color="transparent")
         self.button_setting_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
         self.button_copy_setting = STkButton(self.button_setting_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
@@ -182,6 +184,7 @@ class App(Tk):
         self.button_view_setting_tooltip = CTkToolTip(self.button_view_setting, delay=TOOLTIP_DELAY,
                                                       message=TOOLTIP["view_setting"])
 
+        # setting box simple mode
         self.button_setting_frame_simple = CTkFrame(self.setting_box_simple, fg_color="transparent")
         self.button_setting_frame_simple.pack(side="right", padx=(20, 10), pady=5)
         self.button_copy_setting_simple = STkButton(self.button_setting_frame_simple,
@@ -201,6 +204,7 @@ class App(Tk):
                                                              message=TOOLTIP["view_setting"])
 
         # function buttons
+        # edit
         self.button_edit_frame = CTkFrame(self, fg_color="transparent")
         self.button_edit_frame.grid(row=3, column=1, pady=(0, 20), padx=(0, 20), sticky="w")
         self.button_edit = STkButton(self.button_edit_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
@@ -214,6 +218,7 @@ class App(Tk):
         self.button_edit.label = self.button_edit_label
         self.button_edit_tooltip = CTkToolTip(self.button_edit, delay=TOOLTIP_DELAY, message=TOOLTIP["edit"])
 
+        # save
         self.button_save_frame = CTkFrame(self, fg_color="transparent")
         self.button_save_frame.grid(row=3, column=2, pady=(0, 20), padx=(0, 20), sticky="w")
         self.button_save = STkButton(self.button_save_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
@@ -237,6 +242,7 @@ class App(Tk):
         self.button_save.arrow = self.button_save_option_arrow
         self.button_save_tooltip = CTkToolTip(self.button_save, delay=TOOLTIP_DELAY, message=TOOLTIP["save"])
 
+        # remove
         self.button_remove_frame = CTkFrame(self, fg_color="transparent")
         self.button_remove_frame.grid(row=3, column=3, pady=(0, 20), padx=(0, 20), sticky="w")
         self.button_remove = STkButton(self.button_remove_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
@@ -261,6 +267,7 @@ class App(Tk):
         self.button_remove.arrow = self.button_remove_option_arrow
         self.button_remove_tooltip = CTkToolTip(self.button_remove, delay=TOOLTIP_DELAY, message=TOOLTIP["clear"])
 
+        # export
         self.button_export_frame = CTkFrame(self, fg_color="transparent")
         self.button_export_frame.grid(row=3, column=4, pady=(0, 20), padx=(0, 20), sticky="w")
         self.button_export = STkButton(self.button_export_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
@@ -284,6 +291,7 @@ class App(Tk):
         self.button_export.arrow = self.button_export_option_arrow
         self.button_export_tooltip = CTkToolTip(self.button_export, delay=TOOLTIP_DELAY, message=TOOLTIP["export"])
 
+        # copy
         self.button_copy_raw_frame = CTkFrame(self, fg_color="transparent")
         self.button_copy_raw_frame.grid(row=3, column=5, pady=(0, 20), sticky="w")
         self.button_raw = STkButton(self.button_copy_raw_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
@@ -303,8 +311,7 @@ class App(Tk):
         self.function_buttons = [self.button_copy_positive, self.button_sort_positive, self.button_view_positive,
                                  self.button_copy_negative, self.button_sort_negative, self.button_view_negative,
                                  self.button_copy_setting, self.button_view_setting, self.button_copy_setting_simple,
-                                 self.button_raw,
-                                 self.button_remove, self.button_export, self.button_remove]
+                                 self.button_raw, self.button_remove, self.button_export, self.button_remove]
 
         # button list for edit mode
         self.non_edit_buttons = [self.button_view_positive,
@@ -384,6 +391,7 @@ class App(Tk):
             if self.button_edit.mode == EditMode.ON:
                 self.edit_mode_update()
 
+        # txt importing
         elif new_path.suffix == ".txt":
             if self.button_edit.mode == EditMode.ON:
                 with open(new_path, "r") as f:
@@ -415,7 +423,7 @@ class App(Tk):
         for button in self.function_buttons:
             button.disable()
         if reset_image:
-            self.image_label.configure(image=self.drop_image, text=MESSAGE["drop"])
+            self.image_label.configure(image=self.drop_image, text=MESSAGE["drop"][0])
             self.image = None
         else:
             self.button_edit.enable()

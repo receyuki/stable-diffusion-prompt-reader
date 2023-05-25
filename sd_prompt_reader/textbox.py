@@ -4,8 +4,10 @@ __filename__ = 'textbox.py'
 __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
-from typing import Union, Tuple, Callable, Optional
+from typing import Union, Tuple, Optional
+
 from customtkinter import CTkTextbox, CTkFont
+
 from sd_prompt_reader.constants import EDITABLE, ACCESSIBLE_GRAY
 
 
