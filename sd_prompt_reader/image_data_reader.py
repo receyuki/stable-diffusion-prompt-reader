@@ -74,8 +74,8 @@ class ImageDataReader:
                     self._tool = "ComfyUI"
                     self._comfy_png()
             elif f.format == "JPEG" or f.format == "WEBP":
-                exif = piexif.load(self._info.get("exif")) or {}
                 try:
+                    exif = piexif.load(self._info.get("exif")) or {}
                     self._raw = piexif.helper.UserComment.load(exif.get("Exif").get(piexif.ExifIFD.UserComment))
                 except Exception:
                     pass
