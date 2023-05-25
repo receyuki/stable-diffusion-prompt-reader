@@ -316,6 +316,12 @@ class App(Tk):
                                  self.button_export,
                                  self.button_raw]
 
+        self.edit_buttons = [self.button_copy_positive,
+                             self.button_copy_negative,
+                             self.button_copy_setting,
+                             self.button_remove,
+                             self.button_edit]
+
         for button in self.function_buttons:
             button.disable()
         self.button_save.disable()
@@ -369,8 +375,8 @@ class App(Tk):
                     if self.button_edit.mode == EditMode.OFF:
                         for button in self.function_buttons:
                             button.enable()
-                    self.button_remove.enable()
-                    self.button_edit.enable()
+                    for button in self.edit_buttons:
+                        button.enable()
                     self.status_bar.success(self.image_data.tool)
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
