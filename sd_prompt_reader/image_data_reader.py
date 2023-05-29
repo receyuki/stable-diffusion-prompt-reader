@@ -77,6 +77,8 @@ class ImageDataReader:
                 try:
                     exif = piexif.load(self._info.get("exif")) or {}
                     self._raw = piexif.helper.UserComment.load(exif.get("Exif").get(piexif.ExifIFD.UserComment))
+                except TypeError:
+                    pass
                 except Exception:
                     pass
                 else:
