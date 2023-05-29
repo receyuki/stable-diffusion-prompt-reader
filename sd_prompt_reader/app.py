@@ -671,11 +671,13 @@ class App(Tk):
                     case SortMode.DES:
                         textbox.sort_des()
 
-    @staticmethod
-    def select_image():
+    def select_image(self):
+        initialdir = "/"
+        if self.file_path:
+            initialdir = self.file_path.parent
         return filedialog.askopenfilename(
             title='Select your image file',
-            initialdir="/",
+            initialdir=initialdir,
             filetypes=(("image files", "*.png *.jpg *jpeg *.webp"),)
         )
 
