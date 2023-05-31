@@ -134,6 +134,7 @@ If you are still concerned about the security of the app you can use the instruc
 
 ## TODO
 - Batch image processing tool
+- Gallery/Folder view
 
 ## Credits
 - Inspired by [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
