@@ -18,7 +18,33 @@ from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
 KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
 VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
 CHECKPOINT_LOADER_TYPE = ["CheckpointLoader", "CheckpointLoaderSimple"]
+EASYDIFFUSION_MAPPING_A = {
+    "prompt": "Prompt",
+    "negative_prompt": "Negative Prompt",
+    "seed": "Seed",
+    "use_stable_diffusion_model": "Stable Diffusion model",
+    "clip_skip": "Clip Skip",
+    "use_vae_model": "VAE model",
+    "sampler_name": "Sampler",
+    "width": "Width",
+    "height": "Height",
+    "num_inference_steps": "Steps",
+    "guidance_scale": "Guidance Scale",
+}
 
+EASYDIFFUSION_MAPPING_B = {
+    "prompt": "prompt",
+    "negative_prompt": "negative_prompt",
+    "seed": "seed",
+    "use_stable_diffusion_model": "use_stable_diffusion_model",
+    "clip_skip": "clip_skip",
+    "use_vae_model": "use_vae_model",
+    "sampler_name": "sampler_name",
+    "width": "width",
+    "height": "height",
+    "num_inference_steps": "num_inference_steps",
+    "guidance_scale": "guidance_scale",
+}
 
 class ImageDataReader:
     def __init__(self, file, is_txt: bool = False):
@@ -53,7 +79,7 @@ class ImageDataReader:
                     self._raw = self._info.get("parameters")
                     self._sd_format()
                 # easydiff png format
-                if self._info.get("negative_prompt"):
+                if "negative_prompt" in self._info or "Negative Prompt" in self._info:
                     self._tool = "Easy Diffusion"
                     self._raw = str(self._info).replace("'", '"')
                     self._ed_format()
@@ -70,7 +96,7 @@ class ImageDataReader:
                     self._tool = "NovelAI"
                     self._nai_png()
                 # comfyui format
-                elif self._info.get("prompt"):
+                elif "prompt" in self._info:
                     self._tool = "ComfyUI"
                     self._comfy_png()
             elif f.format == "JPEG" or f.format == "WEBP":
@@ -133,22 +159,26 @@ class ImageDataReader:
 
     def _ed_format(self):
         data = json.loads(self._raw)
-        self._positive = data.get("prompt")
-        data.pop("prompt")
-        self._negative = data.get("negative_prompt")
-        data.pop("negative_prompt")
-        if PureWindowsPath(data.get('use_stable_diffusion_model')).drive:
-            file = PureWindowsPath(data.get('use_stable_diffusion_model')).name
+        if data.get("prompt"):
+            ed = EASYDIFFUSION_MAPPING_B
         else:
-            file = PurePosixPath(data.get('use_stable_diffusion_model')).name
+            ed = EASYDIFFUSION_MAPPING_A
+        self._positive = data.get(ed["prompt"])
+        data.pop(ed["prompt"])
+        self._negative = data.get(ed["negative_prompt"])
+        data.pop(ed["negative_prompt"])
+        if PureWindowsPath(data.get(ed['use_stable_diffusion_model'])).drive:
+            file = PureWindowsPath(data.get(ed['use_stable_diffusion_model'])).name
+        else:
+            file = PurePosixPath(data.get(ed['use_stable_diffusion_model'])).name
 
         self._setting = self.remove_quotes(data).replace("{", "").replace("}", "")
         self._parameter["model"] = file
-        self._parameter["sampler"] = data.get('sampler_name')
-        self._parameter["seed"] = data.get('seed')
-        self._parameter["cfg"] = data.get('guidance_scale')
-        self._parameter["steps"] = data.get('num_inference_steps')
-        self._parameter["size"] = str(data.get('width')) + "x" + str(data.get('height'))
+        self._parameter["sampler"] = data.get(ed['sampler_name'])
+        self._parameter["seed"] = data.get(ed['seed'])
+        self._parameter["cfg"] = data.get(ed['guidance_scale'])
+        self._parameter["steps"] = data.get(ed['num_inference_steps'])
+        self._parameter["size"] = str(data.get(ed['width'])) + "x" + str(data.get(ed['height']))
 
     def _invoke_metadata(self):
         metadata = json.loads(self._info.get("sd-metadata"))
