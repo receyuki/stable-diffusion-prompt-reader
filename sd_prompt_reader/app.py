@@ -672,9 +672,7 @@ class App(Tk):
                         textbox.sort_des()
 
     def select_image(self):
-        initialdir = "/"
-        if self.file_path:
-            initialdir = self.file_path.parent
+        initialdir = self.file_path.parent if self.file_path else "/"
         return filedialog.askopenfilename(
             title='Select your image file',
             initialdir=initialdir,
