@@ -104,7 +104,7 @@ class ImageDataReader:
                     exif = piexif.load(self._info.get("exif")) or {}
                     self._raw = piexif.helper.UserComment.load(exif.get("Exif").get(piexif.ExifIFD.UserComment))
                 except TypeError:
-                    pass
+                    print("empty jpeg")
                 except Exception:
                     pass
                 else:

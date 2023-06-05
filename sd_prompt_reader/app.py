@@ -437,7 +437,7 @@ class App(Tk):
             self.scaling = ScalingTracker.get_window_dpi_scaling(self)
             # resize image to window size
             image_frame_height = self.image_frame.winfo_height() if self.image_frame.winfo_height() > 2 else 560
-            image_frame_width = self.image_frame.winfo_width() - 18 if self.image_frame.winfo_width() > 2 else 560
+            image_frame_width = self.image_frame.winfo_width() - 30 if self.image_frame.winfo_width() > 2 else 560
             if self.image.size[0] > self.image.size[1]:
                 self.image_tk.configure(size=tuple(int(num / self.scaling) for num in
                                                    (image_frame_width,
