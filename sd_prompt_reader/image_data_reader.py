@@ -17,7 +17,7 @@ from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
 # comfyui node types
 KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
 VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
-CHECKPOINT_LOADER_TYPE = ["CheckpointLoader", "CheckpointLoaderSimple"]
+CHECKPOINT_LOADER_TYPE = ["CheckpointLoader", "CheckpointLoaderSimple", "unCLIPCheckpointLoader"]
 EASYDIFFUSION_MAPPING_A = {
     "prompt": "Prompt",
     "negative_prompt": "Negative Prompt",
@@ -441,10 +441,13 @@ class ImageDataReader:
                         last_flow, last_node = self._comfy_traverse(prompt,
                                                                     inputs["samples_from"][0])
                     elif inputs.get("conditioning"):
-                        last_flow, last_node = self._comfy_traverse(prompt,
-                                                                    inputs["conditioning"][0])
-                    flow = self.merge_dict(flow, last_flow)
-                    node += last_node
+                        result = self._comfy_traverse(prompt, inputs["conditioning"][0])
+                        if isinstance(result, list):
+                            last_flow, last_node = result
+                            flow = self.merge_dict(flow, last_flow)
+                            node += last_node
+                        elif isinstance(result, str):
+                            return result
                 except:
                     print("comfyUI bridging node error")
         return flow, node
