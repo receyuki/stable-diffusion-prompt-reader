@@ -5,6 +5,7 @@ __copyright__ = 'Copyright 2023'
 __email__ = 'receyuki@gmail.com'
 
 import json
+from xml.dom import minidom
 from pathlib import PureWindowsPath, PurePosixPath
 
 import piexif
@@ -99,6 +100,10 @@ class ImageDataReader:
                 elif "prompt" in self._info:
                     self._tool = "ComfyUI"
                     self._comfy_png()
+                # drawthings format
+                elif "XML:com.adobe.xmp" in self._info:
+                    self._tool = "Draw Things"
+                    self._dt_format()
             elif f.format == "JPEG" or f.format == "WEBP":
                 try:
                     exif = piexif.load(self._info.get("exif")) or {}
@@ -289,6 +294,28 @@ class ImageDataReader:
         self._parameter["cfg"] = comment_json.get('scale')
         self._parameter["steps"] = comment_json.get('steps')
         self._parameter["size"] = str(self._width) + "x" + str(self._height)
+
+    def _dt_format(self):
+        try:
+            data = minidom.parseString(self._info.get("XML:com.adobe.xmp"))
+            data_json = json.loads(data.getElementsByTagName("exif:UserComment")[0]
+                                   .childNodes[1].childNodes[1].childNodes[0].data)
+        except:
+            print("Draw things format error")
+        else:
+            self._positive = data_json.get("c")
+            self._negative = data_json.get("uc")
+            self._raw = "\n".join([self._positive, self._negative, str(data_json)])
+            data_json.pop("c")
+            data_json.pop("uc")
+            self._setting = self.remove_quotes(str(data_json)[1:-1])
+
+            self._parameter["model"] = data_json.get('model')
+            self._parameter["sampler"] = data_json.get('sampler')
+            self._parameter["seed"] = data_json.get('seed')
+            self._parameter["cfg"] = data_json.get('scale')
+            self._parameter["steps"] = data_json.get('steps')
+            self._parameter["size"] = data_json.get('size')
 
     def _comfy_png(self):
         prompt = self._info.get("prompt") or {}
