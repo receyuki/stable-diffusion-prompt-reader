@@ -47,6 +47,65 @@ EASYDIFFUSION_MAPPING_B = {
     "guidance_scale": "guidance_scale",
 }
 
+PROMPT_MAPPING = [
+    "sd_model",
+    "outpath_samples",
+    "outpath_grids",
+    "prompt_for_display",
+    "prompt",
+    "negative_prompt",
+    "styles",
+    "seed",
+    "subseed_strength",
+    "subseed",
+    "seed_resize_from_h",
+    "seed_resize_from_w",
+    "sampler_index",
+    "sampler_name",
+    "batch_size",
+    "n_iter",
+    "steps",
+    "cfg_scale",
+    "width",
+    "height",
+    "restore_faces",
+    "tiling",
+    "do_not_save_samples",
+    "do_not_save_grid"
+]
+
+# generation_params = {
+#     "Steps": p.steps,
+#     "Sampler": p.sampler_name,
+#     "CFG scale": p.cfg_scale,
+#     "Image CFG scale": getattr(p, 'image_cfg_scale', None),
+#     "Seed": all_seeds[index],
+#     "Face restoration": (opts.face_restoration_model if p.restore_faces else None),
+#     "Size": f"{p.width}x{p.height}",
+#     "Model hash": getattr(p, 'sd_model_hash',
+#                           None if not opts.add_model_hash_to_info or not shared.sd_model.sd_model_hash else shared.sd_model.sd_model_hash),
+#     "Model": (
+#         None if not opts.add_model_name_to_info or not shared.sd_model.sd_checkpoint_info.model_name else shared.sd_model.sd_checkpoint_info.model_name.replace(
+#             ',', '').replace(':', '')),
+#     "Variation seed": (None if p.subseed_strength == 0 else all_subseeds[index]),
+#     "Variation seed strength": (None if p.subseed_strength == 0 else p.subseed_strength),
+#     "Seed resize from": (
+#         None if p.seed_resize_from_w == 0 or p.seed_resize_from_h == 0 else f"{p.seed_resize_from_w}x{p.seed_resize_from_h}"),
+#     "Denoising strength": getattr(p, 'denoising_strength', None),
+#     "Conditional mask weight": getattr(p, "inpainting_mask_weight",
+#                                        shared.opts.inpainting_mask_weight) if p.is_using_inpainting_conditioning else None,
+#     "Clip skip": None if clip_skip <= 1 else clip_skip,
+#     "ENSD": opts.eta_noise_seed_delta if uses_ensd else None,
+#     "Token merging ratio": None if token_merging_ratio == 0 else token_merging_ratio,
+#     "Token merging ratio hr": None if not enable_hr or token_merging_ratio_hr == 0 else token_merging_ratio_hr,
+#     "Init image hash": getattr(p, 'init_img_hash', None),
+#     "RNG": opts.randn_source if opts.randn_source != "GPU" else None,
+#     "NGMS": None if p.s_min_uncond == 0 else p.s_min_uncond,
+#     **p.extra_generation_params,
+#     "Version": program_version() if opts.add_version_to_infotext else None,
+# }
+#
+
 class ImageDataReader:
     def __init__(self, file, is_txt: bool = False):
         self._height = None
