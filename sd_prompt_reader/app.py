@@ -297,11 +297,22 @@ class App(Tk):
         self.button_raw = STkButton(self.button_copy_raw_frame, width=BUTTON_WIDTH_L, height=BUTTON_HEIGHT_L,
                                     image=self.clipboard_image, text="",
                                     font=self.info_font, command=lambda: self.copy_to_clipboard(self.image_data.raw))
-        self.button_raw.pack(side="top")
+        self.button_raw.grid(row=0, column=0)
+        self.button_raw_option = CTkOptionMenu(self,
+                                               font=self.info_font, dynamic_resizing=False,
+                                               values=["single line prompt"],
+                                               command=self.copy_raw)
+        self.button_raw_option_arrow = STkButton(self.button_copy_raw_frame, width=ARROW_WIDTH_L,
+                                                 height=BUTTON_HEIGHT_L, text="",
+                                                 image=self.expand_image,
+                                                 command=lambda: self.option_open(self.button_raw,
+                                                                                  self.button_raw_option))
+        self.button_raw_option_arrow.grid(row=0, column=1)
         self.button_raw_label = CTkLabel(self.button_copy_raw_frame, width=BUTTON_WIDTH_L, height=LABEL_HEIGHT,
                                          text="Copy", font=self.info_font)
-        self.button_raw_label.pack(side="bottom")
+        self.button_raw_label.grid(row=1, column=0, rowspan=2)
         self.button_raw.label = self.button_raw_label
+        self.button_raw.arrow = self.button_raw_option_arrow
         self.button_raw_tooltip = CTkToolTip(self.button_raw, delay=TOOLTIP_DELAY, message=TOOLTIP["copy_raw"])
 
         # text boxes and buttons
@@ -437,7 +448,7 @@ class App(Tk):
             self.scaling = ScalingTracker.get_window_dpi_scaling(self)
             # resize image to window size
             image_frame_height = self.image_frame.winfo_height() if self.image_frame.winfo_height() > 2 else 560
-            image_frame_width = self.image_frame.winfo_width() - 30 if self.image_frame.winfo_width() > 2 else 560
+            image_frame_width = self.image_frame.winfo_width()-5 if self.image_frame.winfo_width() > 2 else 560
             if self.image.size[0] > self.image.size[1]:
                 self.image_tk.configure(size=tuple(int(num / self.scaling) for num in
                                                    (image_frame_width,
@@ -551,6 +562,11 @@ class App(Tk):
                                 print("Save error")
                             else:
                                 self.status_bar.success(MESSAGE["remove_select"][0])
+
+    def copy_raw(self, copy_mode: str = None):
+        match copy_mode:
+            case "single line prompt":
+                self.copy_to_clipboard(self.image_data.prompt_to_line())
 
     def edit_mode_switch(self):
         match self.button_edit.mode:

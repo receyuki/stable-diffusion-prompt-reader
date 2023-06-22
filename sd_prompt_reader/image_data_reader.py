@@ -563,29 +563,29 @@ class ImageDataReader:
     def prompt_to_line(self):
         if not self._setting:
             return ""
-        one_line_prompt = "--prompt "+self.add_quotes(self._positive).replace("\n", "")
+        single_line_prompt = "--prompt " + self.add_quotes(self._positive).replace("\n", "")
         if self._negative:
-            one_line_prompt += " --negative_prompt "+self.add_quotes(self._negative).replace("\n", "")
+            single_line_prompt += " --negative_prompt " + self.add_quotes(self._negative).replace("\n", "")
         setting = dict(param.split(": ") for param in self._setting.split(", "))
         for key, value in setting.items():
             if key == "Size":
                 width, height = value.split("x")
-                one_line_prompt += " --width "+width
-                one_line_prompt += " --height "+height
+                single_line_prompt += " --width " + width
+                single_line_prompt += " --height " + height
             if key == "Seed resize from":
                 seed_resize_from_w, seed_resize_from_h = value.split("x")
-                one_line_prompt += " --seed_resize_from_w "+seed_resize_from_w
-                one_line_prompt += " --seed_resize_from_h "+seed_resize_from_h
+                single_line_prompt += " --seed_resize_from_w " + seed_resize_from_w
+                single_line_prompt += " --seed_resize_from_h " + seed_resize_from_h
             try:
                 (tag, is_str) = PROMPT_MAPPING.get(key)
             except:
                 pass
             else:
                 if is_str:
-                    one_line_prompt += " --"+tag+" "+self.add_quotes(str(value))
+                    single_line_prompt += " --" + tag + " " + self.add_quotes(str(value))
                 else:
-                    one_line_prompt += " --"+tag+" "+value
-        return one_line_prompt
+                    single_line_prompt += " --" + tag + " " + value
+        return single_line_prompt
 
     @property
     def positive(self):
