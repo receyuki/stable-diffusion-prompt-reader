@@ -44,8 +44,17 @@
 如果你使用的工具或格式不在这个列表中，请帮助我支持你的格式：将你的工具生成的原始图片文件压缩并上传到 issues，谢谢。
 
 ## 下载
-### macOS 和 Windows 用户
+### Windows 用户
 从 [GitHub Releases](https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest) 下载可执行文件
+### macOS 用户
+从 [GitHub Releases](https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest) 下载可执行文件
+#### 通过 Homebrew Cask 安装
+你也可以通过 [Homebrew](http://brew.sh/) cask 安装 SD Prompt Reader。  
+```
+brew install --no-quarantine receyuki/sd-prompt-reader/sd-prompt-reader
+```
+使用 `--no-quarantine` 参数是因为目前 SD Prompt Reader 并未签名，具体原因请查看[这里](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md#sd-prompt-readerapp-%E5%B7%B2%E6%8D%9F%E5%9D%8F%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80%E6%82%A8%E5%BA%94%E8%AF%A5%E5%B0%86%E5%AE%83%E7%A7%BB%E5%88%B0%E5%BA%9F%E7%BA%B8%E7%AF%93)
+
 ### Linux 用户 (不定期测试)
 ~~我很确定 Linux 用户可以在没有可执行文件的情况下搞明白怎么用~~
 1. 最低Python版本要求: 3.10
@@ -116,7 +125,7 @@ SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输
 我花费了许多时间来解决 Windows Defender 的错误警报, 但我没法对每个杀毒软件单独解决问题. 
 因此, 你可以选择相信 Windows Defender 或者使用 Linux 用户的使用说明来使用 app.
 ### "SD Prompt Reader.app" 已损坏，无法打开。您应该将它移到废纸篓。
-这是一个使用非 appstore 软件时常见的 macOS 问题, 开发者需要付给苹果每年 $99 来避免这个问题. 
+这是一个使用非 appstore 的未签名软件时常见的 macOS 问题, 开发者需要付给苹果每年 $99 来避免这个问题. 
 你可以在设置中**隐私与安全性**的**安全性**中选择**允许任何来源**, 但这可能造成危险. 
 我推荐的方式是移除 quarantine attributes.
 1. 在应用程序中打开终端. 
