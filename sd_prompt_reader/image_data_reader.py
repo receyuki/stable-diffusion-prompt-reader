@@ -566,7 +566,7 @@ class ImageDataReader:
         single_line_prompt = "--prompt " + self.add_quotes(self._positive).replace("\n", "")
         if self._negative:
             single_line_prompt += " --negative_prompt " + self.add_quotes(self._negative).replace("\n", "")
-        setting = dict(param.split(": ") for param in self._setting.split(", "))
+        setting = dict(filter(lambda x: len(x) == 2, (param.split(": ") for param in self._setting.split(", "))))
         for key, value in setting.items():
             if key == "Size":
                 width, height = value.split("x")
