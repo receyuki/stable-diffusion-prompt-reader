@@ -54,7 +54,7 @@ You may also install SD Prompt Reader via [Homebrew](http://brew.sh/) cask.
 ```
 brew install --no-quarantine receyuki/sd-prompt-reader/sd-prompt-reader
 ```
-The parameter `--no-quarantine` is used since the SD Prompt Reader is currently unsigned as I mentioned [here](https://github.com/receyuki/stable-diffusion-prompt-reader#sd-prompt-readerapp-is-damaged-and-cant-be-opend-you-should-move-it-to-the-trash)
+The parameter `--no-quarantine` is used since the SD Prompt Reader is currently unsigned as I mentioned [here](https://github.com/receyuki/stable-diffusion-prompt-reader#sd-prompt-readerapp-is-damaged-and-cant-be-opened-you-should-move-it-to-the-trash)
 ### For Linux users (not regularly tested)
 ~~I'm pretty sure linux users can figure things out without an executable.~~
 1. The minimum version of Python required is 3.10
