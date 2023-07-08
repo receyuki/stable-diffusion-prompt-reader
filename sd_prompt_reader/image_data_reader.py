@@ -486,12 +486,12 @@ class ImageDataReader:
                                                                     inputs["samples_from"][0])
                     elif inputs.get("conditioning"):
                         result = self._comfy_traverse(prompt, inputs["conditioning"][0])
-                        if isinstance(result, list):
-                            last_flow, last_node = result
-                            flow = self.merge_dict(flow, last_flow)
-                            node += last_node
-                        elif isinstance(result, str):
+                        if isinstance(result, str):
                             return result
+                        elif isinstance(result, list):
+                            last_flow, last_node = result
+                    flow = self.merge_dict(flow, last_flow)
+                    node += last_node
                 except:
                     print("comfyUI bridging node error")
         return flow, node
