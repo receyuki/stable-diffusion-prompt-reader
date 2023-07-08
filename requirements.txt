@@ -1,16 +1,16 @@
 altgraph~=0.17.3
 macholib~=1.16.2
-Pillow~=9.5.0
-pyinstaller~=5.11.0; platform_system == "Windows"
+Pillow~=10.0.0
+pyinstaller~=5.13.0; platform_system == "Windows"
 pyinstaller-hooks-contrib~=2023.2; platform_system == "Windows"
 tkinterdnd2-universal~=1.7.3
 pyperclip~=1.8.2
-customtkinter~=5.1.3
+customtkinter~=5.2.0
 pyobjus~=1.2.1; sys_platform == 'darwin'
 py2app~=0.28.5; sys_platform == 'darwin'
 pyobjc-framework-Cocoa~=9.1.1; sys_platform == 'darwin'
 modulegraph~=0.19.3
-setuptools~=67.8.0
+setuptools~=68.0.0
 piexif~=1.1.3
 packaging~=23.1
 pefile~=2023.2.7
