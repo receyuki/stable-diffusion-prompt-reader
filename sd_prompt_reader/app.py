@@ -395,6 +395,8 @@ class App(Tk):
                             button.enable()
                     for button in self.edit_buttons:
                         button.enable()
+                    if self.image_data.tool != "A1111 webUI":
+                        self.button_raw_option_arrow.disable()
                     self.status_bar.success(self.image_data.tool)
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)
