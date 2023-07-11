@@ -6,9 +6,10 @@ __email__ = 'receyuki@gmail.com'
 
 from importlib import resources
 from pathlib import Path
+import sd_prompt_reader.resources
 
 RELEASE_URL = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
-RESOURCE_DIR = str(resources.files("resources"))
+RESOURCE_DIR = str(resources.files(sd_prompt_reader.resources))
 SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".webp"]
 COLOR_THEME = Path(RESOURCE_DIR, "gray.json")
 INFO_FILE = Path(RESOURCE_DIR, "info_24.png")
