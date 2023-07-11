@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="/resources/icon.png" width=20% height=20%>
+    <img src="sd_prompt_reader/resources/icon.png" width=20% height=20%>
     <h1>Stable Diffusion Prompt Reader</h1>
     <a href="https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest">
         <img alt="GitHub releases" src="https://img.shields.io/github/downloads/receyuki/stable-diffusion-prompt-reader/total"></a>
@@ -14,6 +14,14 @@
 
 一个独立的简易 AI 图片 prompt 查看器，用于在不依赖 webui 的情况下提取由 Stable Diffusion 生成图片内包含的 prompt
     <br>
+  <p>
+    <a href="#功能">功能</a> •
+    <a href="#支持格式">支持格式</a> •
+    <a href="#下载">下载</a> •
+    <a href="#使用方式">使用方式</a> •
+    <a href="#常见问题">常见问题</a> •
+    <a href="#credits">Credits</a>
+  </p>
     <img src="./images/screenshot_v130.png">
 </div>
 
@@ -36,6 +44,7 @@
 | Easy Diffusion |  ✅  |  ✅   |  ✅   |      |
 | InvokeAI       |  ✅  |      |      |      |
 | NovelAI        |  ✅  |      |      |      |
+| Draw Things    |  ✅  |      |      |      |
 | ComfyUI*       |  ✅  |      |      |      |
 | Naifu(4chan)   |  ✅  |      |      |      |
 
@@ -105,6 +114,27 @@ e.g. `sudo apt-get install python3-tk` (基于 Debian 的发行版)
 - 要保存到另一个位置，点击展开的箭头并点击 "select directory".
 - 要覆盖原始图像文件，点击展开的箭头并点击 "overwrite the original image".  
 ![save](./images/save.png)
+
+### 复制为单行 prompt
+将图片 prompt 和设置复制为可被 [Prompts from file or textbox](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#prompts-from-file-or-textbox) 读取的格式
+支持以下参数:
+
+| 设置                      | 参数                   |
+|-------------------------|----------------------|
+| Seed                    | --seed               |
+| Variation seed strength | --subseed_strength   |
+| Seed resize from        | --seed_resize_from_h |
+| Seed resize from        | --seed_resize_from_w |
+| Sampler                 | --sampler_name       |
+| Steps                   | --steps              |
+| CFG scale               | --cfg_scale          |
+| Size                    | --width              |
+| Size                    | --height             |
+| Face restoration        | --restore_faces      |
+
+- 点击展开的箭头并点击 "single line prompt".
+- 将其粘贴到 webui 脚本 "Prompts from file or textbox" 下方的文本框.  
+![single line prompt](./images/single_line_prompt.png)
 
 ## 格式限制
 ### TXT

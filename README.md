@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="./resources/icon.png" width=20% height=20%>
+    <img src="https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/sd_prompt_reader/resources/icon.png" width=20% height=20%>
     <h1>Stable Diffusion Prompt Reader</h1>
     <a href="https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest">
         <img alt="GitHub releases" src="https://img.shields.io/github/downloads/receyuki/stable-diffusion-prompt-reader/total"></a>
@@ -14,7 +14,15 @@
 
 A simple standalone viewer for reading prompt from Stable Diffusion generated image outside the webui.
     <br>
-    <img src="./images/screenshot_v130.png">
+  <p>
+    <a href="#features">Features</a> •
+    <a href="#supported-formats">Supported Formats</a> •
+    <a href="#download">Download</a> •
+    <a href="#usage">Usage</a> •
+    <a href="#faq">FAQ</a> •
+    <a href="#credits">Credits</a>
+  </p>
+    <img src="https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/screenshot_v130.png">
 </div>
 
 ## Features
@@ -36,6 +44,7 @@ A simple standalone viewer for reading prompt from Stable Diffusion generated im
 | Easy Diffusion |  ✅  |  ✅   |  ✅   |      |
 | InvokeAI       |  ✅  |      |      |      |
 | NovelAI        |  ✅  |      |      |      |
+| Draw Things    |  ✅  |      |      |      |
 | ComfyUI*       |  ✅  |      |      |      |
 | Naifu(4chan)   |  ✅  |      |      |      |
 
@@ -89,13 +98,13 @@ OR
 ### Export prompt to a text file
 - Click "Export" will generate a txt file alongside the image file.
 - To save to another location, click the expand arrow and click "select directory".  
-![export](./images/export.png)
+![export](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/export.png)
 
 ### Remove prompt from image
 - Click "Clear" will generate a new image file with suffix "_data_removed" alongside the original image file.
 - To save to another location, click the expand arrow and click "select directory".
 - To overwrite the original image file, click the expand arrow and click "overwrite the original image".  
-![remove](./images/remove.png)
+![remove](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/remove.png)
 
 ### Edit image
 ***Please note that the edited image will be written in A1111 format, it meaning that image in any format will become A1111 format after editing.***
@@ -104,7 +113,28 @@ OR
 - Click "Save" will generate a edited image file with suffix "_edited" alongside the original image file.
 - To save to another location, click the expand arrow and click "select directory".
 - To overwrite the original image file, click the expand arrow and click "overwrite the original image".  
-![save](./images/save.png)
+![save](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/save.png)
+
+### Copy as single line prompt
+Copy image prompt and setting in a format that can be read by [Prompts from file or textbox](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#prompts-from-file-or-textbox) 
+The following parameters are supported:
+
+| Setting                 | Parameter            |
+|-------------------------|----------------------|
+| Seed                    | --seed               |
+| Variation seed strength | --subseed_strength   |
+| Seed resize from        | --seed_resize_from_h |
+| Seed resize from        | --seed_resize_from_w |
+| Sampler                 | --sampler_name       |
+| Steps                   | --steps              |
+| CFG scale               | --cfg_scale          |
+| Size                    | --width              |
+| Size                    | --height             |
+| Face restoration        | --restore_faces      |
+
+- Click the expand arrow and click "single line prompt".
+- Paste it into the textbox below the webui script "Prompts from file or textbox".  
+![single line prompt](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/single_line_prompt.png)
 
 ## Format Limitations
 ### TXT
