@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/sd_prompt_reader/resources/icon.png" width=20% height=20%>
+    <img alt="icon" src="https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/sd_prompt_reader/resources/icon.png" width=20% height=20%>
     <h1>Stable Diffusion Prompt Reader</h1>
     <a href="https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest">
         <img alt="GitHub releases" src="https://img.shields.io/github/downloads/receyuki/stable-diffusion-prompt-reader/total"></a>
@@ -7,7 +7,9 @@
         <img alt="GitHub" src="https://img.shields.io/github/license/receyuki/stable-diffusion-prompt-reader"></a>
     <a href="https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest">
         <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/receyuki/stable-diffusion-prompt-reader"></a>
-        <img src="https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey">
+    <a href="https://pypi.org/project/sd-prompt-reader/">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/sd-prompt-reader"></a>
+    <img alt="platform" src="https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey">
     <br><br>
 
 [简体中文](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md) | [English](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.md)
@@ -22,7 +24,7 @@ A simple standalone viewer for reading prompt from Stable Diffusion generated im
     <a href="#faq">FAQ</a> •
     <a href="#credits">Credits</a>
   </p>
-    <img src="https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/screenshot_v130.png">
+    <img src="https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/screenshot_v130.png">
 </div>
 
 ## Features
@@ -60,27 +62,39 @@ Download executable from [GitHub Releases](https://github.com/receyuki/stable-di
 Download executable from [GitHub Releases](https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest)
 #### Install via Homebrew Cask
 You may also install SD Prompt Reader via [Homebrew](http://brew.sh/) cask.  
-```
+```bash
 brew install --no-quarantine receyuki/sd-prompt-reader/sd-prompt-reader
 ```
 The parameter `--no-quarantine` is used since the SD Prompt Reader is currently unsigned as I mentioned [here](https://github.com/receyuki/stable-diffusion-prompt-reader#sd-prompt-readerapp-is-damaged-and-cant-be-opened-you-should-move-it-to-the-trash)
 ### For Linux users (not regularly tested)
 ~~I'm pretty sure linux users can figure things out without an executable.~~
-1. The minimum version of Python required is 3.10
-2. Make sure you have the tkinter package installed in your Python.
+- The minimum version of Python required is 3.10
+- Make sure you have the tkinter package installed in your Python.  
 If not, install the python3-tk package with package managers.  
-e.g. `sudo apt-get install python3-tk` for Debian-based distributions
-3. Clone this repo.
+e.g. `sudo apt-get install python3-tk` for Debian-based distributions  
+
+You can choose to install with pip or run it manually
+#### Install with pip or pipx
+```bash
+pip install sd-prompt-reader
+```
+or
+```bash
+pipx install sd-prompt-reader
+```
+To launch app just enter `sd-prompt-reader` in the terminal.
+#### Run source code manually
+1. Clone this repo.
     ```bash
     git clone https://github.com/receyuki/stable-diffusion-prompt-reader.git
     ```
    or download repo as a zip.
-4. CD to the directory and install dependencies.
+2. CD to the directory and install dependencies.
     ```bash
     cd stable-diffusion-prompt-reader  
     pip install -r requirements.txt
     ```
-5. Run.
+3. Run.
     ```bash
    python main.py
    ```
@@ -98,13 +112,13 @@ OR
 ### Export prompt to a text file
 - Click "Export" will generate a txt file alongside the image file.
 - To save to another location, click the expand arrow and click "select directory".  
-![export](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/export.png)
+![export](https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/export.png)
 
 ### Remove prompt from image
 - Click "Clear" will generate a new image file with suffix "_data_removed" alongside the original image file.
 - To save to another location, click the expand arrow and click "select directory".
 - To overwrite the original image file, click the expand arrow and click "overwrite the original image".  
-![remove](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/remove.png)
+![remove](https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/remove.png)
 
 ### Edit image
 ***Please note that the edited image will be written in A1111 format, it meaning that image in any format will become A1111 format after editing.***
@@ -113,7 +127,7 @@ OR
 - Click "Save" will generate a edited image file with suffix "_edited" alongside the original image file.
 - To save to another location, click the expand arrow and click "select directory".
 - To overwrite the original image file, click the expand arrow and click "overwrite the original image".  
-![save](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/save.png)
+![save](https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/save.png)
 
 ### Copy as single line prompt
 Copy image prompt and setting in a format that can be read by [Prompts from file or textbox](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#prompts-from-file-or-textbox) 
@@ -134,7 +148,7 @@ The following parameters are supported:
 
 - Click the expand arrow and click "single line prompt".
 - Paste it into the textbox below the webui script "Prompts from file or textbox".  
-![single line prompt](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/images/single_line_prompt.png)
+![single line prompt](https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/single_line_prompt.png)
 
 ## Format Limitations
 ### TXT

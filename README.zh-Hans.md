@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="sd_prompt_reader/resources/icon.png" width=20% height=20%>
+    <img alt="icon" src="https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/sd_prompt_reader/resources/icon.png" width=20% height=20%>
     <h1>Stable Diffusion Prompt Reader</h1>
     <a href="https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest">
         <img alt="GitHub releases" src="https://img.shields.io/github/downloads/receyuki/stable-diffusion-prompt-reader/total"></a>
@@ -7,7 +7,9 @@
         <img alt="GitHub" src="https://img.shields.io/github/license/receyuki/stable-diffusion-prompt-reader"></a>
     <a href="https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest">
         <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/receyuki/stable-diffusion-prompt-reader"></a>
-        <img src="https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey">
+    <a href="https://pypi.org/project/sd-prompt-reader/">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/sd-prompt-reader"></a>
+    <img alt="platform" src="https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey">
     <br><br>
 
 [English](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.md) | [简体中文](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md)
@@ -59,28 +61,40 @@
 从 [GitHub Releases](https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest) 下载可执行文件
 #### 通过 Homebrew Cask 安装
 你也可以通过 [Homebrew](http://brew.sh/) cask 安装 SD Prompt Reader。  
-```
+```bash
 brew install --no-quarantine receyuki/sd-prompt-reader/sd-prompt-reader
 ```
 使用 `--no-quarantine` 参数是因为目前 SD Prompt Reader 并未签名，具体原因请查看[这里](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md#sd-prompt-readerapp-%E5%B7%B2%E6%8D%9F%E5%9D%8F%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80%E6%82%A8%E5%BA%94%E8%AF%A5%E5%B0%86%E5%AE%83%E7%A7%BB%E5%88%B0%E5%BA%9F%E7%BA%B8%E7%AF%93)
 
 ### Linux 用户 (不定期测试)
 ~~我很确定 Linux 用户可以在没有可执行文件的情况下搞明白怎么用~~
-1. 最低Python版本要求: 3.10
-2. 确保你的 Python 中安装了 tkinter 包。
+- 最低Python版本要求: 3.10
+- 确保你的 Python 中安装了 tkinter 包。  
 如果没有，请使用软件包管理器安装 python3-tk 包。  
-e.g. `sudo apt-get install python3-tk` (基于 Debian 的发行版)
-3. Clone repo
+e.g. `sudo apt-get install python3-tk` (基于 Debian 的发行版)  
+
+你可以选择使用 pip 进行安装或者手动运行
+#### 使用 pip 或 pipx 安装
+```bash
+pip install sd-prompt-reader
+```
+or
+```bash
+pipx install sd-prompt-reader
+```
+在终端内输入 `sd-prompt-reader` 来启动 app.
+#### 手动运行源码
+1. Clone repo
     ```bash
     git clone https://github.com/receyuki/stable-diffusion-prompt-reader.git
     ```
    或者直接下载 repo 为 zip 格式.
-4. CD 到文件夹并安装依赖
+2. CD 到文件夹并安装依赖
     ```bash
     cd stable-diffusion-prompt-reader  
     pip install -r requirements.txt
     ```
-5. Run
+3. Run
     ```bash
    python main.py
    ```
