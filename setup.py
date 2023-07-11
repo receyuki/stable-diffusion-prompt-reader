@@ -13,8 +13,19 @@ Usage:
         python setup.py
 """
 import platform
+import toml
+from pathlib import Path
 
-from sd_prompt_reader.__version__ import VERSION
+
+# from sd_prompt_reader.__version__ import VERSION
+
+def get_version():
+    path = Path(__file__).resolve().parents[0] / 'pyproject.toml'
+    pyproject = toml.loads(open(str(path)).read())
+    return pyproject['tool']['poetry']['version']
+
+
+VERSION = get_version()
 
 if platform.system() == "Windows":
     import pyinstaller_versionfile
@@ -53,7 +64,7 @@ elif platform.system() == "Darwin":
             CFBundleTypeRole="Viewer",
         ), ]
     OPTIONS = {
-        'iconfile': 'resources/icon.icns',
+        'iconfile': 'sd_prompt_reader/resources/icon.icns',
         'plist': {
             'CFBundleName': 'SD Prompt Reader',
             'CFBundleDisplayName': 'SD Prompt Reader',
@@ -65,7 +76,7 @@ elif platform.system() == "Darwin":
         'includes': ['pyperclip', 'PIL', 'tkinter', 'tkinterdnd2', 'os', 'customtkinter', 'plyer', 'pyobjus',
                      'plyer.platforms.macosx.notification', 'tcl8', 'tcl8.6', 'charset_normalizer.md__mypyc',
                      'PIL.WebPImagePlugin', 'sd_prompt_reader'],
-        'packages': ['resources'],
+        'packages': ['sd_prompt_reader.resources'],
     }
 
     setup(
