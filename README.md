@@ -24,7 +24,7 @@ A simple standalone viewer for reading prompt from Stable Diffusion generated im
     <a href="#faq">FAQ</a> •
     <a href="#credits">Credits</a>
   </p>
-    <img src="https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/screenshot_v130.png">
+    <img src="https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/screenshot_v132.png">
 </div>
 
 ## Features

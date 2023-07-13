@@ -24,7 +24,7 @@
     <a href="#常见问题">常见问题</a> •
     <a href="#credits">Credits</a>
   </p>
-    <img src="./images/screenshot_v130.png">
+    <img src="./images/screenshot_v132.png">
 </div>
 
 ## 功能
