@@ -22,10 +22,14 @@ from pathlib import Path
 def get_version():
     path = Path(__file__).resolve().parents[0] / 'pyproject.toml'
     pyproject = toml.loads(open(str(path)).read())
-    return pyproject['tool']['poetry']['version']
+    versions = pyproject['tool']['poetry']['version'].split(".")
+    return ".".join(versions[:3])
 
 
 VERSION = get_version()
+version_file = Path(__file__).resolve().parents[0] / 'sd_prompt_reader/__version__.py'
+with open(version_file, 'w') as file:
+    file.write('VERSION = "'+VERSION+'"\n')
 
 if platform.system() == "Windows":
     import pyinstaller_versionfile

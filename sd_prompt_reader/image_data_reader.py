@@ -119,7 +119,6 @@ class ImageDataReader:
                     self._comfy_png()
                 # drawthings format
                 elif "XML:com.adobe.xmp" in self._info:
-                    self._tool = "Draw Things"
                     self._dt_format()
             elif f.format == "JPEG" or f.format == "WEBP":
                 try:
@@ -320,6 +319,7 @@ class ImageDataReader:
         except:
             print("Draw things format error")
         else:
+            self._tool = "Draw Things"
             self._positive = data_json.get("c")
             self._negative = data_json.get("uc")
             self._raw = "\n".join([self._positive, self._negative, str(data_json)])
