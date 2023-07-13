@@ -8,8 +8,8 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('resources', 'resources'), ('venv/lib/site-packages/customtkinter', 'customtkinter')],
-    hiddenimports=['sd_prompt_reader', 'resources'],
+    datas=[('sd_prompt_reader/resources', 'sd_prompt_reader/resources'), ('venv/lib/site-packages/customtkinter', 'customtkinter')],
+    hiddenimports=['sd_prompt_reader'],
     hookspath=['.'],
     hooksconfig={},
     runtime_hooks=[],
@@ -42,6 +42,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='resources/icon.ico',
+    icon='sd_prompt_reader/resources/icon.ico',
     version='file_version_info.txt',
 )
