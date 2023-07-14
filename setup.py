@@ -15,18 +15,17 @@ Usage:
 import platform
 import toml
 from pathlib import Path
-
+from packaging import version
 
 # from sd_prompt_reader.__version__ import VERSION
 
 def get_version():
     path = Path(__file__).resolve().parents[0] / 'pyproject.toml'
     pyproject = toml.loads(open(str(path)).read())
-    versions = pyproject['tool']['poetry']['version'].split(".")
-    return ".".join(versions[:3])
+    return version.parse(pyproject['tool']['poetry']['version'])
 
 
-VERSION = get_version()
+VERSION = get_version().base_version
 version_file = Path(__file__).resolve().parents[0] / 'sd_prompt_reader/__version__.py'
 with open(version_file, 'w') as file:
     file.write('VERSION = "'+VERSION+'"\n')

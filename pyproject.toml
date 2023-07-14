@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sd-prompt-reader"
-version = "1.3.2.post2"
+version = "1.3.2.post3"
 description = "A simple standalone viewer for reading prompt from Stable Diffusion generated image outside the webui."
 authors = ["receyuki <receyuki@gmail.com>"]
 license = "MIT"
@@ -11,7 +11,7 @@ documentation = "https://github.com/receyuki/stable-diffusion-prompt-reader"
 packages = [{include = "sd_prompt_reader"}]
 
 classifiers = [
-    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
