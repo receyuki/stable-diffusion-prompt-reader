@@ -23,6 +23,8 @@ from sd_prompt_reader.ctk_tooltip import CTkToolTip
 from sd_prompt_reader.button import *
 from sd_prompt_reader.textbox import STkTextbox
 from sd_prompt_reader.parameter_viewer import ParameterViewer
+from sd_prompt_reader.image_viewer import ImageViewer
+from sd_prompt_reader.utility import load_icon
 
 
 class App(Tk):
@@ -47,17 +49,16 @@ class App(Tk):
         self.config(menu=empty_menubar)
 
         # load icon images
-        self.drop_image = CTkImage(Image.open(DROP_FILE), size=(48, 48))
-        self.clipboard_image = self.load_icon(COPY_FILE_L, (24, 24))
-        self.clipboard_image_s = self.load_icon(COPY_FILE_S, (20, 20))
-        self.clear_image = self.load_icon(CLEAR_FILE, (24, 24))
-        self.document_image = self.load_icon(DOCUMENT_FILE, (24, 24))
-        self.edit_image = self.load_icon(EDIT_FILE, (24, 24))
-        self.edit_off_image = self.load_icon(EDIT_OFF_FILE, (24, 24))
-        self.save_image = self.load_icon(SAVE_FILE, (24, 24))
-        self.expand_image = self.load_icon(EXPAND_FILE, (12, 24))
-        self.sort_image = self.load_icon(SORT_FILE, (20, 20))
-        self.view_image = self.load_icon(LIGHTBULB_FILE, (20, 20))
+        self.clipboard_image = load_icon(COPY_FILE_L, (24, 24))
+        self.clipboard_image_s = load_icon(COPY_FILE_S, (20, 20))
+        self.clear_image = load_icon(CLEAR_FILE, (24, 24))
+        self.document_image = load_icon(DOCUMENT_FILE, (24, 24))
+        self.edit_image = load_icon(EDIT_FILE, (24, 24))
+        self.edit_off_image = load_icon(EDIT_OFF_FILE, (24, 24))
+        self.save_image = load_icon(SAVE_FILE, (24, 24))
+        self.expand_image = load_icon(EXPAND_FILE, (12, 24))
+        self.sort_image = load_icon(SORT_FILE, (20, 20))
+        self.view_image = load_icon(LIGHTBULB_FILE, (20, 20))
 
         self.icon_image = PhotoImage(file=ICON_FILE)
         self.iconphoto(False, self.icon_image)
@@ -73,18 +74,6 @@ class App(Tk):
         # self.rowconfigure(2, weight=1)
         # self.rowconfigure(3, weight=1)
 
-        # image display
-        self.image_frame = CTkFrame(self)
-        self.image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
-
-        self.image_label = CTkLabel(self.image_frame, width=560, text=MESSAGE["drop"][0],
-                                    image=self.drop_image, compound="top", text_color=ACCESSIBLE_GRAY)
-        self.image_label.pack(fill="both", expand=True)
-        self.image_label.bind("<Button-1>", lambda e: self.display_info(self.select_image(), is_selected=True))
-
-        self.image = None
-        self.image_tk = None
-        self.image_data = None
         self.textbox_fg_color = ThemeManager.theme["CTkTextbox"]["fg_color"]
         self.readable = False
 
@@ -92,6 +81,16 @@ class App(Tk):
         self.status_bar = StatusBar(self)
         self.status_bar.status_frame.grid(row=3, column=6, sticky="ew", padx=20, pady=(0, 20), ipadx=STATUS_BAR_IPAD,
                                           ipady=STATUS_BAR_IPAD)
+
+        # image display
+        self.image_frame = CTkFrame(self)
+        self.image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
+
+        self.image_viewer = ImageViewer(self.image_frame, self.display_info, self.status_bar)
+
+        self.image = None
+        self.image_tk = None
+        self.image_data = None
 
         # textbox
         self.positive_box = STkTextbox(self, wrap="word", height=120)
@@ -344,7 +343,7 @@ class App(Tk):
             button.disable()
         self.button_save.disable()
         self.button_edit.disable()
-        self.file_path = None
+        self.file_path = self.image_viewer.file_path
 
         # bind dnd and resize
         self.drop_target_register(DND_FILES)
@@ -436,7 +435,7 @@ class App(Tk):
         for button in self.function_buttons:
             button.disable()
         if reset_image:
-            self.image_label.configure(image=self.drop_image, text=MESSAGE["drop"][0])
+            self.image_viewer.image_label.configure(image=self.image_viewer.drop_image, text=MESSAGE["drop"][0])
             self.image = None
         else:
             self.button_edit.enable()
@@ -450,7 +449,7 @@ class App(Tk):
             self.scaling = ScalingTracker.get_window_dpi_scaling(self)
             # resize image to window size
             image_frame_height = self.image_frame.winfo_height() if self.image_frame.winfo_height() > 2 else 560
-            image_frame_width = self.image_frame.winfo_width()-5 if self.image_frame.winfo_width() > 2 else 560
+            image_frame_width = self.image_frame.winfo_width() - 5 if self.image_frame.winfo_width() > 2 else 560
             if self.image.size[0] > self.image.size[1]:
                 self.image_tk.configure(size=tuple(int(num / self.scaling) for num in
                                                    (image_frame_width,
@@ -460,7 +459,7 @@ class App(Tk):
                                                    (image_frame_height * aspect_ratio,
                                                     image_frame_height)))
             # display image
-            self.image_label.configure(image=self.image_tk, text="")
+            self.image_viewer.image_label.configure(image=self.image_tk, text="")
 
     def copy_to_clipboard(self, content):
         try:
@@ -688,19 +687,6 @@ class App(Tk):
                         textbox.sort_asc()
                     case SortMode.DES:
                         textbox.sort_des()
-
-    def select_image(self):
-        initialdir = self.file_path.parent if self.file_path else "/"
-        return filedialog.askopenfilename(
-            title='Select your image file',
-            initialdir=initialdir,
-            filetypes=(("image files", "*.png *.jpg *jpeg *.webp"),)
-        )
-
-    @staticmethod
-    def load_icon(icon_file, size):
-        return (CTkImage(Image.open(icon_file[0]), size=size),
-                CTkImage(Image.open(icon_file[1]), size=size))
 
 
 def main():
