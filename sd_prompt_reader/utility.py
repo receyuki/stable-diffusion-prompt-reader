@@ -17,8 +17,8 @@ def load_icon(icon_file, size):
             CTkImage(Image.open(icon_file[1]), size=size))
 
 
-def get_images(dir_path: str):
-    images = [image.resolve() for image in Path(dir_path).rglob("*") if image.suffix in SUPPORTED_FORMATS]
+def get_images(dir_path: Path):
+    images = [image.resolve() for image in dir_path.rglob("*") if image.suffix in SUPPORTED_FORMATS]
     return images
 
 

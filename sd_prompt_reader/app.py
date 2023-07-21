@@ -366,13 +366,14 @@ class App(Tk):
         # stop update thread when reading first image
         self.update_checker.close_thread()
         # selected or drag and drop
+        self.image_viewer.read_dir(event)
         if is_selected:
             if event == "":
                 return
             new_path = Path(event)
         else:
             new_path = Path(event.data.replace("}", "").replace("{", ""))
-
+        return
         # detect suffix and read
         if new_path.suffix in SUPPORTED_FORMATS:
             self.file_path = new_path
