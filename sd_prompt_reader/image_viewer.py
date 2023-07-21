@@ -19,16 +19,17 @@ from sd_prompt_reader.utility import get_images, select_image
 
 
 class GalleryViewer(CTkScrollableFrame):
-    def __init__(self, master, images, command=None, **kwargs):
+    def __init__(self, master, parent, images, command=None, **kwargs):
         super().__init__(master, **kwargs)
         self.grid_columnconfigure(0, weight=1)
 
-        self.command = command
+        # self.command = command
         self.radiobutton_variable = StringVar()
         self.label_list = []
         self.button_list = []
         self.images = images
         self.index = 0
+        self.parent = parent
 
         self.bind_all("<KeyPress-Shift_L>", lambda: self.test(), add="+")
         self.bind_all("<KeyPress-Left>", self.move, add="+")
@@ -39,29 +40,33 @@ class GalleryViewer(CTkScrollableFrame):
 
     def move(self, event):
         print(event)
-        if event.keysym == "Right":
-            self.index = self.index + 1
+        print(len(self.button_list))
+        if event.keysym == "Right" and self.index < (len(self.button_list) - 1):
+            self.index += 1
             self._parent_canvas.xview("scroll", 30, "units")
-        else:
-            self.index = self.index - 1
-            self._parent_canvas.xview("scroll", -30, "units")
-        if len(self.button_list) > 0:
             self.button_list[self.index]._clicked()
+        elif event.keysym == "Left" and self.index > 0:
+            self.index -= 1
+            self._parent_canvas.xview("scroll", -30, "units")
+            self.button_list[self.index]._clicked()
+        # self.parent.update_idletasks()
+        print(self.index)
 
     def display(self, image):
-        for i in self.images:
-            if i.cget("size") != (100, 100):
-                i.configure(size=(100, 100))
+        for i in self.button_list:
+            if i.cget("image").cget("size") != (100, 100):
+                i.cget("image").configure(size=(100, 100))
         image.configure(size=(300, 300))
 
     def add_item(self, item, image=None):
-        label = CTkLabel(self, text="", image=image, compound="left", padx=5, anchor="w")
+        # label = CTkLabel(self, text="", image=image, compound="left", padx=5, anchor="w")
         button = CTkButton(self, text="", image=image, width=100, height=100, fg_color="transparent")
-        if self.command is not None:
-            button.configure(command=lambda: self.display(image))
-        label.grid(row=len(self.label_list), column=0, pady=(0, 10), sticky="w")
+        # if self.command is not None:
+        #
+        button.configure(command=lambda: self.display(image))
+        # label.grid(row=len(self.label_list), column=0, pady=(0, 10), sticky="w")
         button.grid(row=0, column=len(self.button_list), pady=(0, 10), padx=5)
-        self.label_list.append(label)
+        # self.label_list.append(label)
         self.button_list.append(button)
 
     def remove_item(self, item):
@@ -81,7 +86,8 @@ class GalleryViewer(CTkScrollableFrame):
             button.destroy()
             self.label_list.remove(label)
             self.button_list.remove(button)
-
+        self.images = []
+        self.index = 0
 
     def _mouse_wheel_all(self, event):
         if self.check_if_master_is_canvas(event.widget):
@@ -130,18 +136,18 @@ class ImageViewer:
                                             # command=self.label_button_frame_event,
                                             corner_radius=0,
                                             images=self.images,
-                                            orientation="horizontal")
+                                            orientation="horizontal",
+                                            parent=self.parent)
 
     def add_image(self, image_list):
         print(len(self.images))
         for i in image_list:
             self.images.append(CTkImage(Image.open(i), size=(100, 100)))
-        self.images[0].configure(size=(300, 300))
-        for i in range(len(image_list)):  # add items with images
+        # self.images[0].configure(size=(300, 300))
+        for i in range(len(self.images)):  # add items with images
             self.gallery_viewer.add_item(f"image and item {i}", image=self.images[i % len(self.images)])
-            if i == 1:
-                self.gallery_viewer.button_list[0]._clicked()
             self.parent.update_idletasks()
+        self.gallery_viewer.button_list[0]._clicked()
         self.gallery_viewer.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
         self.image_label.grid_forget()
 
