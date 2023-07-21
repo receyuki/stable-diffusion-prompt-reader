@@ -347,7 +347,7 @@ class App(Tk):
 
         # bind dnd and resize
         self.drop_target_register(DND_FILES)
-        self.dnd_bind("<<Drop>>", self.display_info)
+        self.dnd_bind("<<Drop>>", self.image_viewer.read_dir)
         self.bind("<Configure>", self.resize_image)
 
         # update checker
@@ -355,25 +355,25 @@ class App(Tk):
 
         # open with in windows
         if len(sys.argv) > 1:
-            self.display_info(sys.argv[1], is_selected=True)
+            self.image_viewer.read_dir(sys.argv[1], is_selected=True)
+            # self.display_info(sys.argv[1], is_selected=True)
         # open with in macOS
         self.createcommand("::tk::mac::OpenDocument", self.open_document_handler)
 
     def open_document_handler(self, *args):
-        self.display_info(args[0], is_selected=True)
+        # self.display_info(args[0], is_selected=True)
+        self.image_viewer.read_dir(args[0], is_selected=True)
 
-    def display_info(self, event, is_selected=False):
+    # def display_info(self, event, is_selected=False):
+    def display_info(self, image):
         # stop update thread when reading first image
         self.update_checker.close_thread()
         # selected or drag and drop
-        self.image_viewer.read_dir(event)
-        if is_selected:
-            if event == "":
-                return
-            new_path = Path(event)
-        else:
-            new_path = Path(event.data.replace("}", "").replace("{", ""))
-        return
+
+        if not image:
+            return
+        new_path = image
+
         # detect suffix and read
         if new_path.suffix in SUPPORTED_FORMATS:
             self.file_path = new_path

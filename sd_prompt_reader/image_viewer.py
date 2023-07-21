@@ -19,11 +19,12 @@ from sd_prompt_reader.utility import get_images, select_image
 
 
 class GalleryViewer(CTkScrollableFrame):
-    def __init__(self, master, parent, images, command=None, **kwargs):
+    def __init__(self, master, parent, images, display_info, command=None, **kwargs):
         super().__init__(master, **kwargs)
         self.grid_columnconfigure(0, weight=1)
 
         # self.command = command
+        self.display_info = display_info
         self.radiobutton_variable = StringVar()
         self.label_list = []
         self.button_list = []
@@ -57,6 +58,7 @@ class GalleryViewer(CTkScrollableFrame):
             if i.cget("image").cget("size") != (100, 100):
                 i.cget("image").configure(size=(100, 100))
         image.configure(size=(300, 300))
+        # self.display_info(image)
 
     def add_item(self, item, image=None):
         # label = CTkLabel(self, text="", image=image, compound="left", padx=5, anchor="w")
@@ -110,6 +112,8 @@ class ImageViewer:
         self.parent = parent
         self.display_info = display_info
         self.file_path = None
+        self.images = []
+        self.file_list = []
 
         self.parent.grid_rowconfigure(0, weight=1)
         self.parent.grid_rowconfigure(2, weight=1)
@@ -125,7 +129,7 @@ class ImageViewer:
         self.image_label.grid(row=1, column=1)
 
         # gallery view
-        self.images = []
+
 
         # self.image_frame = customtkinter.CTkLabel(master=self, width=500, height=500,text="")
         # self.image_frame.grid(row=0,column=3)
@@ -137,9 +141,15 @@ class ImageViewer:
                                             corner_radius=0,
                                             images=self.images,
                                             orientation="horizontal",
-                                            parent=self.parent)
+                                            parent=self.parent,
+                                            display_info=self.display_info)
 
-    def add_image(self, image_list):
+    def single_image(self):
+        self.image_label.grid(row=1, column=1)
+        self.gallery_viewer.grid_forget()
+        self.display_info(self.file_list[0])
+
+    def multi_image(self, image_list):
         print(len(self.images))
         for i in image_list:
             self.images.append(CTkImage(Image.open(i), size=(100, 100)))
@@ -147,7 +157,7 @@ class ImageViewer:
         for i in range(len(self.images)):  # add items with images
             self.gallery_viewer.add_item(f"image and item {i}", image=self.images[i % len(self.images)])
             self.parent.update_idletasks()
-        self.gallery_viewer.button_list[0]._clicked()
+        self.gallery_viewer.button_list[0].cget("image").configure(size=(300, 300))
         self.gallery_viewer.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
         self.image_label.grid_forget()
 
@@ -159,7 +169,7 @@ class ImageViewer:
 
     def read_dir(self, event, is_selected=False):
         path_list = []
-        file_list = []
+        self.file_list = []
         # selected by filedialog or open with
         if is_selected:
             if event == "":
@@ -184,15 +194,18 @@ class ImageViewer:
 
         # get all files in path list
         for p in path_list:
-            if p.is_file():
-                file_list.append(p)
+            if p.is_file() and p.suffix in SUPPORTED_FORMATS:
+                self.file_list.append(p)
             elif p.is_dir():
-                file_list += get_images(p)
+                self.file_list += get_images(p)
 
-        print(len(file_list))
-        for e in file_list:
+        print(len(self.file_list))
+        for e in self.file_list:
             with open(e, "rb") as f:
                 image_data = ImageDataReader(f)
                 print(image_data.setting)
         self.clear_image()
-        self.add_image(file_list)
+        if len(self.file_list) == 1:
+            self.single_image()
+        else:
+            self.multi_image(self.file_list)
