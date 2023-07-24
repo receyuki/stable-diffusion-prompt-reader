@@ -19,12 +19,12 @@ from sd_prompt_reader.utility import get_images, select_image
 
 
 class GalleryViewer(CTkScrollableFrame):
-    def __init__(self, master, parent, images, display_info, command=None, **kwargs):
+    def __init__(self, master, parent, images, display, command=None, **kwargs):
         super().__init__(master, **kwargs)
         self.grid_columnconfigure(0, weight=1)
 
-        # self.command = command
-        self.display_info = display_info
+        self.command = command
+        self.display = display
         self.radiobutton_variable = StringVar()
         self.label_list = []
         self.button_list = []
@@ -53,19 +53,20 @@ class GalleryViewer(CTkScrollableFrame):
         # self.parent.update_idletasks()
         print(self.index)
 
-    def display(self, image):
+    def select(self, item, image):
         for i in self.button_list:
             if i.cget("image").cget("size") != (100, 100):
                 i.cget("image").configure(size=(100, 100))
         image.configure(size=(300, 300))
-        # self.display_info(image)
+        print(item)
+        self.display(item[1])
 
     def add_item(self, item, image=None):
         # label = CTkLabel(self, text="", image=image, compound="left", padx=5, anchor="w")
         button = CTkButton(self, text="", image=image, width=100, height=100, fg_color="transparent")
         # if self.command is not None:
         #
-        button.configure(command=lambda: self.display(image))
+        button.configure(command=lambda: self.select(item, image))
         # label.grid(row=len(self.label_list), column=0, pady=(0, 10), sticky="w")
         button.grid(row=0, column=len(self.button_list), pady=(0, 10), padx=5)
         # self.label_list.append(label)
@@ -137,25 +138,26 @@ class ImageViewer:
         # create scrollable label and button frame
         # current_dir = os.path.dirname(os.path.abspath(__file__))
         self.gallery_viewer = GalleryViewer(master=self.parent, width=560, height=300,
-                                            # command=self.label_button_frame_event,
+                                            command=self.single_image,
                                             corner_radius=0,
                                             images=self.images,
                                             orientation="horizontal",
                                             parent=self.parent,
-                                            display_info=self.display_info)
+                                            display=self.display_info)
 
-    def single_image(self):
-        self.image_label.grid(row=1, column=1)
-        self.gallery_viewer.grid_forget()
-        self.display_info(self.file_list[0])
+    def single_image(self, file):
+        print(file)
+        # self.image_label.grid(row=1, column=1)
+        # self.gallery_viewer.grid_forget()
+        # if isinstance(file, CTkImage) or file.suffix == ".txt":
+        #     self.display_info(file)
+        # else:
+        #     self.images.append(CTkImage(Image.open(file), size=(100, 100)))
 
     def multi_image(self, image_list):
-        print(len(self.images))
-        for i in image_list:
-            self.images.append(CTkImage(Image.open(i), size=(100, 100)))
-        # self.images[0].configure(size=(300, 300))
-        for i in range(len(self.images)):  # add items with images
-            self.gallery_viewer.add_item(f"image and item {i}", image=self.images[i % len(self.images)])
+        for i in range(len(image_list)):  # add items with images
+            self.images.append(CTkImage(Image.open(image_list[i]), size=(100, 100)))
+            self.gallery_viewer.add_item((i, image_list[i]), image=self.images[i])
             self.parent.update_idletasks()
         self.gallery_viewer.button_list[0].cget("image").configure(size=(300, 300))
         self.gallery_viewer.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
@@ -194,7 +196,7 @@ class ImageViewer:
 
         # get all files in path list
         for p in path_list:
-            if p.is_file() and p.suffix in SUPPORTED_FORMATS:
+            if p.is_file() and p.suffix in SUPPORTED_FORMATS+[".txt"]:
                 self.file_list.append(p)
             elif p.is_dir():
                 self.file_list += get_images(p)
@@ -206,6 +208,6 @@ class ImageViewer:
                 print(image_data.setting)
         self.clear_image()
         if len(self.file_list) == 1:
-            self.single_image()
+            self.single_image(self.file_list[0])
         else:
             self.multi_image(self.file_list)
