@@ -86,7 +86,7 @@ class App(Tk):
         self.image_frame = CTkFrame(self)
         self.image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
 
-        self.image_viewer = ImageViewer(self.image_frame, self.display_info, self.status_bar)
+        self.image_viewer = ImageViewer(self.image_frame, self.update_idletasks, self.display_info, self.status_bar)
 
         self.image = None
         self.image_tk = None
