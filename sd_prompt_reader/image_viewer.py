@@ -96,7 +96,6 @@ class GalleryViewer(CTkScrollableFrame):
 
     def select(self, item, image):
         print(self.index)
-        #TODO 优化显示(label)
         if self.index == item.index and not self.init:
             return
 
@@ -111,7 +110,8 @@ class GalleryViewer(CTkScrollableFrame):
         # self.after(1)
 
         label_conf = [
-            lambda: self.label_list[item.index]["file_size_label"].configure(text=item.file_size, fg_color=BUTTON_HOVER),
+            lambda: self.label_list[item.index]["file_size_label"].configure(text=item.file_size,
+                                                                             fg_color=BUTTON_HOVER),
             lambda: self.label_list[item.index]["size_label"].configure(text=item.size_str, fg_color=BUTTON_HOVER),
             lambda: self.label_list[item.index]["time_label"].configure(text=item.time, fg_color=BUTTON_HOVER),
             lambda: self.label_list[item.index]["name_label"].configure(text=item.name, fg_color=BUTTON_HOVER)
@@ -136,9 +136,9 @@ class GalleryViewer(CTkScrollableFrame):
             #     label_conf[t-3]()
             #     self.update_idletasks()
             #     self.after(1)
-                # label_grid[t-3]()
-                # self.update_idletasks()
-                # self.after(1)
+            # label_grid[t-3]()
+            # self.update_idletasks()
+            # self.after(1)
 
             current_size = (int(ease_out(t, item.size_s[0], item.size_l[0] - item.size_s[0], ease_step)),
                             int(ease_out(t, item.size_s[1], item.size_l[1] - item.size_s[1], ease_step)))
@@ -151,8 +151,9 @@ class GalleryViewer(CTkScrollableFrame):
 
             if not self.init:
                 last_item = self.item_list[self.index]
-                last_item_current_size = (int(ease_out(t, last_item.size_l[0], last_item.size_s[0] - last_item.size_l[0], ease_step)),
-                                    int(ease_out(t, last_item.size_l[1], last_item.size_s[1] - last_item.size_l[1], ease_step)))
+                last_item_current_size = (
+                int(ease_out(t, last_item.size_l[0], last_item.size_s[0] - last_item.size_l[0], ease_step)),
+                int(ease_out(t, last_item.size_l[1], last_item.size_s[1] - last_item.size_l[1], ease_step)))
                 self.button_list[self.index].cget("image").configure(size=last_item_current_size)
 
                 last_frame_width = int(ease_out(t, 320, 120 - 320, ease_step))
@@ -194,7 +195,6 @@ class GalleryViewer(CTkScrollableFrame):
             e()
         self.update_idletasks()
         self.after(1)
-
 
         # if not self.init:
         #     for label in self.label_names:
@@ -238,7 +238,6 @@ class GalleryViewer(CTkScrollableFrame):
         self.display_thread.start()
         self.after(1)
         self.update_idletasks()
-
 
     def add_item(self, item, image=None):
         frame = CTkFrame(self, fg_color="transparent", width=120, height=400)
@@ -460,22 +459,23 @@ class ImageViewer:
             path_list += map(lambda x: x.replace("\\", ""), re.split(space_pattern, path_raw))
             path_list = list(map(lambda x: Path(x), filter(None, path_list)))
 
-        for e in self.file_list:
-            with open(e, "rb") as f:
-                image_data = ImageDataReader(f)
-                print(image_data.setting)
+        # for e in self.file_list:
+        #     with open(e, "rb") as f:
+        #         image_data = ImageDataReader(f)
+        #         print(image_data.setting)
         self.clear_image()
 
-        if len(path_list) == 1:
+        if len(path_list) == 1 and path_list[0].is_file():
             self.single_image(path_list[0])
         else:
             # get all files in path list
             for p in path_list:
+                print(p)
                 if p.is_file() and p.suffix in SUPPORTED_FORMATS + [".txt"]:
                     self.file_list.append(p)
                 elif p.is_dir():
                     self.file_list += get_images(p)
-            print(len(self.file_list))
+            print(self.file_list)
             self.multi_image(self.file_list)
 
     class ImageInfo:
