@@ -19,6 +19,9 @@ from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
 KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
 VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
 CHECKPOINT_LOADER_TYPE = ["CheckpointLoader", "CheckpointLoaderSimple", "unCLIPCheckpointLoader"]
+CLIP_TEXT_ENCODE_TYPE = ["CLIPTextEncode", "CLIPTextEncodeSDXL", "CLIPTextEncodeSDXLRefiner"]
+
+# easy diffusion maping table
 EASYDIFFUSION_MAPPING_A = {
     "prompt": "Prompt",
     "negative_prompt": "Negative Prompt",
@@ -71,6 +74,8 @@ class ImageDataReader:
         self._info = {}
         self._positive = ""
         self._negative = ""
+        self._positive_sdxl = {}
+        self._negative_sdxl = {}
         self._setting = ""
         self._raw = ""
         self._tool = ""
@@ -403,16 +408,52 @@ class ImageDataReader:
                     flow = inputs
                     last_flow1, last_node1 = self._comfy_traverse(prompt, inputs["model"][0])
                     last_flow2, last_node2 = self._comfy_traverse(prompt, inputs["latent_image"][0])
-                    self._positive = self._comfy_traverse(prompt, inputs["positive"][0])
-                    self._negative = self._comfy_traverse(prompt, inputs["negative"][0])
+                    positive = self._comfy_traverse(prompt, inputs["positive"][0])
+                    if isinstance(positive, str):
+                        self._positive = positive
+                    elif isinstance(positive, dict):
+                        self._positive_sdxl = self.merge_dict(self._positive_sdxl, positive)
+                    negative = self._comfy_traverse(prompt, inputs["negative"][0])
+                    if isinstance(negative, str):
+                        self._negative = negative
+                    elif isinstance(negative, dict):
+                        self._negative_sdxl = self.merge_dict(self._negative_sdxl, negative)
                     flow = self.merge_dict(flow, last_flow1)
                     flow = self.merge_dict(flow, last_flow2)
                     node += last_node1 + last_node2
                 except:
                     print("comfyUI KSampler error")
-            case "CLIPTextEncode":
+            case node_type if node_type in CLIP_TEXT_ENCODE_TYPE:
                 try:
-                    return inputs.get("text")
+                    if node_type == "CLIPTextEncode":
+                        return inputs.get("text")
+                    try:
+                        # SDXLPromptStyler
+                        if node_type == "CLIPTextEncodeSDXL":
+                            self._tool = "ComfyUI SDXL"
+                            text_g = int(inputs["text_g"][0])
+                            text_l = int(inputs["text_l"][0])
+                            prompt_styler_g = self._comfy_traverse(prompt, str(text_g))
+                            prompt_styler_l = self._comfy_traverse(prompt, str(text_l))
+                            self._positive_sdxl["Clip G"] = prompt_styler_g[0]
+                            self._positive_sdxl["Clip L"] = prompt_styler_l[0]
+                            self._negative_sdxl["Clip G"] = prompt_styler_g[1]
+                            self._negative_sdxl["Clip L"] = prompt_styler_l[1]
+                            return
+                        elif node_type == "CLIPTextEncodeSDXLRefiner":
+                            self._tool = "ComfyUI SDXL"
+                            text = int(inputs["text"][0])
+                            prompt_styler = self._comfy_traverse(prompt, str(text))
+                            self._positive_sdxl["Refiner"] = prompt_styler[0]
+                            self._negative_sdxl["Refiner"] = prompt_styler[1]
+                            return
+                    except ValueError:
+                        if node_type == "CLIPTextEncodeSDXL":
+                            self._tool = "ComfyUI SDXL"
+                            return {"Clip G": inputs.get("text_g"), "Clip L": inputs.get("text_l")}
+                        elif node_type == "CLIPTextEncodeSDXLRefiner":
+                            self._tool = "ComfyUI SDXL"
+                            return {"Refiner": inputs.get("text")}
                 except:
                     print("comfyUI CLIPText error")
             case "LoraLoader":
@@ -469,6 +510,12 @@ class ImageDataReader:
                     node += last_node1 + last_node2
                 except:
                     print("comfyUI ConditioningCombine error")
+            # custom nodes
+            case "SDXLPromptStyler":
+                try:
+                    return inputs.get("text_positive"), inputs.get("text_negative")
+                except:
+                    print("comfyUI SDXLPromptStyler error")
             case _:
                 try:
                     last_flow = {}
@@ -596,6 +643,14 @@ class ImageDataReader:
         return self._negative
 
     @property
+    def positive_sdxl(self):
+        return self._positive_sdxl
+
+    @property
+    def negative_sdxl(self):
+        return self._negative_sdxl
+
+    @property
     def setting(self):
         return self._setting
 
@@ -614,3 +669,7 @@ class ImageDataReader:
     @property
     def format(self):
         return self._format
+
+    @property
+    def info(self):
+        return self._info
