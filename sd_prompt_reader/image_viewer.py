@@ -66,10 +66,10 @@ class GalleryViewer(CTkScrollableFrame):
             # self.after(1)
             # self.update_idletasks()
             x_change = (((self.index - 1) * 130 + 15) / self.total_width) - last_x
-            steps = int(abs(x_change) / 0.008)
+            steps = int(abs(x_change) / 0.01)
             print(steps)
             for t in range(steps):
-                current_x = ease_out(t, last_x, x_change, steps)
+                current_x = ease_in_out(t, last_x, x_change, steps)
                 self._parent_canvas.xview_moveto(current_x)
                 self.update_idletasks()
                 self.after(1)
@@ -77,10 +77,10 @@ class GalleryViewer(CTkScrollableFrame):
         elif event.keysym == "Left" and self.index > 0:
 
             x_change = (((self.index - 2) * 130 + 15) / self.total_width) - last_x
-            steps = int(abs(x_change) / 0.008)
+            steps = int(abs(x_change) / 0.01)
             print(last_x, x_change)
             for t in range(steps):
-                current_x = ease_out(t, last_x, x_change, steps)
+                current_x = ease_in_out(t, last_x, x_change, steps)
                 self._parent_canvas.xview_moveto(current_x)
                 self.update_idletasks()
                 self.after(1)
@@ -95,6 +95,7 @@ class GalleryViewer(CTkScrollableFrame):
         print(self.index)
 
     def select(self, item, image):
+        self.display(None)
         print(self.index)
         if self.index == item.index and not self.init:
             return
@@ -236,8 +237,7 @@ class GalleryViewer(CTkScrollableFrame):
             self.display_thread.join()
         self.display_thread = threading.Thread(target=self.display(item.path))
         self.display_thread.start()
-        self.after(1)
-        self.update_idletasks()
+
 
     def add_item(self, item, image=None):
         frame = CTkFrame(self, fg_color="transparent", width=120, height=400)

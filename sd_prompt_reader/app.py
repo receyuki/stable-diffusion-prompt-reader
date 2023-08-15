@@ -370,12 +370,15 @@ class App(Tk):
         self.update_checker.close_thread()
         # selected or drag and drop
 
-        if not image:
-            return
+        # if not image:
+        #     return
         new_path = image
 
+        if not image:
+            self.unsupported_format(["Reading", "Reading"])
+
         # detect suffix and read
-        if new_path.suffix in SUPPORTED_FORMATS:
+        elif new_path.suffix in SUPPORTED_FORMATS:
             self.file_path = new_path
             with open(self.file_path, "rb") as f:
                 self.image_data = ImageDataReader(f)
