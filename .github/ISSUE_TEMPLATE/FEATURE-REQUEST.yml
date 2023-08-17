@@ -1,5 +1,5 @@
 name: "Feature Request"
-description: Create a new ticket for a new feature request
+description: Create a new ticket for a new feature request.
 title: "[FEATURE REQUEST] - title"
 labels: [
   "question"
@@ -24,7 +24,7 @@ body:
   - type: textarea
     id: reference_issues
     attributes:
-      label: "Reference Issues"
+      label: "Reference Issues."
       description: Common issues
       placeholder: "#Issues IDs"
     validations:
