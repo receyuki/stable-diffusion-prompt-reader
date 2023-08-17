@@ -18,12 +18,11 @@ body:
     attributes:
       label: "Reproduction steps"
       description: Please enter an explicit description of your issue.
-      value: |
+      placeholder: |
         1. Go to '...'
         2. Click on '....'
         3. Scroll down to '....'
         4. See error
-      render: bash
     validations:
       required: false
   - type: textarea
@@ -32,7 +31,6 @@ body:
       label: "Image file"
       description: If applicable, add original image files or screenshots to help explain your problem.
       placeholder: ![DESCRIPTION](LINK.png)
-      render: bash
     validations:
       required: false
   - type: dropdown
