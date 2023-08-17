@@ -30,7 +30,8 @@ body:
     attributes:
       label: "Image file"
       description: If applicable, add original image files or screenshots to help explain your problem.
-      placeholder: ![DESCRIPTION](LINK.png)
+      placeholder: |
+        ![DESCRIPTION](LINK.png)
     validations:
       required: false
   - type: dropdown
