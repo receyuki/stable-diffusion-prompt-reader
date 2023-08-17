@@ -1,0 +1,85 @@
+name: "Bug Report"
+description: Create a new ticket for a bug.
+title: "[BUG] - title"
+labels: [
+  "bug"
+]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: Please enter an explicit description of your issue.
+      placeholder: Short and explicit description of your incident...
+    validations:
+      required: true
+  - type: textarea
+    id: reprod
+    attributes:
+      label: "Reproduction steps"
+      description: Please enter an explicit description of your issue.
+      value: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+      render: bash
+    validations:
+      required: false
+  - type: textarea
+    id: image
+    attributes:
+      label: "Image file"
+      description: If applicable, add original image file or screenshots to help explain your problem.
+      value: |
+        ![DESCRIPTION](LINK.png)
+      render: bash
+    validations:
+      required: false
+  - type: dropdown
+    id: version
+    attributes:
+      label: "Version"
+      description: What version are you running?
+      multiple: true
+      options:
+        - 1.3.2
+        - 1.3.1
+        - 1.3.0
+        - 1.2.0
+        - 1.1.1
+        - 1.1.0
+        - 1.0.1
+        - 1.0.0
+      default: 0
+    validations:
+      required: false
+  - type: dropdown
+    id: os
+    attributes:
+      label: "OS"
+      description: What is the impacted environment?
+      multiple: true
+      options:
+        - Windows
+        - Mac
+        - Linux
+    validations:
+      required: true
+  - type: dropdown
+    id: tool
+    attributes:
+      label: "Tool"
+      description: What tool are you using?
+      multiple: false
+      options:
+        - A1111's webUI
+        - Easy Diffusion
+        - InvokeAI
+        - NovelAI
+        - Draw Things
+        - ComfyUI
+        - Naifu(4chan)
+        - Other
+    validations:
+      required: true
