@@ -363,11 +363,17 @@ class ImageDataReader:
         self._raw += "\n" + str(prompt)
         if workflow:
             self._raw += "\n" + str(workflow)
+
+        seed = None
+        if longest_flow.get('seed'):
+            seed = longest_flow.get('seed')
+        elif longest_flow.get('noise_seed'):
+            seed = longest_flow.get('noise_seed')
         self._setting = (
             f"Steps: {longest_flow.get('steps')}"
             f", Sampler: {self.remove_quotes(longest_flow.get('sampler_name'))}"
             f", CFG scale: {longest_flow.get('cfg')}"
-            f", Seed: {longest_flow.get('seed')}"
+            f", Seed: {seed}"
             f", Size: {self._width}x{self._height}"
             f", Model: {self.remove_quotes(longest_flow.get('ckpt_name'))}"
             f", Scheduler: {self.remove_quotes(longest_flow.get('scheduler'))}"
