@@ -23,6 +23,7 @@ from sd_prompt_reader.ctk_tooltip import CTkToolTip
 from sd_prompt_reader.button import *
 from sd_prompt_reader.textbox import STkTextbox
 from sd_prompt_reader.parameter_viewer import ParameterViewer
+from sd_prompt_reader.prompt_viewer import PromptViewer
 
 
 class App(Tk):
@@ -94,13 +95,11 @@ class App(Tk):
                                           ipady=STATUS_BAR_IPAD)
 
         # textbox
-        self.positive_box = STkTextbox(self, wrap="word", height=120)
-        self.positive_box.grid(row=0, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(20, 20))
-        self.positive_box.text = "Prompt"
+        self.positive_box = PromptViewer(self, self.status_bar, "Prompt")
+        self.positive_box.prompt_frame.grid(row=0, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(20, 20))
 
-        self.negative_box = STkTextbox(self, wrap="word", height=120)
-        self.negative_box.grid(row=1, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
-        self.negative_box.text = "Negative Prompt"
+        self.negative_box = PromptViewer(self, self.status_bar, "Negative Prompt")
+        self.negative_box.prompt_frame.grid(row=1, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
 
         self.setting_box = STkTextbox(self, wrap="word", height=80)
         self.setting_box.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
@@ -111,61 +110,6 @@ class App(Tk):
         self.setting_box_parameter = CTkFrame(self.setting_box_simple, fg_color="transparent")
         self.setting_box_parameter = ParameterViewer(self.setting_box_simple, self.status_bar)
         self.setting_box_parameter.setting_box_parameter.pack(side="left", padx=5)
-
-        # textbox buttons
-        # positive box
-        self.button_positive_frame = CTkFrame(self.positive_box, fg_color="transparent")
-        self.button_positive_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
-        self.button_copy_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.clipboard_image_s, text="",
-                                              command=lambda: self.copy_to_clipboard(self.positive_box.ctext))
-        self.button_copy_positive.pack(side="top")
-        self.button_copy_positive_tooltip = CTkToolTip(self.button_copy_positive, delay=TOOLTIP_DELAY,
-                                                       message=TOOLTIP["copy_prompt"])
-        self.button_sort_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.sort_image, text="",
-                                              command=lambda: self.mode_switch(self.button_sort_positive,
-                                                                               self.positive_box),
-                                              mode=SortMode.OFF)
-        self.button_sort_positive.pack(side="top", pady=10)
-        self.button_sort_positive_tooltip = CTkToolTip(self.button_sort_positive, delay=TOOLTIP_DELAY,
-                                                       message=TOOLTIP["sort"])
-        self.button_view_positive = STkButton(self.button_positive_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.view_image, text="",
-                                              command=lambda: self.mode_switch(self.button_view_positive,
-                                                                               self.positive_box,
-                                                                               sort_button=self.button_sort_positive),
-                                              mode=ViewMode.NORMAL)
-        self.button_view_positive.pack(side="top")
-        self.button_view_positive_tooltip = CTkToolTip(self.button_view_positive, delay=TOOLTIP_DELAY,
-                                                       message=TOOLTIP["view_prompt"])
-
-        # negative box
-        self.button_negative_frame = CTkFrame(self.negative_box, fg_color="transparent")
-        self.button_negative_frame.grid(row=0, column=1, padx=(20, 10), pady=(5, 0))
-        self.button_copy_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.clipboard_image_s, text="",
-                                              command=lambda: self.copy_to_clipboard(self.negative_box.ctext))
-        self.button_copy_negative.pack(side="top")
-        self.button_copy_negative_tooltip = CTkToolTip(self.button_copy_negative, delay=TOOLTIP_DELAY,
-                                                       message=TOOLTIP["copy_prompt"])
-        self.button_sort_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.sort_image, text="",
-                                              command=lambda: self.mode_switch(self.button_sort_negative,
-                                                                               self.negative_box),
-                                              mode=SortMode.OFF)
-        self.button_sort_negative.pack(side="top", pady=10)
-        self.button_sort_negative_tooltip = CTkToolTip(self.button_sort_negative, delay=TOOLTIP_DELAY,
-                                                       message=TOOLTIP["sort"])
-        self.button_view_negative = STkButton(self.button_negative_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                              image=self.view_image, text="",
-                                              command=lambda: self.mode_switch(self.button_view_negative,
-                                                                               self.negative_box,
-                                                                               sort_button=self.button_sort_negative),
-                                              mode=ViewMode.NORMAL)
-        self.button_view_negative.pack(side="top")
-        self.button_view_negative_tooltip = CTkToolTip(self.button_view_negative, delay=TOOLTIP_DELAY,
-                                                       message=TOOLTIP["view_prompt"])
 
         # setting box
         self.button_setting_frame = CTkFrame(self.setting_box, fg_color="transparent")
@@ -319,23 +263,26 @@ class App(Tk):
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
 
         # general button list
-        self.function_buttons = [self.button_copy_positive, self.button_sort_positive, self.button_view_positive,
-                                 self.button_copy_negative, self.button_sort_negative, self.button_view_negative,
+        self.function_buttons = [self.positive_box.button_copy,
+                                 self.positive_box.button_sort,
+                                 self.positive_box.button_view,
+                                 self.negative_box.button_copy,
+                                 self.negative_box.button_sort,
+                                 self.negative_box.button_view,
                                  self.button_copy_setting, self.button_view_setting, self.button_copy_setting_simple,
                                  self.button_raw, self.button_remove, self.button_export, self.button_remove]
 
         # button list for edit mode
-        self.non_edit_buttons = [self.button_view_positive,
-                                 self.button_view_negative,
+        self.non_edit_buttons = [self.positive_box.button_view,
+                                 self.negative_box.button_view,
                                  self.button_view_setting,
-                                 self.button_sort_positive,
-                                 self.button_sort_negative,
-                                 self.button_view_negative,
+                                 self.positive_box.button_sort,
+                                 self.negative_box.button_sort,
                                  self.button_export,
                                  self.button_raw]
 
-        self.edit_buttons = [self.button_copy_positive,
-                             self.button_copy_negative,
+        self.edit_buttons = [self.positive_box.button_copy,
+                             self.negative_box.button_copy,
                              self.button_copy_setting,
                              self.button_remove,
                              self.button_edit]
@@ -384,12 +331,16 @@ class App(Tk):
                 else:
                     self.readable = True
                     # insert prompt
-                    self.positive_box.text = self.image_data.positive
-                    self.negative_box.text = self.image_data.negative
+                    self.positive_box.text(self.image_data.positive)
+                    self.negative_box.text(self.image_data.negative)
                     self.setting_box.text = self.image_data.setting
                     self.setting_box_parameter.update_text(self.image_data.parameter)
-                    self.mode_update(self.button_view_positive, self.positive_box, self.button_sort_positive)
-                    self.mode_update(self.button_view_negative, self.negative_box, self.button_sort_negative)
+                    self.mode_update(self.positive_box.button_view,
+                                     self.positive_box.prompt_box,
+                                     self.positive_box.button_sort)
+                    self.mode_update(self.negative_box.button_view,
+                                     self.negative_box.prompt_box,
+                                     self.negative_box.button_sort)
                     if self.button_edit.mode == EditMode.OFF:
                         for button in self.function_buttons:
                             button.enable()
@@ -535,7 +486,7 @@ class App(Tk):
         with Image.open(self.file_path) as image:
             new_stem = self.file_path.stem + "_edited"
             new_path = self.file_path.with_stem(new_stem)
-            data = self.positive_box.ctext + "Negative prompt: " + self.negative_box.ctext + self.setting_box.ctext
+            data = self.positive_box.text + "Negative prompt: " + self.negative_box.text + self.setting_box.ctext
             if not save_mode:
                 try:
                     self.image_data.save_image(self.file_path, new_path, self.image_data.format, data)
@@ -628,49 +579,6 @@ class App(Tk):
                 self.setting_box.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
                 self.setting_box_simple.grid_forget()
                 self.status_bar.info(MESSAGE["view_setting"][-1])
-
-    def mode_switch(self, button: STkButton, textbox: STkTextbox, sort_button: STkButton = None):
-        if isinstance(button.mode, ViewMode):
-            match button.mode:
-                case ViewMode.NORMAL:
-                    button.switch_on()
-                    button.mode = ViewMode.VERTICAL
-                    textbox.view_vertical()
-                    if sort_button:
-                        match sort_button.mode:
-                            case SortMode.ASC:
-                                textbox.sort_asc()
-                            case SortMode.DES:
-                                textbox.sort_des()
-                    self.status_bar.info(MESSAGE["view_prompt"][0])
-                case ViewMode.VERTICAL:
-                    button.switch_off()
-                    button.mode = ViewMode.NORMAL
-                    textbox.view_normal()
-                    if sort_button:
-                        match sort_button.mode:
-                            case SortMode.ASC:
-                                textbox.sort_asc()
-                            case SortMode.DES:
-                                textbox.sort_des()
-                    self.status_bar.info(MESSAGE["view_prompt"][-1])
-        elif isinstance(button.mode, SortMode):
-            match button.mode:
-                case SortMode.OFF:
-                    button.switch_on()
-                    button.mode = SortMode.ASC
-                    textbox.sort_asc()
-                    self.status_bar.info(MESSAGE["sort"][0])
-                case SortMode.ASC:
-                    button.switch_on()
-                    button.mode = SortMode.DES
-                    textbox.sort_des()
-                    self.status_bar.info(MESSAGE["sort"][1])
-                case SortMode.DES:
-                    button.switch_off()
-                    button.mode = SortMode.OFF
-                    textbox.sort_off()
-                    self.status_bar.info(MESSAGE["sort"][-1])
 
     @staticmethod
     def mode_update(button: STkButton, textbox: STkTextbox, sort_button: STkButton):

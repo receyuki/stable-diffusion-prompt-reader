@@ -82,6 +82,7 @@ class ImageDataReader:
         self.parameter_key = ["model", "sampler", "seed", "cfg", "steps", "size"]
         self._parameter = dict.fromkeys(self.parameter_key, PARAMETER_PLACEHOLDER)
         self._is_txt = is_txt
+        self._is_sdxl = False
         self._format = ""
         self.read_data(file)
 
@@ -447,7 +448,7 @@ class ImageDataReader:
                             self._negative_sdxl["Clip L"] = prompt_styler_l[1]
                             return
                         elif node_type == "CLIPTextEncodeSDXLRefiner":
-                            self._tool = "ComfyUI SDXL"
+                            self._is_sdxl = True
                             text = int(inputs["text"][0])
                             prompt_styler = self._comfy_traverse(prompt, str(text))
                             self._positive_sdxl["Refiner"] = prompt_styler[0]
