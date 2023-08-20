@@ -32,7 +32,7 @@ class PromptViewer:
         self.prompt_box_refiner = self.PromptBox(self, self.prompt_frame_sdxl, "Refiner")
         self.prompt_box_g.textbox.pack(side="left", fill="both", expand=True, padx=(0, 10))
         self.prompt_box_l.textbox.pack(side="left", fill="both", expand=True, padx=(0, 10))
-        # self.prompt_box_refiner.textbox.pack(side="left", fill="both", expand=True)
+        self.prompt_box_refiner.textbox.pack(side="left", fill="both", expand=True)
 
     def edit_on(self):
         if not self.is_sdxl:
