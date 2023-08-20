@@ -96,10 +96,12 @@ class App(Tk):
 
         # textbox
         self.positive_box = PromptViewer(self, self.status_bar, "Prompt")
-        self.positive_box.prompt_frame.grid(row=0, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(20, 20))
+        self.positive_box.viewer_frame.grid(row=0, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(20, 20))
+        # self.positive_box.prompt_frame_sdxl.grid(row=0, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(20, 20))
 
         self.negative_box = PromptViewer(self, self.status_bar, "Negative Prompt")
-        self.negative_box.prompt_frame.grid(row=1, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
+        self.negative_box.viewer_frame.grid(row=1, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
+        # self.negative_box.prompt_frame_sdxl.grid(row=1, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
 
         self.setting_box = STkTextbox(self, wrap="word", height=80)
         self.setting_box.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
@@ -263,32 +265,37 @@ class App(Tk):
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
 
         # general button list
-        self.function_buttons = [self.positive_box.button_copy,
-                                 self.positive_box.button_sort,
-                                 self.positive_box.button_view,
-                                 self.negative_box.button_copy,
-                                 self.negative_box.button_sort,
-                                 self.negative_box.button_view,
+        self.function_buttons = [
+            # self.positive_box.button_copy,
+            #                      self.positive_box.button_sort,
+            #                      self.positive_box.button_view,
+            #                      self.negative_box.button_copy,
+            #                      self.negative_box.button_sort,
+            #                      self.negative_box.button_view,
                                  self.button_copy_setting, self.button_view_setting, self.button_copy_setting_simple,
                                  self.button_raw, self.button_remove, self.button_export, self.button_remove]
 
         # button list for edit mode
-        self.non_edit_buttons = [self.positive_box.button_view,
-                                 self.negative_box.button_view,
+        self.non_edit_buttons = [
+            # self.positive_box.button_view,
+            #                      self.negative_box.button_view,
                                  self.button_view_setting,
-                                 self.positive_box.button_sort,
-                                 self.negative_box.button_sort,
+                                 # self.positive_box.button_sort,
+                                 # self.negative_box.button_sort,
                                  self.button_export,
                                  self.button_raw]
 
-        self.edit_buttons = [self.positive_box.button_copy,
-                             self.negative_box.button_copy,
+        self.edit_buttons = [
+            # self.positive_box.button_copy,
+            #                  self.negative_box.button_copy,
                              self.button_copy_setting,
                              self.button_remove,
                              self.button_edit]
 
         for button in self.function_buttons:
             button.disable()
+        self.positive_box.all_off()
+        self.negative_box.all_off()
         self.button_save.disable()
         self.button_edit.disable()
         self.file_path = None
@@ -331,21 +338,25 @@ class App(Tk):
                 else:
                     self.readable = True
                     # insert prompt
-                    self.positive_box.text(self.image_data.positive)
-                    self.negative_box.text(self.image_data.negative)
+                    if not self.image_data.is_sdxl:
+                        self.positive_box.display(self.image_data.positive)
+                        self.negative_box.display(self.image_data.negative)
+                    else:
+                        self.positive_box.display(self.image_data.positive_sdxl)
+                        self.negative_box.display(self.image_data.negative_sdxl)
                     self.setting_box.text = self.image_data.setting
                     self.setting_box_parameter.update_text(self.image_data.parameter)
-                    self.mode_update(self.positive_box.button_view,
-                                     self.positive_box.prompt_box,
-                                     self.positive_box.button_sort)
-                    self.mode_update(self.negative_box.button_view,
-                                     self.negative_box.prompt_box,
-                                     self.negative_box.button_sort)
+                    self.positive_box.mode_update()
+                    self.negative_box.mode_update()
                     if self.button_edit.mode == EditMode.OFF:
                         for button in self.function_buttons:
                             button.enable()
+                        self.positive_box.all_on()
+                        self.negative_box.all_on()
                     for button in self.edit_buttons:
                         button.enable()
+                    self.positive_box.copy_on()
+                    self.negative_box.copy_on()
                     if self.image_data.tool != "A1111 webUI":
                         self.button_raw_option_arrow.disable()
                     self.status_bar.success(self.image_data.tool)
@@ -386,6 +397,8 @@ class App(Tk):
         self.setting_box_parameter.reset_text()
         for button in self.function_buttons:
             button.disable()
+        self.positive_box.all_off()
+        self.negative_box.all_off()
         if reset_image:
             self.image_label.configure(image=self.drop_image, text=MESSAGE["drop"][0])
             self.image = None

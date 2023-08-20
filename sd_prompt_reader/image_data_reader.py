@@ -419,12 +419,12 @@ class ImageDataReader:
                     if isinstance(positive, str):
                         self._positive = positive
                     elif isinstance(positive, dict):
-                        self._positive_sdxl = self.merge_dict(self._positive_sdxl, positive)
+                        self._positive_sdxl.update(positive)
                     negative = self._comfy_traverse(prompt, inputs["negative"][0])
                     if isinstance(negative, str):
                         self._negative = negative
                     elif isinstance(negative, dict):
-                        self._negative_sdxl = self.merge_dict(self._negative_sdxl, negative)
+                        self._negative_sdxl.update(negative)
                     flow = self.merge_dict(flow, last_flow1)
                     flow = self.merge_dict(flow, last_flow2)
                     node += last_node1 + last_node2
@@ -437,7 +437,7 @@ class ImageDataReader:
                     try:
                         # SDXLPromptStyler
                         if node_type == "CLIPTextEncodeSDXL":
-                            self._tool = "ComfyUI SDXL"
+                            self._is_sdxl = True
                             text_g = int(inputs["text_g"][0])
                             text_l = int(inputs["text_l"][0])
                             prompt_styler_g = self._comfy_traverse(prompt, str(text_g))
@@ -456,10 +456,10 @@ class ImageDataReader:
                             return
                     except ValueError:
                         if node_type == "CLIPTextEncodeSDXL":
-                            self._tool = "ComfyUI SDXL"
+                            self._is_sdxl = True
                             return {"Clip G": inputs.get("text_g"), "Clip L": inputs.get("text_l")}
                         elif node_type == "CLIPTextEncodeSDXLRefiner":
-                            self._tool = "ComfyUI SDXL"
+                            self._is_sdxl = True
                             return {"Refiner": inputs.get("text")}
                 except:
                     print("comfyUI CLIPText error")
@@ -680,3 +680,7 @@ class ImageDataReader:
     @property
     def info(self):
         return self._info
+
+    @property
+    def is_sdxl(self):
+        return self._is_sdxl
