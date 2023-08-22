@@ -17,6 +17,7 @@ import toml
 from pathlib import Path
 from packaging import version
 
+
 # from sd_prompt_reader.__version__ import VERSION
 
 def get_version():
@@ -28,7 +29,7 @@ def get_version():
 VERSION = get_version().base_version
 version_file = Path(__file__).resolve().parents[0] / 'sd_prompt_reader/__version__.py'
 with open(version_file, 'w') as file:
-    file.write('VERSION = "'+VERSION+'"\n')
+    file.write('VERSION = "' + VERSION + '"\n')
 
 if platform.system() == "Windows":
     import pyinstaller_versionfile

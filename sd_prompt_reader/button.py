@@ -49,6 +49,10 @@ class STkButton(CTkButton):
                  **kwargs):
 
         self._simage = image
+        if self._simage:
+            self._simage_default = self._simage[0]
+        else:
+            self._simage_default = None
         self._label = label
         self._arrow = arrow
         self._mode = mode
@@ -74,7 +78,7 @@ class STkButton(CTkButton):
                          text=text,
                          font=font,
                          textvariable=textvariable,
-                         image=self._simage[0],
+                         image=self._simage_default,
                          state=state,
                          hover=hover,
                          command=command,
@@ -157,3 +161,9 @@ class SettingMode(Enum):
 class EditMode(Enum):
     OFF = 0
     ON = 1
+
+
+class PromptMode(Enum):
+    CLIP_G = 0
+    CLIP_L = 1
+    REFINER = 2

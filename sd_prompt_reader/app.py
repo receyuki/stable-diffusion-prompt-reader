@@ -359,6 +359,8 @@ class App(Tk):
                     self.negative_box.copy_on()
                     if self.image_data.tool != "A1111 webUI":
                         self.button_raw_option_arrow.disable()
+                    if self.image_data.is_sdxl:
+                        self.button_edit.disable()
                     self.status_bar.success(self.image_data.tool)
                 self.image = Image.open(f)
                 self.image_tk = CTkImage(self.image)

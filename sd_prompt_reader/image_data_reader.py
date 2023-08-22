@@ -359,8 +359,16 @@ class ImageDataReader:
                 longest_nodes = nodes
                 longest_flow_len = len(nodes)
 
-        self._raw += self._positive
-        self._raw += "\n" + self._negative
+        if not self._is_sdxl:
+            self._raw += self._positive
+            self._raw += "\n" + self._negative or ""
+        else:
+            self._raw += self._positive_sdxl.get("Clip G") or ""
+            self._raw += "\n" + (self._positive_sdxl.get("Clip L") or "")
+            self._raw += "\n" + (self._positive_sdxl.get("Refiner") or "")
+            self._raw += "\n" + (self._negative_sdxl.get("Clip G") or "")
+            self._raw += "\n" + (self._negative_sdxl.get("Clip L") or "")
+            self._raw += "\n" + (self._negative_sdxl.get("Refiner") or "")
         self._raw += "\n" + str(prompt)
         if workflow:
             self._raw += "\n" + str(workflow)
