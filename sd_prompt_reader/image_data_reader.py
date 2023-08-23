@@ -396,7 +396,7 @@ class ImageDataReader:
 
         self._parameter["model"] = str(self.remove_quotes(longest_flow.get('ckpt_name')))
         self._parameter["sampler"] = str(self.remove_quotes(longest_flow.get('sampler_name')))
-        self._parameter["seed"] = str(longest_flow.get('seed'))
+        self._parameter["seed"] = seed
         self._parameter["cfg"] = str(longest_flow.get('cfg'))
         self._parameter["steps"] = str(longest_flow.get('steps'))
         self._parameter["size"] = str(self._width) + "x" + str(self._height)

@@ -21,7 +21,7 @@ class ParameterViewer:
         self.setting_model_label = CTkLabel(self.setting_model_frame, text="Model:")
         self.setting_model_label.pack(side="left", padx=(0, 5))
         self.setting_model = CTkLabel(self.setting_model_frame, text=PARAMETER_PLACEHOLDER, fg_color=BUTTON_HOVER,
-                                      corner_radius=5)
+                                      corner_radius=5, wraplength=300)
         self.setting_model.pack(side="left")
         self.setting_model.bind("<Button-1>", lambda e: self.copy_to_clipboard(self.setting_model.cget("text")))
 
@@ -30,7 +30,7 @@ class ParameterViewer:
         self.setting_sampler_label = CTkLabel(self.setting_sampler_frame, text="Sampler:")
         self.setting_sampler_label.pack(side="left", padx=(0, 5))
         self.setting_sampler = CTkLabel(self.setting_sampler_frame, text=PARAMETER_PLACEHOLDER, fg_color=BUTTON_HOVER,
-                                        corner_radius=5)
+                                        corner_radius=5, wraplength=300)
         self.setting_sampler.pack(side="left")
         self.setting_sampler.bind("<Button-1>", lambda e: self.copy_to_clipboard(self.setting_sampler.cget("text")))
 
@@ -39,7 +39,7 @@ class ParameterViewer:
         self.setting_seed_label = CTkLabel(self.setting_seed_frame, text="Seed:")
         self.setting_seed_label.pack(side="left", padx=(0, 5))
         self.setting_seed = CTkLabel(self.setting_seed_frame, text=PARAMETER_PLACEHOLDER, fg_color=BUTTON_HOVER,
-                                     corner_radius=5)
+                                     corner_radius=5, wraplength=300)
         self.setting_seed.pack(side="left")
         self.setting_seed.bind("<Button-1>", lambda e: self.copy_to_clipboard(self.setting_seed.cget("text")))
 
