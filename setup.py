@@ -29,14 +29,14 @@ def get_version():
 VERSION = get_version().base_version
 version_file = Path(__file__).resolve().parents[0] / 'sd_prompt_reader/__version__.py'
 with open(version_file, 'w') as file:
-    file.write('VERSION = "' + VERSION + '"\n')
+    file.write('VERSION = "' + str(get_version()) + '"\n')
 
 if platform.system() == "Windows":
     import pyinstaller_versionfile
 
     pyinstaller_versionfile.create_versionfile(
         output_file="file_version_info.txt",
-        version=VERSION,
+        version=get_version().base_version,
         file_description="SD Prompt Reader",
         internal_name="SD Prompt Reader",
         legal_copyright="Copyright © 2023 receyuki All rights reserved.",
@@ -72,7 +72,8 @@ elif platform.system() == "Darwin":
         'plist': {
             'CFBundleName': 'SD Prompt Reader',
             'CFBundleDisplayName': 'SD Prompt Reader',
-            'CFBundleVersion': VERSION,
+            'CFBundleVersion': str(get_version()),
+            'CFBundleShortVersionString': get_version().base_version,
             'CFBundleIdentifier': 'com.receyuki.sd-prompt-reader',
             'NSHumanReadableCopyright': 'Copyright © 2023 receyuki All rights reserved.',
             'CFBundleDocumentTypes': CFBundleDocumentTypes
