@@ -375,9 +375,9 @@ class ImageDataReader:
 
         seed = None
         if longest_flow.get('seed'):
-            seed = longest_flow.get('seed')
+            seed = str(longest_flow.get('seed'))
         elif longest_flow.get('noise_seed'):
-            seed = longest_flow.get('noise_seed')
+            seed = str(longest_flow.get('noise_seed'))
         self._setting = (
             f"Steps: {longest_flow.get('steps')}"
             f", Sampler: {self.remove_quotes(longest_flow.get('sampler_name'))}"
