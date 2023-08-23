@@ -167,3 +167,5 @@ class PromptMode(Enum):
     CLIP_G = 0
     CLIP_L = 1
     REFINER = 2
+    TAB = 3
+    SEPARATE = 4

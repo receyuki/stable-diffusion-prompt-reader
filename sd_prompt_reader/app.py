@@ -97,11 +97,9 @@ class App(Tk):
         # textbox
         self.positive_box = PromptViewer(self, self.status_bar, "Prompt")
         self.positive_box.viewer_frame.grid(row=0, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(20, 20))
-        # self.positive_box.prompt_frame_sdxl.grid(row=0, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(20, 20))
 
         self.negative_box = PromptViewer(self, self.status_bar, "Negative Prompt")
         self.negative_box.viewer_frame.grid(row=1, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
-        # self.negative_box.prompt_frame_sdxl.grid(row=1, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
 
         self.setting_box = STkTextbox(self, wrap="word", height=80)
         self.setting_box.grid(row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20))
@@ -265,30 +263,15 @@ class App(Tk):
         self.boxes = [self.positive_box, self.negative_box, self.setting_box]
 
         # general button list
-        self.function_buttons = [
-            # self.positive_box.button_copy,
-            #                      self.positive_box.button_sort,
-            #                      self.positive_box.button_view,
-            #                      self.negative_box.button_copy,
-            #                      self.negative_box.button_sort,
-            #                      self.negative_box.button_view,
-                                 self.button_copy_setting, self.button_view_setting, self.button_copy_setting_simple,
+        self.function_buttons = [self.button_copy_setting, self.button_view_setting, self.button_copy_setting_simple,
                                  self.button_raw, self.button_remove, self.button_export, self.button_remove]
 
         # button list for edit mode
-        self.non_edit_buttons = [
-            # self.positive_box.button_view,
-            #                      self.negative_box.button_view,
-                                 self.button_view_setting,
-                                 # self.positive_box.button_sort,
-                                 # self.negative_box.button_sort,
+        self.non_edit_buttons = [self.button_view_setting,
                                  self.button_export,
                                  self.button_raw]
 
-        self.edit_buttons = [
-            # self.positive_box.button_copy,
-            #                  self.negative_box.button_copy,
-                             self.button_copy_setting,
+        self.edit_buttons = [self.button_copy_setting,
                              self.button_remove,
                              self.button_edit]
 
@@ -387,15 +370,15 @@ class App(Tk):
         else:
             self.unsupported_format(MESSAGE["suffix_error"], True)
             if self.button_edit.mode == EditMode.ON:
-                self.positive_box.edit_off()
-                self.negative_box.edit_off()
-                self.setting_box.edit_off()
+                for box in self.boxes:
+                    box.edit_off()
             self.button_edit.disable()
 
     def unsupported_format(self, message, reset_image=False):
         self.readable = False
-        for box in self.boxes:
-            box.text = message[0]
+        self.setting_box.text = message[0]
+        self.positive_box.display(message[0])
+        self.negative_box.display(message[0])
         self.setting_box_parameter.reset_text()
         for button in self.function_buttons:
             button.disable()

@@ -28,6 +28,8 @@ EDIT_OFF_FILE = (Path(RESOURCE_DIR, "edit_off_24.png"), Path(RESOURCE_DIR, "edit
 LIGHTBULB_FILE = (Path(RESOURCE_DIR, "lightbulb_20.png"), Path(RESOURCE_DIR, "lightbulb_20_alpha.png"))
 SAVE_FILE = (Path(RESOURCE_DIR, "save_24.png"), Path(RESOURCE_DIR, "save_24_alpha.png"))
 SORT_FILE = (Path(RESOURCE_DIR, "sort_by_alpha_20.png"), Path(RESOURCE_DIR, "sort_by_alpha_20_alpha.png"))
+VIEW_SEPARATE_FILE = (Path(RESOURCE_DIR, "view_week_20.png"), Path(RESOURCE_DIR, "view_week_20_alpha.png"))
+VIEW_TAB_FILE = (Path(RESOURCE_DIR, "view_sidebar_20.png"), Path(RESOURCE_DIR, "view_sidebar_20_alpha.png"))
 ICON_FILE = Path(RESOURCE_DIR, "icon.png")
 ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
 MESSAGE = {
@@ -69,7 +71,9 @@ TOOLTIP = {
     "copy_setting":     "Copy setting to the clipboard",
     "sort":             "Sort prompt lines in ascending or descending order",
     "view_prompt":      "View prompt in vertical orientation",
-    "view_setting":     "View setting in simple mode"
+    "view_setting":     "View setting in simple mode",
+    "view_separate":    "View Clip G, Clip L and Refiner prompt in separate textbox",
+    "view_tab":         "View Clip G, Clip L and Refiner prompt in one textbox"
 }
 DEFAULT_GRAY = "#8E8E93"
 ACCESSIBLE_GRAY = ("#6C6C70", "#AEAEB2")
