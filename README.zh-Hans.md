@@ -40,15 +40,15 @@
 - 支持系统深色和浅色模式
 
 ## 支持格式
-|                | PNG | JPEG | WEBP | TXT* |
-|----------------|:---:|:----:|:----:|:----:|
-| A1111's webUI  |  ✅  |  ✅   |  ✅   |  ✅   |
-| Easy Diffusion |  ✅  |  ✅   |  ✅   |      |
-| InvokeAI       |  ✅  |      |      |      |
-| NovelAI        |  ✅  |      |      |      |
-| Draw Things    |  ✅  |      |      |      |
-| ComfyUI*       |  ✅  |      |      |      |
-| Naifu(4chan)   |  ✅  |      |      |      |
+|                                                                          | PNG | JPEG | WEBP | TXT* |
+|--------------------------------------------------------------------------|:---:|:----:|:----:|:----:|
+| [A1111's webUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) |   ✅ |  ✅   |  ✅   |  ✅   |
+| [Easy Diffusion](https://github.com/easydiffusion/easydiffusion)         |  ✅  |  ✅   |  ✅   |      |
+| [InvokeAI](https://github.com/invoke-ai/InvokeAI)                        |  ✅  |      |      |      |
+| [ComfyUI](https://github.com/comfyanonymous/ComfyUI)*                    |  ✅  |      |      |      |
+| [NovelAI](https://novelai.net/)                                          |  ✅  |      |      |      |
+| [Draw Things](https://drawthings.ai/)                                    |  ✅  |      |      |      |
+| Naifu(4chan)                                                             |  ✅  |      |      |      |
 
 \* 见[格式限制](#TXT).
 
