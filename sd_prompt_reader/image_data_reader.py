@@ -346,7 +346,7 @@ class ImageDataReader:
         prompt_json = json.loads(prompt)
 
         # find end node of each flow
-        end_nodes = list(filter(lambda item: item[-1].get("class_type") == "SaveImage", prompt_json.items()))
+        end_nodes = list(filter(lambda item: item[-1].get("class_type") in ["SaveImage"] + KSAMPLER_TYPES, prompt_json.items()))
         longest_flow = {}
         longest_nodes = []
         longest_flow_len = 0
