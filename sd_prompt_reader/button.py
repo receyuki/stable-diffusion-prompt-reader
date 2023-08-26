@@ -1,8 +1,7 @@
-# -*- encoding:utf-8 -*-
-__author__ = 'receyuki'
-__filename__ = 'button.py'
-__copyright__ = 'Copyright 2023'
-__email__ = 'receyuki@gmail.com'
+__author__ = "receyuki"
+__filename__ = "button.py"
+__copyright__ = "Copyright 2023"
+__email__ = "receyuki@gmail.com"
 
 import tkinter
 from enum import Enum
@@ -14,40 +13,39 @@ from sd_prompt_reader.constants import ACCESSIBLE_GRAY, INACCESSIBLE_GRAY, BUTTO
 
 
 class STkButton(CTkButton):
-    def __init__(self,
-                 master: any,
-                 width: int = 140,
-                 height: int = 28,
-                 corner_radius: Optional[int] = None,
-                 border_width: Optional[int] = None,
-                 border_spacing: int = 2,
-
-                 bg_color: Union[str, Tuple[str, str]] = "transparent",
-                 fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-                 hover_color: Optional[Union[str, Tuple[str, str]]] = None,
-                 border_color: Optional[Union[str, Tuple[str, str]]] = None,
-                 text_color: Optional[Union[str, Tuple[str, str]]] = None,
-                 text_color_disabled: Optional[Union[str, Tuple[str, str]]] = None,
-
-                 background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
-                 round_width_to_even_numbers: bool = True,
-                 round_height_to_even_numbers: bool = True,
-
-                 text: str = "CTkButton",
-                 font: Optional[Union[tuple, CTkFont]] = None,
-                 textvariable: Union[tkinter.Variable, None] = None,
-                 image: Union[Tuple[CTkImage, CTkImage], None] = None,
-                 state: str = "normal",
-                 hover: bool = True,
-                 command: Union[Callable[[], None], None] = None,
-                 compound: str = "left",
-                 anchor: str = "center",
-
-                 label: CTkLabel = None,
-                 arrow=None,
-                 mode: Enum = None,
-                 **kwargs):
-
+    def __init__(
+        self,
+        master: any,
+        width: int = 140,
+        height: int = 28,
+        corner_radius: Optional[int] = None,
+        border_width: Optional[int] = None,
+        border_spacing: int = 2,
+        bg_color: Union[str, Tuple[str, str]] = "transparent",
+        fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+        border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        text_color: Optional[Union[str, Tuple[str, str]]] = None,
+        text_color_disabled: Optional[Union[str, Tuple[str, str]]] = None,
+        background_corner_colors: Union[
+            Tuple[Union[str, Tuple[str, str]]], None
+        ] = None,
+        round_width_to_even_numbers: bool = True,
+        round_height_to_even_numbers: bool = True,
+        text: str = "CTkButton",
+        font: Optional[Union[tuple, CTkFont]] = None,
+        textvariable: Union[tkinter.Variable, None] = None,
+        image: Union[Tuple[CTkImage, CTkImage], None] = None,
+        state: str = "normal",
+        hover: bool = True,
+        command: Union[Callable[[], None], None] = None,
+        compound: str = "left",
+        anchor: str = "center",
+        label: CTkLabel = None,
+        arrow=None,
+        mode: Enum = None,
+        **kwargs
+    ):
         self._simage = image
         if self._simage:
             self._simage_default = self._simage[0]
@@ -57,34 +55,33 @@ class STkButton(CTkButton):
         self._arrow = arrow
         self._mode = mode
 
-        super().__init__(master=master,
-                         width=width,
-                         height=height,
-                         corner_radius=corner_radius,
-                         border_width=border_width,
-                         border_spacing=border_spacing,
-
-                         bg_color=bg_color,
-                         fg_color=fg_color,
-                         hover_color=hover_color,
-                         border_color=border_color,
-                         text_color=text_color,
-                         text_color_disabled=text_color_disabled,
-
-                         background_corner_colors=background_corner_colors,
-                         round_width_to_even_numbers=round_width_to_even_numbers,
-                         round_height_to_even_numbers=round_height_to_even_numbers,
-
-                         text=text,
-                         font=font,
-                         textvariable=textvariable,
-                         image=self._simage_default,
-                         state=state,
-                         hover=hover,
-                         command=command,
-                         compound=compound,
-                         anchor=anchor,
-                         **kwargs)
+        super().__init__(
+            master=master,
+            width=width,
+            height=height,
+            corner_radius=corner_radius,
+            border_width=border_width,
+            border_spacing=border_spacing,
+            bg_color=bg_color,
+            fg_color=fg_color,
+            hover_color=hover_color,
+            border_color=border_color,
+            text_color=text_color,
+            text_color_disabled=text_color_disabled,
+            background_corner_colors=background_corner_colors,
+            round_width_to_even_numbers=round_width_to_even_numbers,
+            round_height_to_even_numbers=round_height_to_even_numbers,
+            text=text,
+            font=font,
+            textvariable=textvariable,
+            image=self._simage_default,
+            state=state,
+            hover=hover,
+            command=command,
+            compound=compound,
+            anchor=anchor,
+            **kwargs
+        )
 
     @property
     def label(self):

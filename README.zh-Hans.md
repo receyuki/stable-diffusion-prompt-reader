@@ -9,6 +9,8 @@
         <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/receyuki/stable-diffusion-prompt-reader"></a>
     <a href="https://pypi.org/project/sd-prompt-reader/">
         <img alt="PyPI" src="https://img.shields.io/pypi/v/sd-prompt-reader"></a>
+    <a href="https://github.com/psf/black">
+        <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
     <img alt="platform" src="https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey">
     <br><br>
 

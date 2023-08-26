@@ -1,16 +1,16 @@
-# -*- encoding:utf-8 -*-
-__author__ = 'receyuki'
-__filename__ = 'prompt_viewer.py'
-__copyright__ = 'Copyright 2023'
-__email__ = 'receyuki@gmail.com'
+__author__ = "receyuki"
+__filename__ = "prompt_viewer.py"
+__copyright__ = "Copyright 2023"
+__email__ = "receyuki@gmail.com"
+
+
+from CTkToolTip import *
+from customtkinter import CTkFrame, CTkLabel, ThemeManager
 
 from sd_prompt_reader.button import STkButton, SortMode, ViewMode, PromptMode, EditMode
 from sd_prompt_reader.constants import *
-from CTkToolTip import *
 from sd_prompt_reader.textbox import STkTextbox
 from sd_prompt_reader.utility import load_icon, copy_to_clipboard
-
-from customtkinter import CTkFrame, CTkLabel, ThemeManager
 
 
 class PromptViewer:
@@ -41,58 +41,106 @@ class PromptViewer:
         self.prompt_box_sdxl = self.PromptBox(self, self.prompt_frame_sdxl, True)
         self.prompt_box_sdxl.textbox.pack(fill="both", expand=True)
 
-        self.prompt_frame_sdxl_separate = CTkFrame(self.viewer_frame, fg_color="transparent")
-        self.prompt_box_g = self.PromptBox(self, self.prompt_frame_sdxl_separate, "Clip G")
-        self.prompt_box_l = self.PromptBox(self, self.prompt_frame_sdxl_separate, "Clip L")
-        self.prompt_box_r = self.PromptBox(self, self.prompt_frame_sdxl_separate, "Refiner")
-        self.prompt_box_g.textbox.pack(side="left", fill="both", expand=True, padx=(0, 10))
-        self.prompt_box_l.textbox.pack(side="left", fill="both", expand=True, padx=(0, 10))
-        self.prompt_box_r.textbox.pack(side="left", fill="both", expand=True, padx=(0, 10))
+        self.prompt_frame_sdxl_separate = CTkFrame(
+            self.viewer_frame, fg_color="transparent"
+        )
+        self.prompt_box_g = self.PromptBox(
+            self, self.prompt_frame_sdxl_separate, "Clip G"
+        )
+        self.prompt_box_l = self.PromptBox(
+            self, self.prompt_frame_sdxl_separate, "Clip L"
+        )
+        self.prompt_box_r = self.PromptBox(
+            self, self.prompt_frame_sdxl_separate, "Refiner"
+        )
+        self.prompt_box_g.textbox.pack(
+            side="left", fill="both", expand=True, padx=(0, 10)
+        )
+        self.prompt_box_l.textbox.pack(
+            side="left", fill="both", expand=True, padx=(0, 10)
+        )
+        self.prompt_box_r.textbox.pack(
+            side="left", fill="both", expand=True, padx=(0, 10)
+        )
 
-        self.sdxl_button_frame_outer = CTkFrame(self.prompt_frame_sdxl_separate,
-                                                fg_color=ThemeManager.theme["CTkTextbox"]["fg_color"])
+        self.sdxl_button_frame_outer = CTkFrame(
+            self.prompt_frame_sdxl_separate,
+            fg_color=ThemeManager.theme["CTkTextbox"]["fg_color"],
+        )
         self.sdxl_button_frame_outer.pack(side="right", fill="y")
-        self.sdxl_button_frame = CTkFrame(self.sdxl_button_frame_outer, fg_color="transparent")
+        self.sdxl_button_frame = CTkFrame(
+            self.sdxl_button_frame_outer, fg_color="transparent"
+        )
         self.sdxl_button_frame.pack(expand=True, padx=10, pady=3)
-        self.button_sort = STkButton(self.sdxl_button_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                     image=self.sort_image, text="",
-                                     command=lambda: self.mode_switch(self.button_sort),
-                                     mode=SortMode.OFF)
+        self.button_sort = STkButton(
+            self.sdxl_button_frame,
+            width=BUTTON_WIDTH_S,
+            height=BUTTON_HEIGHT_S,
+            image=self.sort_image,
+            text="",
+            command=lambda: self.mode_switch(self.button_sort),
+            mode=SortMode.OFF,
+        )
         self.button_sort.pack(side="top")
-        self.button_sort_tooltip = CTkToolTip(self.button_sort, delay=TOOLTIP_DELAY,
-                                              message=TOOLTIP["sort"])
-        self.button_view = STkButton(self.sdxl_button_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                     image=self.view_image, text="",
-                                     command=lambda: self.mode_switch(self.button_view,
-                                                                      sort_button=self.button_sort),
-                                     mode=ViewMode.NORMAL)
+        self.button_sort_tooltip = CTkToolTip(
+            self.button_sort, delay=TOOLTIP_DELAY, message=TOOLTIP["sort"]
+        )
+        self.button_view = STkButton(
+            self.sdxl_button_frame,
+            width=BUTTON_WIDTH_S,
+            height=BUTTON_HEIGHT_S,
+            image=self.view_image,
+            text="",
+            command=lambda: self.mode_switch(
+                self.button_view, sort_button=self.button_sort
+            ),
+            mode=ViewMode.NORMAL,
+        )
         self.button_view.pack(side="top", pady=10)
-        self.button_view_tooltip = CTkToolTip(self.button_view, delay=TOOLTIP_DELAY,
-                                              message=TOOLTIP["view_prompt"])
-        self.prompt_tab_mode = STkButton(self.sdxl_button_frame, height=BUTTON_HEIGHT_S, width=BUTTON_WIDTH_S, text="",
-                                         image=self.tab_image,
-                                         command=lambda: self.switch_view(PromptMode.TAB))
+        self.button_view_tooltip = CTkToolTip(
+            self.button_view, delay=TOOLTIP_DELAY, message=TOOLTIP["view_prompt"]
+        )
+        self.prompt_tab_mode = STkButton(
+            self.sdxl_button_frame,
+            height=BUTTON_HEIGHT_S,
+            width=BUTTON_WIDTH_S,
+            text="",
+            image=self.tab_image,
+            command=lambda: self.switch_view(PromptMode.TAB),
+        )
         self.prompt_tab_mode.pack(side="top")
-        self.prompt_tab_mode_tooltip = CTkToolTip(self.prompt_tab_mode, delay=TOOLTIP_DELAY,
-                                                  message=TOOLTIP["view_tab"])
+        self.prompt_tab_mode_tooltip = CTkToolTip(
+            self.prompt_tab_mode, delay=TOOLTIP_DELAY, message=TOOLTIP["view_tab"]
+        )
 
-        self.prompt_box_list_sdxl = [self.prompt_box_sdxl, self.prompt_box_g, self.prompt_box_l, self.prompt_box_r]
+        self.prompt_box_list_sdxl = [
+            self.prompt_box_sdxl,
+            self.prompt_box_g,
+            self.prompt_box_l,
+            self.prompt_box_r,
+        ]
         self.edit_button_list_sdxl = []
-        self.copy_button_list_sdxl = [self.prompt_box_sdxl.button_copy,
-                                      self.prompt_box_g.button_copy,
-                                      self.prompt_box_l.button_copy,
-                                      self.prompt_box_r.button_copy]
-        self.all_button_list_non_sdxl = [self.prompt_box.button_copy,
-                                         self.prompt_box.button_view,
-                                         self.prompt_box.button_sort]
-        self.all_button_list_sdxl = [self.prompt_box_sdxl.button_copy,
-                                     self.prompt_box_sdxl.button_view,
-                                     self.prompt_box_sdxl.button_sort,
-                                     self.prompt_box_g.button_copy,
-                                     self.prompt_box_l.button_copy,
-                                     self.prompt_box_r.button_copy,
-                                     self.button_view,
-                                     self.button_sort]
+        self.copy_button_list_sdxl = [
+            self.prompt_box_sdxl.button_copy,
+            self.prompt_box_g.button_copy,
+            self.prompt_box_l.button_copy,
+            self.prompt_box_r.button_copy,
+        ]
+        self.all_button_list_non_sdxl = [
+            self.prompt_box.button_copy,
+            self.prompt_box.button_view,
+            self.prompt_box.button_sort,
+        ]
+        self.all_button_list_sdxl = [
+            self.prompt_box_sdxl.button_copy,
+            self.prompt_box_sdxl.button_view,
+            self.prompt_box_sdxl.button_sort,
+            self.prompt_box_g.button_copy,
+            self.prompt_box_l.button_copy,
+            self.prompt_box_r.button_copy,
+            self.button_view,
+            self.button_sort,
+        ]
 
     def edit_on(self):
         self.prompt_box.textbox.edit_on()
@@ -152,7 +200,7 @@ class PromptViewer:
                     case PromptMode.SEPARATE:
                         self.prompt_frame_sdxl_separate.pack_forget()
                 self.prompt_frame.pack(fill="both", expand=True)
-            self.text = (prompt or "")
+            self.text = prompt or ""
             self.is_sdxl = False
         elif isinstance(prompt, dict):
             if self.parent.button_edit.mode == EditMode.ON:
@@ -161,9 +209,9 @@ class PromptViewer:
             # TAB
             self.prompt_box_sdxl.prompt = prompt
             # SEPARATE
-            self.prompt_box_g.textbox.text = (prompt.get("Clip G") or "")
-            self.prompt_box_l.textbox.text = (prompt.get("Clip L") or "")
-            self.prompt_box_r.textbox.text = (prompt.get("Refiner") or "")
+            self.prompt_box_g.textbox.text = prompt.get("Clip G") or ""
+            self.prompt_box_l.textbox.text = prompt.get("Clip L") or ""
+            self.prompt_box_r.textbox.text = prompt.get("Refiner") or ""
 
             self.prompt_frame.pack_forget()
             match self.prompt_box_mode:
@@ -208,68 +256,134 @@ class PromptViewer:
 
             if isinstance(sdxl, str):
                 self.button_frame = CTkFrame(self.textbox, fg_color="transparent")
-                self.button_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="news")
-                self.prompt_label = CTkLabel(self.button_frame, height=BUTTON_HEIGHT_S, text=sdxl)
+                self.button_frame.grid(
+                    row=1, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="news"
+                )
+                self.prompt_label = CTkLabel(
+                    self.button_frame, height=BUTTON_HEIGHT_S, text=sdxl
+                )
                 self.prompt_label.pack(side="left", padx=10)
-                self.button_copy = STkButton(self.button_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                             image=prompt_viewer.clipboard_image_s, text="",
-                                             command=lambda: copy_to_clipboard(self.status_bar, self.textbox.text))
+                self.button_copy = STkButton(
+                    self.button_frame,
+                    width=BUTTON_WIDTH_S,
+                    height=BUTTON_HEIGHT_S,
+                    image=prompt_viewer.clipboard_image_s,
+                    text="",
+                    command=lambda: copy_to_clipboard(
+                        self.status_bar, self.textbox.text
+                    ),
+                )
                 self.button_copy.pack(side="right", padx=5)
-                self.button_copy_tooltip = CTkToolTip(self.button_copy, delay=TOOLTIP_DELAY,
-                                                      message=TOOLTIP["copy_prompt"])
+                self.button_copy_tooltip = CTkToolTip(
+                    self.button_copy,
+                    delay=TOOLTIP_DELAY,
+                    message=TOOLTIP["copy_prompt"],
+                )
             else:
                 self.button_frame = CTkFrame(self.textbox, fg_color="transparent")
-                self.button_frame.grid(row=0, column=1, rowspan=2, padx=(20, 10), pady=(5, 0))
-                self.button_copy = STkButton(self.button_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                             image=prompt_viewer.clipboard_image_s, text="",
-                                             command=lambda: copy_to_clipboard(self.status_bar, self.textbox.text))
+                self.button_frame.grid(
+                    row=0, column=1, rowspan=2, padx=(20, 10), pady=(5, 0)
+                )
+                self.button_copy = STkButton(
+                    self.button_frame,
+                    width=BUTTON_WIDTH_S,
+                    height=BUTTON_HEIGHT_S,
+                    image=prompt_viewer.clipboard_image_s,
+                    text="",
+                    command=lambda: copy_to_clipboard(
+                        self.status_bar, self.textbox.text
+                    ),
+                )
                 self.button_copy.pack(side="top")
-                self.button_copy_tooltip = CTkToolTip(self.button_copy, delay=TOOLTIP_DELAY,
-                                                      message=TOOLTIP["copy_prompt"])
-                self.button_sort = STkButton(self.button_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                             image=prompt_viewer.sort_image, text="",
-                                             command=lambda: self.mode_switch(self.button_sort),
-                                             mode=SortMode.OFF)
+                self.button_copy_tooltip = CTkToolTip(
+                    self.button_copy,
+                    delay=TOOLTIP_DELAY,
+                    message=TOOLTIP["copy_prompt"],
+                )
+                self.button_sort = STkButton(
+                    self.button_frame,
+                    width=BUTTON_WIDTH_S,
+                    height=BUTTON_HEIGHT_S,
+                    image=prompt_viewer.sort_image,
+                    text="",
+                    command=lambda: self.mode_switch(self.button_sort),
+                    mode=SortMode.OFF,
+                )
                 self.button_sort.pack(side="top", pady=10)
-                self.button_sort_tooltip = CTkToolTip(self.button_sort, delay=TOOLTIP_DELAY,
-                                                      message=TOOLTIP["sort"])
-                self.button_view = STkButton(self.button_frame, width=BUTTON_WIDTH_S, height=BUTTON_HEIGHT_S,
-                                             image=prompt_viewer.view_image, text="",
-                                             command=lambda: self.mode_switch(self.button_view,
-                                                                              sort_button=self.button_sort),
-                                             mode=ViewMode.NORMAL)
+                self.button_sort_tooltip = CTkToolTip(
+                    self.button_sort, delay=TOOLTIP_DELAY, message=TOOLTIP["sort"]
+                )
+                self.button_view = STkButton(
+                    self.button_frame,
+                    width=BUTTON_WIDTH_S,
+                    height=BUTTON_HEIGHT_S,
+                    image=prompt_viewer.view_image,
+                    text="",
+                    command=lambda: self.mode_switch(
+                        self.button_view, sort_button=self.button_sort
+                    ),
+                    mode=ViewMode.NORMAL,
+                )
                 self.button_view.pack(side="top")
-                self.button_view_tooltip = CTkToolTip(self.button_view, delay=TOOLTIP_DELAY,
-                                                      message=TOOLTIP["view_prompt"])
+                self.button_view_tooltip = CTkToolTip(
+                    self.button_view,
+                    delay=TOOLTIP_DELAY,
+                    message=TOOLTIP["view_prompt"],
+                )
 
                 if sdxl:
                     self.tab_frame = CTkFrame(self.textbox, fg_color="transparent")
-                    self.tab_frame.grid(row=1, column=0, padx=5, pady=(0, 10), sticky="news")
+                    self.tab_frame.grid(
+                        row=1, column=0, padx=5, pady=(0, 10), sticky="news"
+                    )
 
-                    self.prompt_tab_g = STkButton(self.tab_frame, height=BUTTON_HEIGHT_S, text="Clip G",
-                                                  command=lambda: self.prompt_switch(PromptMode.CLIP_G))
+                    self.prompt_tab_g = STkButton(
+                        self.tab_frame,
+                        height=BUTTON_HEIGHT_S,
+                        text="Clip G",
+                        command=lambda: self.prompt_switch(PromptMode.CLIP_G),
+                    )
                     self.prompt_tab_g.pack(side="left", padx=5, expand=True, fill="x")
                     self.prompt_tab_g.switch_on()
-                    self.prompt_tab_l = STkButton(self.tab_frame, height=BUTTON_HEIGHT_S, text="Clip L",
-                                                  command=lambda: self.prompt_switch(PromptMode.CLIP_L))
+                    self.prompt_tab_l = STkButton(
+                        self.tab_frame,
+                        height=BUTTON_HEIGHT_S,
+                        text="Clip L",
+                        command=lambda: self.prompt_switch(PromptMode.CLIP_L),
+                    )
                     self.prompt_tab_l.pack(side="left", padx=5, expand=True, fill="x")
-                    self.prompt_tab_r = STkButton(self.tab_frame, height=BUTTON_HEIGHT_S, text="Refiner",
-                                                  command=lambda: self.prompt_switch(PromptMode.REFINER))
+                    self.prompt_tab_r = STkButton(
+                        self.tab_frame,
+                        height=BUTTON_HEIGHT_S,
+                        text="Refiner",
+                        command=lambda: self.prompt_switch(PromptMode.REFINER),
+                    )
                     self.prompt_tab_r.pack(side="left", padx=5, expand=True, fill="x")
-                    self.prompt_tab_mode = STkButton(self.tab_frame, height=BUTTON_HEIGHT_S, width=BUTTON_WIDTH_S,
-                                                     text="",
-                                                     image=prompt_viewer.separate_image,
-                                                     command=lambda: prompt_viewer.switch_view(PromptMode.SEPARATE))
+                    self.prompt_tab_mode = STkButton(
+                        self.tab_frame,
+                        height=BUTTON_HEIGHT_S,
+                        width=BUTTON_WIDTH_S,
+                        text="",
+                        image=prompt_viewer.separate_image,
+                        command=lambda: prompt_viewer.switch_view(PromptMode.SEPARATE),
+                    )
                     self.prompt_tab_mode.pack(side="right", padx=5)
-                    self.prompt_tab_mode_tooltip = CTkToolTip(self.prompt_tab_mode, delay=TOOLTIP_DELAY,
-                                                              message=TOOLTIP["view_separate"])
+                    self.prompt_tab_mode_tooltip = CTkToolTip(
+                        self.prompt_tab_mode,
+                        delay=TOOLTIP_DELAY,
+                        message=TOOLTIP["view_separate"],
+                    )
 
-        def mode_switch(self, button: STkButton, sort_button: STkButton = None, update_status=True):
+        def mode_switch(
+            self, button: STkButton, sort_button: STkButton = None, update_status=True
+        ):
             if isinstance(button.mode, ViewMode):
                 match button.mode:
                     case ViewMode.NORMAL:
                         button.switch_on()
-                        button.mode = ViewMode.VERTICAL if update_status else ViewMode.NORMAL
+                        button.mode = (
+                            ViewMode.VERTICAL if update_status else ViewMode.NORMAL
+                        )
                         self.textbox.view_vertical()
                         if sort_button:
                             match sort_button.mode:
@@ -280,7 +394,9 @@ class PromptViewer:
                         self.status_bar.info(MESSAGE["view_prompt"][0])
                     case ViewMode.VERTICAL:
                         button.switch_off()
-                        button.mode = ViewMode.NORMAL if update_status else ViewMode.VERTICAL
+                        button.mode = (
+                            ViewMode.NORMAL if update_status else ViewMode.VERTICAL
+                        )
                         self.textbox.view_normal()
                         if sort_button:
                             match sort_button.mode:
@@ -331,19 +447,19 @@ class PromptViewer:
                     self.prompt_tab_g.switch_on()
                     self.prompt_tab_l.switch_off()
                     self.prompt_tab_r.switch_off()
-                    self.textbox.text = (self._prompt.get("Clip G") or "")
+                    self.textbox.text = self._prompt.get("Clip G") or ""
                     self.mode_update()
                 case PromptMode.CLIP_L:
                     self.prompt_tab_g.switch_off()
                     self.prompt_tab_l.switch_on()
                     self.prompt_tab_r.switch_off()
-                    self.textbox.text = (self._prompt.get("Clip L") or "")
+                    self.textbox.text = self._prompt.get("Clip L") or ""
                     self.mode_update()
                 case PromptMode.REFINER:
                     self.prompt_tab_g.switch_off()
                     self.prompt_tab_l.switch_off()
                     self.prompt_tab_r.switch_on()
-                    self.textbox.text = (self._prompt.get("Refiner") or "")
+                    self.textbox.text = self._prompt.get("Refiner") or ""
                     self.mode_update()
 
         @property

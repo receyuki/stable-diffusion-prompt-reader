@@ -1,8 +1,7 @@
-# -*- encoding:utf-8 -*-
-__author__ = 'receyuki'
-__filename__ = 'image_data_reader.py'
-__copyright__ = 'Copyright 2023'
-__email__ = 'receyuki@gmail.com'
+__author__ = "receyuki"
+__filename__ = "image_data_reader.py"
+__copyright__ = "Copyright 2023"
+__email__ = "receyuki@gmail.com"
 
 import json
 from xml.dom import minidom
@@ -18,8 +17,16 @@ from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
 # comfyui node types
 KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
 VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
-CHECKPOINT_LOADER_TYPE = ["CheckpointLoader", "CheckpointLoaderSimple", "unCLIPCheckpointLoader"]
-CLIP_TEXT_ENCODE_TYPE = ["CLIPTextEncode", "CLIPTextEncodeSDXL", "CLIPTextEncodeSDXLRefiner"]
+CHECKPOINT_LOADER_TYPE = [
+    "CheckpointLoader",
+    "CheckpointLoaderSimple",
+    "unCLIPCheckpointLoader",
+]
+CLIP_TEXT_ENCODE_TYPE = [
+    "CLIPTextEncode",
+    "CLIPTextEncodeSDXL",
+    "CLIPTextEncodeSDXLRefiner",
+]
 
 # easy diffusion maping table
 EASYDIFFUSION_MAPPING_A = {
@@ -54,16 +61,16 @@ PROMPT_MAPPING = {
     # "Model":                    ("sd_model",            True),
     # "prompt",
     # "negative_prompt",
-    "Seed":                     ("seed",                False),
-    "Variation seed strength":  ("subseed_strength",    False),
+    "Seed": ("seed", False),
+    "Variation seed strength": ("subseed_strength", False),
     # "seed_resize_from_h",
     # "seed_resize_from_w",
-    "Sampler":                  ("sampler_name",        True),
-    "Steps":                    ("steps",               False),
-    "CFG scale":                ("cfg_scale",           False),
+    "Sampler": ("sampler_name", True),
+    "Steps": ("steps", False),
+    "CFG scale": ("cfg_scale", False),
     # "width",
     # "height",
-    "Face restoration":         ("restore_faces",       False),
+    "Face restoration": ("restore_faces", False),
 }
 
 
@@ -129,7 +136,9 @@ class ImageDataReader:
             elif f.format == "JPEG" or f.format == "WEBP":
                 try:
                     exif = piexif.load(self._info.get("exif")) or {}
-                    self._raw = piexif.helper.UserComment.load(exif.get("Exif").get(piexif.ExifIFD.UserComment))
+                    self._raw = piexif.helper.UserComment.load(
+                        exif.get("Exif").get(piexif.ExifIFD.UserComment)
+                    )
                 except TypeError:
                     print("empty jpeg")
                 except Exception:
@@ -148,14 +157,18 @@ class ImageDataReader:
         if self._raw and "\nSteps:" in self._raw:
             # w/ neg
             if "Negative prompt:" in self._raw:
-                prompt_index = [self._raw.index("\nNegative prompt:"),
-                                self._raw.index("\nSteps:")]
+                prompt_index = [
+                    self._raw.index("\nNegative prompt:"),
+                    self._raw.index("\nSteps:"),
+                ]
             # w/o neg
             else:
                 prompt_index = [self._raw.index("\nSteps:")]
-            self._positive = self._raw[:prompt_index[0]]
-            self._negative = self._raw[prompt_index[0] + 1 + len("Negative prompt: "):prompt_index[-1]]
-            self._setting = self._raw[prompt_index[-1] + 1:]
+            self._positive = self._raw[: prompt_index[0]]
+            self._negative = self._raw[
+                prompt_index[0] + 1 + len("Negative prompt: ") : prompt_index[-1]
+            ]
+            self._setting = self._raw[prompt_index[-1] + 1 :]
 
             parameter_index = [
                 self._setting.find("Model: ") + len("Model: "),
@@ -166,21 +179,35 @@ class ImageDataReader:
                 self._setting.find("Size: ") + len("Size: "),
             ]
             if self._setting.find("Model: ") != -1:
-                self._parameter["model"] = self._setting[parameter_index[0]:self._setting.find(",", parameter_index[0])]
-            self._parameter["sampler"] = self._setting[parameter_index[1]:self._setting.find(",", parameter_index[1])]
-            self._parameter["seed"] = self._setting[parameter_index[2]:self._setting.find(",", parameter_index[2])]
-            self._parameter["cfg"] = self._setting[parameter_index[3]:self._setting.find(",", parameter_index[3])]
-            self._parameter["steps"] = self._setting[parameter_index[4]:self._setting.find(",", parameter_index[4])]
-            self._parameter["size"] = self._setting[parameter_index[5]:self._setting.find(",", parameter_index[5])]
+                self._parameter["model"] = self._setting[
+                    parameter_index[0] : self._setting.find(",", parameter_index[0])
+                ]
+            self._parameter["sampler"] = self._setting[
+                parameter_index[1] : self._setting.find(",", parameter_index[1])
+            ]
+            self._parameter["seed"] = self._setting[
+                parameter_index[2] : self._setting.find(",", parameter_index[2])
+            ]
+            self._parameter["cfg"] = self._setting[
+                parameter_index[3] : self._setting.find(",", parameter_index[3])
+            ]
+            self._parameter["steps"] = self._setting[
+                parameter_index[4] : self._setting.find(",", parameter_index[4])
+            ]
+            self._parameter["size"] = self._setting[
+                parameter_index[5] : self._setting.find(",", parameter_index[5])
+            ]
         elif self._raw:
             # w/ neg
             if "Negative prompt:" in self._raw:
                 prompt_index = [self._raw.index("\nNegative prompt:")]
-                self._negative = self._raw[prompt_index[0] + 1 + len("Negative prompt: "):]
+                self._negative = self._raw[
+                    prompt_index[0] + 1 + len("Negative prompt: ") :
+                ]
             # w/o neg
             else:
                 prompt_index = [len(self._raw)]
-            self._positive = self._raw[:prompt_index[0]]
+            self._positive = self._raw[: prompt_index[0]]
         else:
             self._raw = ""
 
@@ -194,36 +221,44 @@ class ImageDataReader:
         data.pop(ed["prompt"])
         self._negative = data.get(ed["negative_prompt"])
         data.pop(ed["negative_prompt"])
-        if PureWindowsPath(data.get(ed['use_stable_diffusion_model'])).drive:
-            file = PureWindowsPath(data.get(ed['use_stable_diffusion_model'])).name
+        if PureWindowsPath(data.get(ed["use_stable_diffusion_model"])).drive:
+            file = PureWindowsPath(data.get(ed["use_stable_diffusion_model"])).name
         else:
-            file = PurePosixPath(data.get(ed['use_stable_diffusion_model'])).name
+            file = PurePosixPath(data.get(ed["use_stable_diffusion_model"])).name
 
         self._setting = self.remove_quotes(data).replace("{", "").replace("}", "")
         self._parameter["model"] = file
-        self._parameter["sampler"] = data.get(ed['sampler_name'])
-        self._parameter["seed"] = data.get(ed['seed'])
-        self._parameter["cfg"] = data.get(ed['guidance_scale'])
-        self._parameter["steps"] = data.get(ed['num_inference_steps'])
-        self._parameter["size"] = str(data.get(ed['width'])) + "x" + str(data.get(ed['height']))
+        self._parameter["sampler"] = data.get(ed["sampler_name"])
+        self._parameter["seed"] = data.get(ed["seed"])
+        self._parameter["cfg"] = data.get(ed["guidance_scale"])
+        self._parameter["steps"] = data.get(ed["num_inference_steps"])
+        self._parameter["size"] = (
+            str(data.get(ed["width"])) + "x" + str(data.get(ed["height"]))
+        )
 
     def _invoke_metadata(self):
         metadata = json.loads(self._info.get("sd-metadata"))
         image = metadata.get("image")
-        prompt = image.get("prompt")[0].get("prompt") if isinstance(image.get("prompt"), list) else image.get("prompt")
+        prompt = (
+            image.get("prompt")[0].get("prompt")
+            if isinstance(image.get("prompt"), list)
+            else image.get("prompt")
+        )
         prompt_index = [prompt.rfind("["), prompt.rfind("]")]
 
         # w/ neg
         if -1 not in prompt_index:
-            self._positive = prompt[:prompt_index[0]]
-            self._negative = prompt[prompt_index[0] + 1:prompt_index[1]]
+            self._positive = prompt[: prompt_index[0]]
+            self._negative = prompt[prompt_index[0] + 1 : prompt_index[1]]
         # w/o neg
         else:
             self._positive = prompt
 
         self._raw += self._positive
         self._raw += "\n" + self.negative
-        self._raw += "\n" + self._info.get("Dream") + "\n" + self._info.get("sd-metadata")
+        self._raw += (
+            "\n" + self._info.get("Dream") + "\n" + self._info.get("sd-metadata")
+        )
         self._setting = (
             f"Steps: {image.get('steps')}"
             f", Sampler: {image.get('sampler')}"
@@ -241,12 +276,14 @@ class ImageDataReader:
             f", Variations: {image.get('variations')}"
         )
 
-        self._parameter["model"] = metadata.get('model_weights')
-        self._parameter["sampler"] = image.get('sampler')
-        self._parameter["seed"] = image.get('seed')
-        self._parameter["cfg"] = image.get('cfg_scale')
-        self._parameter["steps"] = image.get('steps')
-        self._parameter["size"] = str(image.get('width')) + "x" + str(image.get('height'))
+        self._parameter["model"] = metadata.get("model_weights")
+        self._parameter["sampler"] = image.get("sampler")
+        self._parameter["seed"] = image.get("seed")
+        self._parameter["cfg"] = image.get("cfg_scale")
+        self._parameter["steps"] = image.get("steps")
+        self._parameter["size"] = (
+            str(image.get("width")) + "x" + str(image.get("height"))
+        )
 
     def _invoke_dream(self):
         dream = self._info.get("Dream")
@@ -255,8 +292,8 @@ class ImageDataReader:
 
         # w/ neg
         if -1 not in neg_index:
-            self._positive = dream[1:neg_index[0]]
-            self._negative = dream[neg_index[0] + 1:neg_index[1]]
+            self._positive = dream[1 : neg_index[0]]
+            self._negative = dream[neg_index[0] + 1 : neg_index[1]]
         # w/o neg
         else:
             self._positive = dream[1:prompt_index]
@@ -265,12 +302,14 @@ class ImageDataReader:
         self._raw += "\n" + self.negative
         self._raw += "\n" + self._info.get("Dream")
 
-        setting_index = [dream.rfind("-s"),
-                         dream.rfind("-S"),
-                         dream.rfind("-W"),
-                         dream.rfind("-H"),
-                         dream.rfind("-C"),
-                         dream.rfind("-A")]
+        setting_index = [
+            dream.rfind("-s"),
+            dream.rfind("-S"),
+            dream.rfind("-W"),
+            dream.rfind("-H"),
+            dream.rfind("-C"),
+            dream.rfind("-A"),
+        ]
         self._setting = (
             f"Steps: {dream[setting_index[0] + 3:setting_index[1] - 1]}"
             f", Sampler: {dream[setting_index[5] + 3:].split()[0]}"
@@ -280,12 +319,15 @@ class ImageDataReader:
             f"x{dream[setting_index[3] + 3:setting_index[4] - 1]}"
         )
 
-        self._parameter["sampler"] = dream[setting_index[5] + 3:].split()[0]
-        self._parameter["seed"] = dream[setting_index[1] + 3:setting_index[2] - 1]
-        self._parameter["cfg"] = dream[setting_index[4] + 3:setting_index[5] - 1]
-        self._parameter["steps"] = dream[setting_index[0] + 3:setting_index[1] - 1]
-        self._parameter["size"] = str(dream[setting_index[2] + 3:setting_index[3] - 1]) + "x" \
-                                  + str(dream[setting_index[3] + 3:setting_index[4] - 1])
+        self._parameter["sampler"] = dream[setting_index[5] + 3 :].split()[0]
+        self._parameter["seed"] = dream[setting_index[1] + 3 : setting_index[2] - 1]
+        self._parameter["cfg"] = dream[setting_index[4] + 3 : setting_index[5] - 1]
+        self._parameter["steps"] = dream[setting_index[0] + 3 : setting_index[1] - 1]
+        self._parameter["size"] = (
+            str(dream[setting_index[2] + 3 : setting_index[3] - 1])
+            + "x"
+            + str(dream[setting_index[3] + 3 : setting_index[4] - 1])
+        )
 
     def _nai_png(self):
         self._positive = self._info.get("Description")
@@ -311,17 +353,22 @@ class ImageDataReader:
         if self._setting:
             self._setting += ", Clip skip: 2, ENSD: 31337"
 
-        self._parameter["sampler"] = comment_json.get('sampler')
-        self._parameter["seed"] = comment_json.get('seed')
-        self._parameter["cfg"] = comment_json.get('scale')
-        self._parameter["steps"] = comment_json.get('steps')
+        self._parameter["sampler"] = comment_json.get("sampler")
+        self._parameter["seed"] = comment_json.get("seed")
+        self._parameter["cfg"] = comment_json.get("scale")
+        self._parameter["steps"] = comment_json.get("steps")
         self._parameter["size"] = str(self._width) + "x" + str(self._height)
 
     def _dt_format(self):
         try:
             data = minidom.parseString(self._info.get("XML:com.adobe.xmp"))
-            data_json = json.loads(data.getElementsByTagName("exif:UserComment")[0]
-                                   .childNodes[1].childNodes[1].childNodes[0].data)
+            data_json = json.loads(
+                data.getElementsByTagName("exif:UserComment")[0]
+                .childNodes[1]
+                .childNodes[1]
+                .childNodes[0]
+                .data
+            )
         except:
             print("Draw things format error")
         else:
@@ -333,12 +380,12 @@ class ImageDataReader:
             data_json.pop("uc")
             self._setting = self.remove_quotes(str(data_json)[1:-1])
 
-            self._parameter["model"] = data_json.get('model')
-            self._parameter["sampler"] = data_json.get('sampler')
-            self._parameter["seed"] = data_json.get('seed')
-            self._parameter["cfg"] = data_json.get('scale')
-            self._parameter["steps"] = data_json.get('steps')
-            self._parameter["size"] = data_json.get('size')
+            self._parameter["model"] = data_json.get("model")
+            self._parameter["sampler"] = data_json.get("sampler")
+            self._parameter["seed"] = data_json.get("seed")
+            self._parameter["cfg"] = data_json.get("scale")
+            self._parameter["steps"] = data_json.get("steps")
+            self._parameter["size"] = data_json.get("size")
 
     def _comfy_png(self):
         prompt = self._info.get("prompt") or {}
@@ -346,7 +393,13 @@ class ImageDataReader:
         prompt_json = json.loads(prompt)
 
         # find end node of each flow
-        end_nodes = list(filter(lambda item: item[-1].get("class_type") in ["SaveImage"] + KSAMPLER_TYPES, prompt_json.items()))
+        end_nodes = list(
+            filter(
+                lambda item: item[-1].get("class_type")
+                in ["SaveImage"] + KSAMPLER_TYPES,
+                prompt_json.items(),
+            )
+        )
         longest_flow = {}
         longest_nodes = []
         longest_flow_len = 0
@@ -374,10 +427,10 @@ class ImageDataReader:
             self._raw += "\n" + str(workflow)
 
         seed = None
-        if longest_flow.get('seed'):
-            seed = str(longest_flow.get('seed'))
-        elif longest_flow.get('noise_seed'):
-            seed = str(longest_flow.get('noise_seed'))
+        if longest_flow.get("seed"):
+            seed = str(longest_flow.get("seed"))
+        elif longest_flow.get("noise_seed"):
+            seed = str(longest_flow.get("noise_seed"))
         self._setting = (
             f"Steps: {longest_flow.get('steps')}"
             f", Sampler: {self.remove_quotes(longest_flow.get('sampler_name'))}"
@@ -392,13 +445,19 @@ class ImageDataReader:
         if "upscale_method" in longest_flow:
             self._setting += f", Upscale method: {self.remove_quotes(longest_flow.get('upscale_method'))}"
         if "upscaler" in longest_flow:
-            self._setting += f", Upscale model: {self.remove_quotes(longest_flow.get('upscaler'))}"
+            self._setting += (
+                f", Upscale model: {self.remove_quotes(longest_flow.get('upscaler'))}"
+            )
 
-        self._parameter["model"] = str(self.remove_quotes(longest_flow.get('ckpt_name')))
-        self._parameter["sampler"] = str(self.remove_quotes(longest_flow.get('sampler_name')))
+        self._parameter["model"] = str(
+            self.remove_quotes(longest_flow.get("ckpt_name"))
+        )
+        self._parameter["sampler"] = str(
+            self.remove_quotes(longest_flow.get("sampler_name"))
+        )
         self._parameter["seed"] = seed
-        self._parameter["cfg"] = str(longest_flow.get('cfg'))
-        self._parameter["steps"] = str(longest_flow.get('steps'))
+        self._parameter["cfg"] = str(longest_flow.get("cfg"))
+        self._parameter["steps"] = str(longest_flow.get("steps"))
         self._parameter["size"] = str(self._width) + "x" + str(self._height)
 
     def _comfy_traverse(self, prompt, end_node):
@@ -413,7 +472,9 @@ class ImageDataReader:
         match prompt[end_node]["class_type"]:
             case "SaveImage":
                 try:
-                    last_flow, last_node = self._comfy_traverse(prompt, inputs["images"][0])
+                    last_flow, last_node = self._comfy_traverse(
+                        prompt, inputs["images"][0]
+                    )
                     flow = self.merge_dict(flow, last_flow)
                     node += last_node
                 except:
@@ -421,8 +482,12 @@ class ImageDataReader:
             case node_type if node_type in KSAMPLER_TYPES:
                 try:
                     flow = inputs
-                    last_flow1, last_node1 = self._comfy_traverse(prompt, inputs["model"][0])
-                    last_flow2, last_node2 = self._comfy_traverse(prompt, inputs["latent_image"][0])
+                    last_flow1, last_node1 = self._comfy_traverse(
+                        prompt, inputs["model"][0]
+                    )
+                    last_flow2, last_node2 = self._comfy_traverse(
+                        prompt, inputs["latent_image"][0]
+                    )
                     positive = self._comfy_traverse(prompt, inputs["positive"][0])
                     if isinstance(positive, str):
                         self._positive = positive
@@ -449,15 +514,22 @@ class ImageDataReader:
                             if isinstance(inputs["text_g"], list):
                                 text_g = int(inputs["text_g"][0])
                                 text_l = int(inputs["text_l"][0])
-                                prompt_styler_g = self._comfy_traverse(prompt, str(text_g))
-                                prompt_styler_l = self._comfy_traverse(prompt, str(text_l))
+                                prompt_styler_g = self._comfy_traverse(
+                                    prompt, str(text_g)
+                                )
+                                prompt_styler_l = self._comfy_traverse(
+                                    prompt, str(text_l)
+                                )
                                 self._positive_sdxl["Clip G"] = prompt_styler_g[0]
                                 self._positive_sdxl["Clip L"] = prompt_styler_l[0]
                                 self._negative_sdxl["Clip G"] = prompt_styler_g[1]
                                 self._negative_sdxl["Clip L"] = prompt_styler_l[1]
                                 return
                             elif isinstance(inputs["text_g"], str):
-                                return {"Clip G": inputs.get("text_g"), "Clip L": inputs.get("text_l")}
+                                return {
+                                    "Clip G": inputs.get("text_g"),
+                                    "Clip L": inputs.get("text_l"),
+                                }
                         case "CLIPTextEncodeSDXLRefiner":
                             self._is_sdxl = True
                             if isinstance(inputs["text"], list):
@@ -474,7 +546,9 @@ class ImageDataReader:
             case "LoraLoader":
                 try:
                     flow = inputs
-                    last_flow, last_node = self._comfy_traverse(prompt, inputs["model"][0])
+                    last_flow, last_node = self._comfy_traverse(
+                        prompt, inputs["model"][0]
+                    )
                     flow = self.merge_dict(flow, last_flow)
                     node += last_node
                 except:
@@ -486,7 +560,9 @@ class ImageDataReader:
                     print("comfyUI CheckpointLoader error")
             case node_type if node_type in VAE_ENCODE_TYPE:
                 try:
-                    last_flow, last_node = self._comfy_traverse(prompt, inputs["pixels"][0])
+                    last_flow, last_node = self._comfy_traverse(
+                        prompt, inputs["pixels"][0]
+                    )
                     flow = self.merge_dict(flow, last_flow)
                     node += last_node
                 except:
@@ -494,7 +570,9 @@ class ImageDataReader:
             case "ImageScale":
                 try:
                     flow = inputs
-                    last_flow, last_node = self._comfy_traverse(prompt, inputs["image"][0])
+                    last_flow, last_node = self._comfy_traverse(
+                        prompt, inputs["image"][0]
+                    )
                     flow = self.merge_dict(flow, last_flow)
                     node += last_node
                 except:
@@ -507,7 +585,9 @@ class ImageDataReader:
             case "ImageUpscaleWithModel":
                 try:
                     flow = inputs
-                    last_flow, last_node = self._comfy_traverse(prompt, inputs["image"][0])
+                    last_flow, last_node = self._comfy_traverse(
+                        prompt, inputs["image"][0]
+                    )
                     model = self._comfy_traverse(prompt, inputs["upscale_model"][0])
                     flow = self.merge_dict(flow, last_flow)
                     flow = self.merge_dict(flow, model)
@@ -516,10 +596,12 @@ class ImageDataReader:
                     print("comfyUI UpscaleModel error")
             case "ConditioningCombine":
                 try:
-                    last_flow1, last_node1 = self._comfy_traverse(prompt,
-                                                                  inputs["conditioning_1"][0])
-                    last_flow2, last_node2 = self._comfy_traverse(prompt,
-                                                                  inputs["conditioning_2"][0])
+                    last_flow1, last_node1 = self._comfy_traverse(
+                        prompt, inputs["conditioning_1"][0]
+                    )
+                    last_flow2, last_node2 = self._comfy_traverse(
+                        prompt, inputs["conditioning_2"][0]
+                    )
                     flow = self.merge_dict(flow, last_flow1)
                     flow = self.merge_dict(flow, last_flow2)
                     node += last_node1 + last_node2
@@ -536,16 +618,25 @@ class ImageDataReader:
                     last_flow = {}
                     last_node = []
                     if inputs.get("samples"):
-                        last_flow, last_node = self._comfy_traverse(prompt, inputs["samples"][0])
+                        last_flow, last_node = self._comfy_traverse(
+                            prompt, inputs["samples"][0]
+                        )
                     elif inputs.get("image"):
-                        last_flow, last_node = self._comfy_traverse(prompt, inputs["image"][0])
+                        last_flow, last_node = self._comfy_traverse(
+                            prompt, inputs["image"][0]
+                        )
                     elif inputs.get("model"):
-                        last_flow, last_node = self._comfy_traverse(prompt, inputs["model"][0])
+                        last_flow, last_node = self._comfy_traverse(
+                            prompt, inputs["model"][0]
+                        )
                     elif inputs.get("clip"):
-                        last_flow, last_node = self._comfy_traverse(prompt, inputs["clip"][0])
+                        last_flow, last_node = self._comfy_traverse(
+                            prompt, inputs["clip"][0]
+                        )
                     elif inputs.get("samples_from"):
-                        last_flow, last_node = self._comfy_traverse(prompt,
-                                                                    inputs["samples_from"][0])
+                        last_flow, last_node = self._comfy_traverse(
+                            prompt, inputs["samples_from"][0]
+                        )
                     elif inputs.get("conditioning"):
                         result = self._comfy_traverse(prompt, inputs["conditioning"][0])
                         if isinstance(result, str):
@@ -575,11 +666,15 @@ class ImageDataReader:
                     metadata = PngInfo()
                     metadata.add_text("parameters", data)
                 case "JPEG" | "WEBP":
-                    metadata = piexif.dump({
-                        "Exif": {
-                            piexif.ExifIFD.UserComment: piexif.helper.UserComment.dump(data, encoding="unicode")
-                        },
-                    })
+                    metadata = piexif.dump(
+                        {
+                            "Exif": {
+                                piexif.ExifIFD.UserComment: piexif.helper.UserComment.dump(
+                                    data, encoding="unicode"
+                                )
+                            },
+                        }
+                    )
 
         with Image.open(image_path) as f:
             try:
@@ -616,19 +711,28 @@ class ImageDataReader:
 
     @staticmethod
     def remove_quotes(string):
-        return str(string).replace('"', '').replace("'", "")
+        return str(string).replace('"', "").replace("'", "")
 
     @staticmethod
     def add_quotes(string):
-        return '"'+str(string)+'"'
+        return '"' + str(string) + '"'
 
     def prompt_to_line(self):
         if not self._setting:
             return ""
-        single_line_prompt = "--prompt " + self.add_quotes(self._positive).replace("\n", "")
+        single_line_prompt = "--prompt " + self.add_quotes(self._positive).replace(
+            "\n", ""
+        )
         if self._negative:
-            single_line_prompt += " --negative_prompt " + self.add_quotes(self._negative).replace("\n", "")
-        setting = dict(filter(lambda x: len(x) == 2, (param.split(": ") for param in self._setting.split(", "))))
+            single_line_prompt += " --negative_prompt " + self.add_quotes(
+                self._negative
+            ).replace("\n", "")
+        setting = dict(
+            filter(
+                lambda x: len(x) == 2,
+                (param.split(": ") for param in self._setting.split(", ")),
+            )
+        )
         for key, value in setting.items():
             if key == "Size":
                 width, height = value.split("x")
@@ -644,7 +748,9 @@ class ImageDataReader:
                 pass
             else:
                 if is_str:
-                    single_line_prompt += " --" + tag + " " + self.add_quotes(str(value))
+                    single_line_prompt += (
+                        " --" + tag + " " + self.add_quotes(str(value))
+                    )
                 else:
                     single_line_prompt += " --" + tag + " " + value
         return single_line_prompt
