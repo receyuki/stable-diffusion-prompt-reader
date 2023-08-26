@@ -1,8 +1,7 @@
-# -*- encoding:utf-8 -*-
-__author__ = 'receyuki'
-__filename__ = 'utility.py'
-__copyright__ = 'Copyright 2023'
-__email__ = 'receyuki@gmail.com'
+__author__ = "receyuki"
+__filename__ = "utility.py"
+__copyright__ = "Copyright 2023"
+__email__ = "receyuki@gmail.com"
 
 from customtkinter import filedialog
 
@@ -14,21 +13,27 @@ import pyperclip
 
 
 def load_icon(icon_file, size):
-    return (CTkImage(Image.open(icon_file[0]), size=size),
-            CTkImage(Image.open(icon_file[1]), size=size))
+    return (
+        CTkImage(Image.open(icon_file[0]), size=size),
+        CTkImage(Image.open(icon_file[1]), size=size),
+    )
 
 
 def get_images(dir_path: Path):
-    images = [image.resolve() for image in dir_path.rglob("*") if image.suffix in SUPPORTED_FORMATS]
+    images = [
+        image.resolve()
+        for image in dir_path.rglob("*")
+        if image.suffix in SUPPORTED_FORMATS
+    ]
     return images
 
 
 def select_image(file_path=None):
     initial_dir = file_path.parent if file_path else "/"
     return filedialog.askopenfilename(
-        title='Select your image file',
+        title="Select your image file",
         initialdir=initial_dir,
-        filetypes=(("image files", "*.png *.jpg *jpeg *.webp"),)
+        filetypes=(("image files", "*.png *.jpg *jpeg *.webp"),),
     )
 
 
@@ -51,7 +56,9 @@ def get_canvas_total_size(canvas):
 
     if all_elements_bbox:
         # Get the maximum X and Y coordinates from the bounding box information of all elements to get the total size
-        total_size = max(all_elements_bbox[2], canvas_width), max(all_elements_bbox[3], canvas_height)
+        total_size = max(all_elements_bbox[2], canvas_width), max(
+            all_elements_bbox[3], canvas_height
+        )
     else:
         # If there are no elements, return the actual width and height of the canvas
         total_size = canvas_width, canvas_height
