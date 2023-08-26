@@ -440,35 +440,35 @@ class ImageDataReader:
                     print("comfyUI KSampler error")
             case node_type if node_type in CLIP_TEXT_ENCODE_TYPE:
                 try:
-                    if node_type == "CLIPTextEncode":
-                        return inputs.get("text")
-                    try:
-                        # SDXLPromptStyler
-                        if node_type == "CLIPTextEncodeSDXL":
+                    match node_type:
+                        case "CLIPTextEncode":
+                            return inputs.get("text")
+                        case "CLIPTextEncodeSDXL":
+                            # SDXLPromptStyler
                             self._is_sdxl = True
-                            text_g = int(inputs["text_g"][0])
-                            text_l = int(inputs["text_l"][0])
-                            prompt_styler_g = self._comfy_traverse(prompt, str(text_g))
-                            prompt_styler_l = self._comfy_traverse(prompt, str(text_l))
-                            self._positive_sdxl["Clip G"] = prompt_styler_g[0]
-                            self._positive_sdxl["Clip L"] = prompt_styler_l[0]
-                            self._negative_sdxl["Clip G"] = prompt_styler_g[1]
-                            self._negative_sdxl["Clip L"] = prompt_styler_l[1]
-                            return
-                        elif node_type == "CLIPTextEncodeSDXLRefiner":
+                            if isinstance(inputs["text_g"], list):
+                                text_g = int(inputs["text_g"][0])
+                                text_l = int(inputs["text_l"][0])
+                                prompt_styler_g = self._comfy_traverse(prompt, str(text_g))
+                                prompt_styler_l = self._comfy_traverse(prompt, str(text_l))
+                                self._positive_sdxl["Clip G"] = prompt_styler_g[0]
+                                self._positive_sdxl["Clip L"] = prompt_styler_l[0]
+                                self._negative_sdxl["Clip G"] = prompt_styler_g[1]
+                                self._negative_sdxl["Clip L"] = prompt_styler_l[1]
+                                return
+                            elif isinstance(inputs["text_g"], str):
+                                return {"Clip G": inputs.get("text_g"), "Clip L": inputs.get("text_l")}
+                        case "CLIPTextEncodeSDXLRefiner":
                             self._is_sdxl = True
-                            text = int(inputs["text"][0])
-                            prompt_styler = self._comfy_traverse(prompt, str(text))
-                            self._positive_sdxl["Refiner"] = prompt_styler[0]
-                            self._negative_sdxl["Refiner"] = prompt_styler[1]
-                            return
-                    except ValueError:
-                        if node_type == "CLIPTextEncodeSDXL":
-                            self._is_sdxl = True
-                            return {"Clip G": inputs.get("text_g"), "Clip L": inputs.get("text_l")}
-                        elif node_type == "CLIPTextEncodeSDXLRefiner":
-                            self._is_sdxl = True
-                            return {"Refiner": inputs.get("text")}
+                            if isinstance(inputs["text"], list):
+                                # SDXLPromptStyler
+                                text = int(inputs["text"][0])
+                                prompt_styler = self._comfy_traverse(prompt, str(text))
+                                self._positive_sdxl["Refiner"] = prompt_styler[0]
+                                self._negative_sdxl["Refiner"] = prompt_styler[1]
+                                return
+                            elif isinstance(inputs["text"], str):
+                                return {"Refiner": inputs.get("text")}
                 except:
                     print("comfyUI CLIPText error")
             case "LoraLoader":
