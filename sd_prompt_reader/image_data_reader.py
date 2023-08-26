@@ -210,7 +210,7 @@ class ImageDataReader:
     def _invoke_metadata(self):
         metadata = json.loads(self._info.get("sd-metadata"))
         image = metadata.get("image")
-        prompt = image.get("prompt")
+        prompt = image.get("prompt")[0].get("prompt") if isinstance(image.get("prompt"), list) else image.get("prompt")
         prompt_index = [prompt.rfind("["), prompt.rfind("]")]
 
         # w/ neg
