@@ -19,7 +19,7 @@ from sd_prompt_reader.ctkdnd import Tk
 from sd_prompt_reader.image_data_reader import ImageDataReader
 from sd_prompt_reader.status_bar import StatusBar
 from sd_prompt_reader.update_checker import UpdateChecker
-from sd_prompt_reader.ctk_tooltip import CTkToolTip
+from CTkToolTip import *
 from sd_prompt_reader.button import *
 from sd_prompt_reader.textbox import STkTextbox
 from sd_prompt_reader.parameter_viewer import ParameterViewer

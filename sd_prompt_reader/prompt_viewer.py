@@ -6,7 +6,7 @@ __email__ = 'receyuki@gmail.com'
 
 from sd_prompt_reader.button import STkButton, SortMode, ViewMode, PromptMode, EditMode
 from sd_prompt_reader.constants import *
-from sd_prompt_reader.ctk_tooltip import CTkToolTip
+from CTkToolTip import *
 from sd_prompt_reader.textbox import STkTextbox
 from sd_prompt_reader.utility import load_icon, copy_to_clipboard
 
