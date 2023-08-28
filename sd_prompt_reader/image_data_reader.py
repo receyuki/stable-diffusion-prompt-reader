@@ -19,6 +19,7 @@ from sd_prompt_reader.format import (
     NovelAI,
     ComfyUI,
     DrawThings,
+    SwarmUI,
 )
 
 
@@ -53,77 +54,91 @@ class ImageDataReader:
             self._height = f.height
             self._info = f.info
             self._format = f.format
-            if f.format == "PNG":
-                # a1111 png format
-                if "parameters" in self._info:
-                    self._tool = "A1111 webUI"
-                    # self._raw = self._info.get("parameters")
-                    # self._sd_format()
-                    self._parser = A1111(info=self._info)
-                # easydiff png format
-                if "negative_prompt" in self._info or "Negative Prompt" in self._info:
-                    self._tool = "Easy Diffusion"
-                    # self._raw = str(self._info).replace("'", '"')
-                    # self._ed_format()
-                    self._parser = EasyDiffusion(info=self._info)
-                # invokeai metadata format
-                elif "sd-metadata" in self._info:
-                    self._tool = "InvokeAI"
-                    # self._invoke_metadata()
-                    self._parser = InvokeAI(info=self._info)
-                # invokeai legacy dream format
-                elif "Dream" in self._info:
-                    self._tool = "InvokeAI"
-                    # self._invoke_dream()
-                    self._parser = InvokeAI(info=self._info)
-                # novelai format
-                elif self._info.get("Software") == "NovelAI":
-                    self._tool = "NovelAI"
-                    # self._nai_png()
-                    self._parser = NovelAI(info=self._info)
-                # comfyui format
-                elif "prompt" in self._info:
-                    self._tool = "ComfyUI"
-                    # self._comfy_png()
-                    self._parser = ComfyUI(info=self._info)
-                # drawthings format
-                elif "XML:com.adobe.xmp" in self._info:
-                    # self._dt_format()
-                    try:
-                        data = minidom.parseString(self._info.get("XML:com.adobe.xmp"))
-                        data_json = json.loads(
-                            data.getElementsByTagName("exif:UserComment")[0]
-                            .childNodes[1]
-                            .childNodes[1]
-                            .childNodes[0]
-                            .data
-                        )
-                    except:
-                        print("Draw things format error")
-                    else:
-                        self._tool = "Draw Things"
-                        self._parser = DrawThings(info=data_json)
-            elif f.format == "JPEG" or f.format == "WEBP":
-                try:
-                    exif = piexif.load(self._info.get("exif")) or {}
-                    self._raw = piexif.helper.UserComment.load(
-                        exif.get("Exif").get(piexif.ExifIFD.UserComment)
-                    )
-                except TypeError:
-                    print("empty jpeg")
-                except Exception:
-                    pass
-                else:
-                    # easydiff jpeg and webp format
-                    if self._raw[0] == "{":
-                        self._tool = "Easy Diffusion"
-                        # self._ed_format()
-                        self._parser = EasyDiffusion(raw=self._raw)
-                    # a1111 jpeg and webp format
-                    else:
-                        # self._tool = "A1111 webUI"
+            # swarm format
+            try:
+                exif = json.loads(f.getexif().get(0x0110))
+                if "sui_image_params" in exif:
+                    self._tool = "StableSwarmUI"
+                    self._parser = SwarmUI(info=exif)
+            except TypeError:
+                if f.format == "PNG":
+                    # a1111 png format
+                    if "parameters" in self._info:
+                        self._tool = "A1111 webUI"
+                        # self._raw = self._info.get("parameters")
                         # self._sd_format()
-                        self._parser = A1111(raw=self._raw)
+                        self._parser = A1111(info=self._info)
+                    # easydiff png format
+                    elif (
+                        "negative_prompt" in self._info
+                        or "Negative Prompt" in self._info
+                    ):
+                        self._tool = "Easy Diffusion"
+                        # self._raw = str(self._info).replace("'", '"')
+                        # self._ed_format()
+                        self._parser = EasyDiffusion(info=self._info)
+                    # invokeai metadata format
+                    elif "sd-metadata" in self._info:
+                        self._tool = "InvokeAI"
+                        # self._invoke_metadata()
+                        self._parser = InvokeAI(info=self._info)
+                    # invokeai legacy dream format
+                    elif "Dream" in self._info:
+                        self._tool = "InvokeAI"
+                        # self._invoke_dream()
+                        self._parser = InvokeAI(info=self._info)
+                    # novelai format
+                    elif self._info.get("Software") == "NovelAI":
+                        self._tool = "NovelAI"
+                        # self._nai_png()
+                        self._parser = NovelAI(info=self._info)
+                    # comfyui format
+                    elif "prompt" in self._info:
+                        self._tool = "ComfyUI"
+                        # self._comfy_png()
+                        self._parser = ComfyUI(
+                            info=self._info, width=self._width, height=self._width
+                        )
+                    # drawthings format
+                    elif "XML:com.adobe.xmp" in self._info:
+                        # self._dt_format()
+                        try:
+                            data = minidom.parseString(
+                                self._info.get("XML:com.adobe.xmp")
+                            )
+                            data_json = json.loads(
+                                data.getElementsByTagName("exif:UserComment")[0]
+                                .childNodes[1]
+                                .childNodes[1]
+                                .childNodes[0]
+                                .data
+                            )
+                        except:
+                            print("Draw things format error")
+                        else:
+                            self._tool = "Draw Things"
+                            self._parser = DrawThings(info=data_json)
+                elif f.format == "JPEG" or f.format == "WEBP":
+                    try:
+                        exif = piexif.load(self._info.get("exif")) or {}
+                        self._raw = piexif.helper.UserComment.load(
+                            exif.get("Exif").get(piexif.ExifIFD.UserComment)
+                        )
+                    except TypeError:
+                        print("empty jpeg")
+                    except Exception:
+                        pass
+                    else:
+                        # easydiff jpeg and webp format
+                        if self._raw[0] == "{":
+                            self._tool = "Easy Diffusion"
+                            # self._ed_format()
+                            self._parser = EasyDiffusion(raw=self._raw)
+                        # a1111 jpeg and webp format
+                        else:
+                            # self._tool = "A1111 webUI"
+                            # self._sd_format()
+                            self._parser = A1111(raw=self._raw)
 
     @staticmethod
     def remove_data(image_file):
