@@ -9,3 +9,4 @@ from .invokeai import InvokeAI
 from .novelai import NovelAI
 from .comfyui import ComfyUI
 from .drawthings import DrawThings
+from .swarmui import SwarmUI
