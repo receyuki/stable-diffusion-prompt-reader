@@ -46,7 +46,6 @@ class ImageDataReader:
     def read_data(self, file):
         if self._is_txt:
             self._raw = file.read()
-            # self._sd_format()
             self._parser = A1111(raw=self._raw)
             return
         with Image.open(file) as f:
@@ -65,8 +64,6 @@ class ImageDataReader:
                     # a1111 png format
                     if "parameters" in self._info:
                         self._tool = "A1111 webUI"
-                        # self._raw = self._info.get("parameters")
-                        # self._sd_format()
                         self._parser = A1111(info=self._info)
                     # easydiff png format
                     elif (
@@ -74,34 +71,27 @@ class ImageDataReader:
                         or "Negative Prompt" in self._info
                     ):
                         self._tool = "Easy Diffusion"
-                        # self._raw = str(self._info).replace("'", '"')
-                        # self._ed_format()
                         self._parser = EasyDiffusion(info=self._info)
                     # invokeai metadata format
                     elif "sd-metadata" in self._info:
                         self._tool = "InvokeAI"
-                        # self._invoke_metadata()
                         self._parser = InvokeAI(info=self._info)
                     # invokeai legacy dream format
                     elif "Dream" in self._info:
                         self._tool = "InvokeAI"
-                        # self._invoke_dream()
                         self._parser = InvokeAI(info=self._info)
                     # novelai format
                     elif self._info.get("Software") == "NovelAI":
                         self._tool = "NovelAI"
-                        # self._nai_png()
                         self._parser = NovelAI(info=self._info)
                     # comfyui format
                     elif "prompt" in self._info:
                         self._tool = "ComfyUI"
-                        # self._comfy_png()
                         self._parser = ComfyUI(
                             info=self._info, width=self._width, height=self._width
                         )
                     # drawthings format
                     elif "XML:com.adobe.xmp" in self._info:
-                        # self._dt_format()
                         try:
                             data = minidom.parseString(
                                 self._info.get("XML:com.adobe.xmp")
@@ -132,12 +122,9 @@ class ImageDataReader:
                         # easydiff jpeg and webp format
                         if self._raw[0] == "{":
                             self._tool = "Easy Diffusion"
-                            # self._ed_format()
                             self._parser = EasyDiffusion(raw=self._raw)
                         # a1111 jpeg and webp format
                         else:
-                            # self._tool = "A1111 webUI"
-                            # self._sd_format()
                             self._parser = A1111(raw=self._raw)
 
     @staticmethod
