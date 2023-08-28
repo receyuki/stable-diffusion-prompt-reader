@@ -24,8 +24,10 @@ CLIP_TEXT_ENCODE_TYPE = [
 
 
 class ComfyUI(BaseFormat):
-    def __init__(self, info: dict = None, raw: str = ""):
-        super().__init__(info, raw)
+    def __init__(
+        self, info: dict = None, raw: str = "", width: int = None, height: int = None
+    ):
+        super().__init__(info, raw, width, height)
         self._comfy_png()
 
     def _comfy_png(self):

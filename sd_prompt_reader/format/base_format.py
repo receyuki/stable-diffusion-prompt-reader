@@ -7,9 +7,11 @@ from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
 
 
 class BaseFormat:
-    def __init__(self, info: dict = None, raw: str = ""):
-        self._height = None
-        self._width = None
+    def __init__(
+        self, info: dict = None, raw: str = "", width: int = None, height: int = None
+    ):
+        self._height = height
+        self._width = width
         self._info = info
         self._positive = ""
         self._negative = ""
