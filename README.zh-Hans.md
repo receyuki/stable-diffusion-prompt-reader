@@ -44,8 +44,9 @@
 ## 支持格式
 |                                                                          | PNG | JPEG | WEBP | TXT* |
 |--------------------------------------------------------------------------|:---:|:----:|:----:|:----:|
-| [A1111's webUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) |   ✅ |  ✅   |  ✅   |  ✅   |
+| [A1111's webUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) |  ✅  |  ✅   |  ✅   |  ✅   |
 | [Easy Diffusion](https://github.com/easydiffusion/easydiffusion)         |  ✅  |  ✅   |  ✅   |      |
+| [StableSwarmUI](https://github.com/Stability-AI/StableSwarmUI)*          |  ✅  |  ✅   |      |      |
 | [InvokeAI](https://github.com/invoke-ai/InvokeAI)                        |  ✅  |      |      |      |
 | [ComfyUI](https://github.com/comfyanonymous/ComfyUI)*                    |  ✅  |      |      |      |
 | [NovelAI](https://novelai.net/)                                          |  ✅  |      |      |      |
@@ -54,7 +55,7 @@
 
 \* 见[格式限制](#TXT).
 
-如果你使用的工具或格式不在这个列表中，请帮助我支持你的格式：将你的工具生成的原始图片文件压缩并上传到 issues，谢谢。
+如果你使用的工具或格式不在这个列表中，请帮助我支持你的格式：将你的工具生成的原始图片文件上传到 issues，谢谢。
 
 ## 下载
 ### Windows 用户
@@ -106,7 +107,7 @@ pipx install sd-prompt-reader
 - 打开可执行文件 (.exe 或 .app) 并将图片拖入窗口.
 
 或
-- 右键图片选择使用SD Prompt Reader作为打开方式
+- 右键图片选择使用 SD Prompt Reader 作为打开方式
 
 或
 - 直接将图片拖入可执行文件 (.exe 或 .app).
@@ -125,8 +126,8 @@ pipx install sd-prompt-reader
 ### 编辑图片
 ***请注意，编辑后的图片将以 A1111 格式进行写入，这意味着任何格式的图片在编辑后都将变为 A1111 格式.***
 - 点击 "Edit" 进入编辑模式
-- 直接在文本框中编辑 prompt，或者导入txt格式的prompt数据.
-- 点击 "Save" 将在原图像文件旁生成一个后缀为"_edited"的编辑后图像文件.
+- 直接在文本框中编辑 prompt，或者导入 txt 格式的prompt数据.
+- 点击 "Save" 将在原图像文件旁生成一个后缀为 "_edited" 的编辑后图像文件.
 - 要保存到另一个位置，点击展开的箭头并点击 "select directory".
 - 要覆盖原始图像文件，点击展开的箭头并点击 "overwrite the original image".  
 ![save](./images/save.png)
@@ -152,15 +153,25 @@ pipx install sd-prompt-reader
 - 将其粘贴到 webui 脚本 "Prompts from file or textbox" 下方的文本框.  
 ![single line prompt](./images/single_line_prompt.png)
 
+### ComfyUI SDXL 流程
+***SDXL 流程不支持编辑，如有需要请去除图片中的 prompt 后再进行编辑***  
+如果图片中 workflow 包含多组 SDXL 的 prompt，
+也就是 Clip G(text_g), Clip L(text_l) 和 Refiner 时，
+SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式。
+多组 prompt 显示模式有两种界面供你选择，你可以通过按钮来进行切换。  
+![comfyui_sdxl.png](https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/comfyui_sdxl.png)
+
 ## 格式限制
 ### TXT
 1. txt 文件仅能在编辑模式下导入.
 2. 仅支持 A1111 格式的 txt 文件. 你可以使用 A1111 webui 生成的txt文件, 或使用 SD prompt reader 从 A1111 生成的图片中导出 txt.
+### StableSwarmUI
+StableSwarmUI 依然处于 Alpha 测试状态，其格式未来可能会发生改变，我将会持续跟进 StableSwarmUI 未来的更新。
 ### ComfyUI
-***对comfyUI的支持需要更多测试。如果你认为你的图片不能正常显示，请将ComfyUI生成的原始文件以压缩文件的形式上传到issues.***
-1. 如果设置框中有多组数据(seed, steps, CFG, etc.)，这意味着流程中有多个KSampler节点
-2. 由于ComfyUI的特性，workflow中的所有节点和流程都存储在图像中，包括没有被使用的。并且一个流程可以有多个分支，多个输入和输出.
-(e.g. 在一个流程中同时生成原图和hires. fix后的图像)
+***对 comfyUI 的支持需要更多测试。如果你认为你的图片不能正常显示，请将 ComfyUI 生成的原始文件以压缩文件的形式上传到 issues.***
+1. 如果设置框中有多组数据(seed, steps, CFG, etc.)，这意味着流程中有多个 KSampler 节点
+2. 由于 ComfyUI 的特性，workflow 中的所有节点和流程都存储在图像中，包括没有被使用的。并且一个流程可以有多个分支，多个输入和输出.
+(e.g. 在一个流程中同时生成原图和 hires. fix 后的图像)
 SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输入和输出的最长分支.
 ### Easy Diffusion
 默认设置下, Easy Diffusion 不会将 prompt 写入图片. 请更改设置中的 _Metadata format_ 为 _embed_ 来写入 prompt 到图片中.
