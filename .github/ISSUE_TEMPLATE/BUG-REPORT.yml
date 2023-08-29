@@ -41,6 +41,7 @@ body:
       description: What version are you running?
       multiple: false
       options:
+        - 1.3.3
         - 1.3.2
         - 1.3.1
         - 1.3.0
@@ -60,7 +61,8 @@ body:
       multiple: false
       options:
         - Windows
-        - Mac
+        - Mac (Apple silicon)
+        - Mac (Intel)
         - Linux
     validations:
       required: true
@@ -72,11 +74,12 @@ body:
       multiple: false
       options:
         - A1111's webUI
+        - StableSwarmUI
+        - ComfyUI
         - Easy Diffusion
         - InvokeAI
         - NovelAI
         - Draw Things
-        - ComfyUI
         - Naifu(4chan)
         - Other
     validations:
