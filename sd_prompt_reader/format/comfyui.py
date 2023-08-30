@@ -167,7 +167,15 @@ class ComfyUI(BaseFormat):
                 try:
                     match node_type:
                         case "CLIPTextEncode":
-                            return inputs.get("text")
+                            # SDXLPromptStyler
+                            if isinstance(inputs["text"], list):
+                                text = int(inputs["text"][0])
+                                prompt_styler = self._comfy_traverse(prompt, str(text))
+                                self._positive = prompt_styler[0]
+                                self._negative = prompt_styler[1]
+                                return
+                            elif isinstance(inputs["text"], str):
+                                return inputs.get("text")
                         case "CLIPTextEncodeSDXL":
                             # SDXLPromptStyler
                             self._is_sdxl = True
@@ -227,6 +235,26 @@ class ComfyUI(BaseFormat):
                     node += last_node
                 except:
                     print("comfyUI VAE error")
+            case "ControlNetApplyAdvanced":
+                try:
+                    positive = self._comfy_traverse(prompt, inputs["positive"][0])
+                    if isinstance(positive, str):
+                        self._positive = positive
+                    elif isinstance(positive, dict):
+                        self._positive_sdxl.update(positive)
+                    negative = self._comfy_traverse(prompt, inputs["negative"][0])
+                    if isinstance(negative, str):
+                        self._negative = negative
+                    elif isinstance(negative, dict):
+                        self._negative_sdxl.update(negative)
+
+                    last_flow, last_node = self._comfy_traverse(
+                        prompt, inputs["image"][0]
+                    )
+                    flow = merge_dict(flow, last_flow)
+                    node += last_node
+                except:
+                    print("comfyUI ControlNetApply error")
             case "ImageScale":
                 try:
                     flow = inputs
@@ -286,7 +314,7 @@ class ComfyUI(BaseFormat):
                         last_flow, last_node = self._comfy_traverse(
                             prompt, inputs["samples"][0]
                         )
-                    elif inputs.get("image"):
+                    elif inputs.get("image") and isinstance(inputs.get("image"), list):
                         last_flow, last_node = self._comfy_traverse(
                             prompt, inputs["image"][0]
                         )
