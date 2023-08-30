@@ -16,7 +16,7 @@ class Fooocus(BaseFormat):
         self._fc_format()
 
     def _fc_format(self):
-        data_json = json.loads(self.info.get("Comment"))
+        data_json = self.info
         self._tool = "Fooocus"
         self._positive = data_json.get("prompt")
         self._negative = data_json.get("negative_prompt")

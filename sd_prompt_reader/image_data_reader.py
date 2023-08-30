@@ -91,9 +91,15 @@ class ImageDataReader:
                         self._parser = ComfyUI(
                             info=self._info, width=self._width, height=self._height
                         )
+                    # fooocus format
                     elif "Comment" in self._info:
-                        self._tool = "Fooocus"
-                        self._parser = Fooocus(info=self._info)
+                        try:
+                            self._tool = "Fooocus"
+                            self._parser = Fooocus(
+                                info=json.loads(self._info.get("Comment"))
+                            )
+                        except:
+                            print("Fooocus format error")
                     # drawthings format
                     elif "XML:com.adobe.xmp" in self._info:
                         try:
@@ -113,23 +119,33 @@ class ImageDataReader:
                             self._tool = "Draw Things"
                             self._parser = DrawThings(info=data_json)
                 elif f.format == "JPEG" or f.format == "WEBP":
-                    try:
-                        exif = piexif.load(self._info.get("exif")) or {}
-                        self._raw = piexif.helper.UserComment.load(
-                            exif.get("Exif").get(piexif.ExifIFD.UserComment)
-                        )
-                    except TypeError:
-                        print("empty jpeg")
-                    except Exception:
-                        pass
+                    # fooocus jpeg format
+                    if "comment" in self._info:
+                        try:
+                            self._tool = "Fooocus"
+                            self._parser = Fooocus(
+                                info=json.loads(self._info.get("comment"))
+                            )
+                        except:
+                            print("Fooocus format error")
                     else:
-                        # easydiff jpeg and webp format
-                        if self._raw[0] == "{":
-                            self._tool = "Easy Diffusion"
-                            self._parser = EasyDiffusion(raw=self._raw)
-                        # a1111 jpeg and webp format
+                        try:
+                            exif = piexif.load(self._info.get("exif")) or {}
+                            self._raw = piexif.helper.UserComment.load(
+                                exif.get("Exif").get(piexif.ExifIFD.UserComment)
+                            )
+                        except TypeError:
+                            print("empty jpeg")
+                        except Exception:
+                            pass
                         else:
-                            self._parser = A1111(raw=self._raw)
+                            # easydiff jpeg and webp format
+                            if self._raw[0] == "{":
+                                self._tool = "Easy Diffusion"
+                                self._parser = EasyDiffusion(raw=self._raw)
+                            # a1111 jpeg and webp format
+                            else:
+                                self._parser = A1111(raw=self._raw)
 
     @staticmethod
     def remove_data(image_file):
