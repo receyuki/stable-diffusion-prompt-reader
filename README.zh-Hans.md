@@ -168,11 +168,12 @@ SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式。
 ### StableSwarmUI
 StableSwarmUI 依然处于 Alpha 测试状态，其格式未来可能会发生改变，我将会持续跟进 StableSwarmUI 未来的更新。
 ### ComfyUI
-***对 comfyUI 的支持需要更多测试。如果你认为你的图片不能正常显示，请将 ComfyUI 生成的原始文件以压缩文件的形式上传到 issues.***
+***对 comfyUI 的支持需要更多测试。如果你认为你的图片不能正常显示，请将 ComfyUI 生成的原始文件上传到 issues.***
 1. 如果设置框中有多组数据(seed, steps, CFG, etc.)，这意味着流程中有多个 KSampler 节点
 2. 由于 ComfyUI 的特性，workflow 中的所有节点和流程都存储在图像中，包括没有被使用的。并且一个流程可以有多个分支，多个输入和输出.
 (e.g. 在一个流程中同时生成原图和 hires. fix 后的图像)
 SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输入和输出的最长分支.
+3. [ComfyUI SDXL 流程](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md#comfyui-sdxl-%E6%B5%81%E7%A8%8B)
 ### Easy Diffusion
 默认设置下, Easy Diffusion 不会将 prompt 写入图片. 请更改设置中的 _Metadata format_ 为 _embed_ 来写入 prompt 到图片中.
 
