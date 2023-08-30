@@ -20,6 +20,7 @@ from sd_prompt_reader.format import (
     ComfyUI,
     DrawThings,
     SwarmUI,
+    Fooocus,
 )
 
 
@@ -90,6 +91,9 @@ class ImageDataReader:
                         self._parser = ComfyUI(
                             info=self._info, width=self._width, height=self._height
                         )
+                    elif "Comment" in self._info:
+                        self._tool = "Fooocus"
+                        self._parser = Fooocus(info=self._info)
                     # drawthings format
                     elif "XML:com.adobe.xmp" in self._info:
                         try:
