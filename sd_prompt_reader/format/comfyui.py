@@ -15,12 +15,14 @@ CHECKPOINT_LOADER_TYPE = [
     "CheckpointLoader",
     "CheckpointLoaderSimple",
     "unCLIPCheckpointLoader",
+    "Checkpoint Loader (Simple)",
 ]
 CLIP_TEXT_ENCODE_TYPE = [
     "CLIPTextEncode",
     "CLIPTextEncodeSDXL",
     "CLIPTextEncodeSDXLRefiner",
 ]
+SAVE_IMAGE_TYPE = ["SaveImage", "Image Save"]
 
 
 class ComfyUI(BaseFormat):
@@ -69,11 +71,12 @@ class ComfyUI(BaseFormat):
         if workflow:
             self._raw += "\n" + str(workflow)
 
-        seed = None
-        if longest_flow.get("seed"):
-            seed = str(longest_flow.get("seed"))
-        elif longest_flow.get("noise_seed"):
-            seed = str(longest_flow.get("noise_seed"))
+        seed = str(
+            longest_flow.get("seed")
+            if longest_flow.get("seed")
+            else longest_flow.get("noise_seed")
+        )
+
         self._setting = (
             f"Steps: {longest_flow.get('steps')}"
             f", Sampler: {remove_quotes(longest_flow.get('sampler_name'))}"
@@ -113,7 +116,7 @@ class ComfyUI(BaseFormat):
             print("node error")
             return flow, node
         match prompt[end_node]["class_type"]:
-            case "SaveImage":
+            case node_type if node_type in SAVE_IMAGE_TYPE:
                 try:
                     last_flow, last_node = self._comfy_traverse(
                         prompt, inputs["images"][0]
@@ -141,6 +144,20 @@ class ComfyUI(BaseFormat):
                         self._negative = negative
                     elif isinstance(negative, dict):
                         self._negative_sdxl.update(negative)
+                    seed = None
+                    # handle "CR Seed"
+                    if inputs.get("seed") and isinstance(inputs.get("seed"), list):
+                        seed = {"seed": self._comfy_traverse(prompt, inputs["seed"][0])}
+                    elif inputs.get("noise_seed") and isinstance(
+                        inputs.get("noise_seed"), list
+                    ):
+                        seed = {
+                            "noise_seed": self._comfy_traverse(
+                                prompt, inputs["noise_seed"][0]
+                            )
+                        }
+                    if seed:
+                        flow.update(seed)
                     flow = merge_dict(flow, last_flow1)
                     flow = merge_dict(flow, last_flow2)
                     node += last_node1 + last_node2
@@ -256,6 +273,11 @@ class ComfyUI(BaseFormat):
                     return inputs.get("text_positive"), inputs.get("text_negative")
                 except:
                     print("comfyUI SDXLPromptStyler error")
+            case "CR Seed":
+                try:
+                    return inputs.get("seed")
+                except:
+                    print("comfyUI CR Seed error")
             case _:
                 try:
                     last_flow = {}

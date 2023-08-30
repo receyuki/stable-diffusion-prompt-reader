@@ -88,7 +88,7 @@ class ImageDataReader:
                     elif "prompt" in self._info:
                         self._tool = "ComfyUI"
                         self._parser = ComfyUI(
-                            info=self._info, width=self._width, height=self._width
+                            info=self._info, width=self._width, height=self._height
                         )
                     # drawthings format
                     elif "XML:com.adobe.xmp" in self._info:
