@@ -22,11 +22,14 @@ class SwarmUI(BaseFormat):
         self._setting = remove_quotes(str(data_json)[1:-1])
 
         self._parameter["model"] = data_json.get("model")
-        self._parameter["sampler"] = str(
-            remove_quotes(
-                (data_json.get("comfyuisampler"), data_json.get("autowebuisampler"))
+        comfyuisampler = data_json.get("comfyuisampler")
+        autowebuisampler = data_json.get("autowebuisampler")
+        if comfyuisampler and autowebuisampler:
+            self._parameter["sampler"] = str(
+                remove_quotes((comfyuisampler, autowebuisampler))
             )
-        )
+        else:
+            self._parameter["sampler"] = str(comfyuisampler or autowebuisampler)
         self._parameter["seed"] = data_json.get("seed")
         self._parameter["cfg"] = data_json.get("cfgscale")
         self._parameter["steps"] = data_json.get("steps")
