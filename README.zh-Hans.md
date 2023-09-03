@@ -47,6 +47,7 @@
 | [A1111's webUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) |  ✅  |  ✅   |  ✅   |  ✅   |
 | [Easy Diffusion](https://github.com/easydiffusion/easydiffusion)         |  ✅  |  ✅   |  ✅   |      |
 | [StableSwarmUI](https://github.com/Stability-AI/StableSwarmUI)*          |  ✅  |  ✅   |      |      |
+| [Fooocus-MRE](https://github.com/MoonRide303/Fooocus-MRE)*               |  ✅  |  ✅   |      |      |
 | [InvokeAI](https://github.com/invoke-ai/InvokeAI)                        |  ✅  |      |      |      |
 | [ComfyUI](https://github.com/comfyanonymous/ComfyUI)*                    |  ✅  |      |      |      |
 | [NovelAI](https://novelai.net/)                                          |  ✅  |      |      |      |
@@ -55,7 +56,7 @@
 
 \* 见[格式限制](#TXT).
 
-如果你使用的工具或格式不在这个列表中，请帮助我支持你的格式：将你的工具生成的原始图片文件上传到 issues，谢谢。
+如果你使用的工具或格式不在这个列表中, 请帮助我支持你的格式: 将你的工具生成的原始图片文件上传到 issues, 谢谢.
 
 ## 下载
 ### Windows 用户
@@ -63,17 +64,17 @@
 ### macOS 用户
 从 [GitHub Releases](https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest) 下载可执行文件
 #### 通过 Homebrew Cask 安装
-你也可以通过 [Homebrew](http://brew.sh/) cask 安装 SD Prompt Reader。  
+你也可以通过 [Homebrew](http://brew.sh/) cask 安装 SD Prompt Reader.  
 ```bash
 brew install --no-quarantine receyuki/sd-prompt-reader/sd-prompt-reader
 ```
-使用 `--no-quarantine` 参数是因为目前 SD Prompt Reader 并未签名，具体原因请查看[这里](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md#sd-prompt-readerapp-%E5%B7%B2%E6%8D%9F%E5%9D%8F%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80%E6%82%A8%E5%BA%94%E8%AF%A5%E5%B0%86%E5%AE%83%E7%A7%BB%E5%88%B0%E5%BA%9F%E7%BA%B8%E7%AF%93)
+使用 `--no-quarantine` 参数是因为目前 SD Prompt Reader 并未签名, 具体原因请查看[这里](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md#sd-prompt-readerapp-%E5%B7%B2%E6%8D%9F%E5%9D%8F%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80%E6%82%A8%E5%BA%94%E8%AF%A5%E5%B0%86%E5%AE%83%E7%A7%BB%E5%88%B0%E5%BA%9F%E7%BA%B8%E7%AF%93)
 
 ### Linux 用户 (不定期测试)
 ~~我很确定 Linux 用户可以在没有可执行文件的情况下搞明白怎么用~~
 - 最低Python版本要求: 3.10
-- 确保你的 Python 中安装了 tkinter 包。  
-如果没有，请使用软件包管理器安装 python3-tk 包。  
+- 确保你的 Python 中安装了 tkinter 包.  
+如果没有，请使用软件包管理器安装 python3-tk 包.  
 e.g. `sudo apt-get install python3-tk` (基于 Debian 的发行版)  
 
 你可以选择使用 pip 进行安装或者手动运行
@@ -114,22 +115,22 @@ pipx install sd-prompt-reader
 
 ### 导出 prompt 到 txt 文件
 - 点击 "Export" 将在图像文件旁生成一个txt文件.
-- 要保存到另一个位置，点击展开的箭头并点击 "select directory".  
+- 要保存到另一个位置, 点击展开的箭头并点击 "select directory".  
 ![export](./images/export.png)
 
 ### 去除图片中的 prompt
 - 点击 "Clear" 将在原图像文件旁生成一个后缀为"_data_removed"的图像文件.
-- 要保存到另一个位置，点击展开的箭头并点击 "select directory".
-- 要覆盖原始图像文件，点击展开的箭头并点击 "overwrite the original image".  
+- 要保存到另一个位置, 点击展开的箭头并点击 "select directory".  
+- 要覆盖原始图像文件, 点击展开的箭头并点击 "overwrite the original image".  
 ![remove](./images/remove.png)
 
 ### 编辑图片
-***请注意，编辑后的图片将以 A1111 格式进行写入，这意味着任何格式的图片在编辑后都将变为 A1111 格式.***
+***请注意，编辑后的图片将以 A1111 格式进行写入, 这意味着任何格式的图片在编辑后都将变为 A1111 格式.***
 - 点击 "Edit" 进入编辑模式
-- 直接在文本框中编辑 prompt，或者导入 txt 格式的prompt数据.
-- 点击 "Save" 将在原图像文件旁生成一个后缀为 "_edited" 的编辑后图像文件.
-- 要保存到另一个位置，点击展开的箭头并点击 "select directory".
-- 要覆盖原始图像文件，点击展开的箭头并点击 "overwrite the original image".  
+- 直接在文本框中编辑 prompt, 或者导入 txt 格式的prompt数据.  
+- 点击 "Save" 将在原图像文件旁生成一个后缀为 "_edited" 的编辑后图像文件.  
+- 要保存到另一个位置, 点击展开的箭头并点击 "select directory".  
+- 要覆盖原始图像文件, 点击展开的箭头并点击 "overwrite the original image".  
 ![save](./images/save.png)
 
 ### 复制为单行 prompt
@@ -155,10 +156,10 @@ pipx install sd-prompt-reader
 
 ### ComfyUI SDXL 流程
 ***SDXL 流程不支持编辑，如有需要请去除图片中的 prompt 后再进行编辑***  
-如果图片中 workflow 包含多组 SDXL 的 prompt，
-也就是 Clip G(text_g), Clip L(text_l) 和 Refiner 时，
-SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式。
-多组 prompt 显示模式有两种界面供你选择，你可以通过按钮来进行切换。  
+如果图片中 workflow 包含多组 SDXL 的 prompt, 
+也就是 Clip G(text_g), Clip L(text_l) 和 Refiner 时, 
+SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式.
+多组 prompt 显示模式有两种界面供你选择，你可以通过按钮来进行切换.  
 ![comfyui_sdxl.png](https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/comfyui_sdxl.png)
 
 ## 格式限制
@@ -166,16 +167,19 @@ SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式。
 1. txt 文件仅能在编辑模式下导入.
 2. 仅支持 A1111 格式的 txt 文件. 你可以使用 A1111 webui 生成的txt文件, 或使用 SD prompt reader 从 A1111 生成的图片中导出 txt.
 ### StableSwarmUI
-StableSwarmUI 依然处于 Alpha 测试状态，其格式未来可能会发生改变，我将会持续跟进 StableSwarmUI 未来的更新。
+StableSwarmUI 依然处于 Alpha 测试状态，其格式未来可能会发生改变, 我将会持续跟进 StableSwarmUI 未来的更新.
 ### ComfyUI
-***对 comfyUI 的支持需要更多测试。如果你认为你的图片不能正常显示，请将 ComfyUI 生成的原始文件上传到 issues.***
+***对 comfyUI 的支持需要更多测试. 如果你认为你的图片不能正常显示, 请将 ComfyUI 生成的原始文件上传到 issues.***
 1. 如果设置框中有多组数据(seed, steps, CFG, etc.)，这意味着流程中有多个 KSampler 节点
-2. 由于 ComfyUI 的特性，workflow 中的所有节点和流程都存储在图像中，包括没有被使用的。并且一个流程可以有多个分支，多个输入和输出.
+2. 由于 ComfyUI 的特性, workflow 中的所有节点和流程都存储在图像中, 包括没有被使用的. 并且一个流程可以有多个分支，多个输入和输出.
 (e.g. 在一个流程中同时生成原图和 hires. fix 后的图像)
 SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输入和输出的最长分支.
 3. [ComfyUI SDXL 流程](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md#comfyui-sdxl-%E6%B5%81%E7%A8%8B)
 ### Easy Diffusion
 默认设置下, Easy Diffusion 不会将 prompt 写入图片. 请更改设置中的 _Metadata format_ 为 _embed_ 来写入 prompt 到图片中.
+### Fooocus-MRE
+由于原版的 [Fooocus](https://github.com/lllyasviel/Fooocus) 并不支持将 metadata 写入图片文件, 
+SD Prompt Reader 仅支持由 [Fooocus MoonRide Edition](https://github.com/MoonRide303/Fooocus-MRE) 生成的图片.
 
 ## 常见问题
 ### 病毒警告
@@ -200,6 +204,7 @@ SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输
 ## 待办
 - 图像批处理功能
 - 多图像/文件夹模式
+- 用户设置
 
 ## Credits
 - Inspired by [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
