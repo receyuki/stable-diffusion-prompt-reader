@@ -91,6 +91,7 @@ class ParameterViewer:
             text=PARAMETER_PLACEHOLDER,
             fg_color=BUTTON_HOVER,
             corner_radius=5,
+            wraplength=300,
         )
         self.setting_cfg.pack(side="left")
         self.setting_cfg.bind(
@@ -109,6 +110,7 @@ class ParameterViewer:
             text=PARAMETER_PLACEHOLDER,
             fg_color=BUTTON_HOVER,
             corner_radius=5,
+            wraplength=300,
         )
         self.setting_steps.pack(side="left")
         self.setting_steps.bind(
@@ -127,6 +129,7 @@ class ParameterViewer:
             text=PARAMETER_PLACEHOLDER,
             fg_color=BUTTON_HOVER,
             corner_radius=5,
+            wraplength=300,
         )
         self.setting_size.pack(side="left")
         self.setting_size.bind(
