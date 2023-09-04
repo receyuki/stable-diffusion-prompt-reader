@@ -145,6 +145,7 @@ class ImageDataReader:
                                 self._parser = EasyDiffusion(raw=self._raw)
                             # a1111 jpeg and webp format
                             else:
+                                self._tool = "A1111 webUI"
                                 self._parser = A1111(raw=self._raw)
 
     @staticmethod
