@@ -1,8 +1,7 @@
-# -*- encoding:utf-8 -*-
-__author__ = 'receyuki'
-__filename__ = 'utility.py'
-__copyright__ = 'Copyright 2023'
-__email__ = 'receyuki@gmail.com'
+__author__ = "receyuki"
+__filename__ = "utility.py"
+__copyright__ = "Copyright 2023"
+__email__ = "receyuki@gmail.com"
 
 from customtkinter import filedialog
 
@@ -10,25 +9,41 @@ from PIL import Image
 from customtkinter import CTkImage
 from pathlib import Path
 from sd_prompt_reader.constants import *
+import pyperclip
 
 
 def load_icon(icon_file, size):
-    return (CTkImage(Image.open(icon_file[0]), size=size),
-            CTkImage(Image.open(icon_file[1]), size=size))
+    return (
+        CTkImage(Image.open(icon_file[0]), size=size),
+        CTkImage(Image.open(icon_file[1]), size=size),
+    )
 
 
 def get_images(dir_path: Path):
-    images = [image.resolve() for image in dir_path.rglob("*") if image.suffix in SUPPORTED_FORMATS]
+    images = [
+        image.resolve()
+        for image in dir_path.rglob("*")
+        if image.suffix in SUPPORTED_FORMATS
+    ]
     return images
 
 
 def select_image(file_path=None):
     initial_dir = file_path.parent if file_path else "/"
     return filedialog.askopenfilename(
-        title='Select your image file',
+        title="Select your image file",
         initialdir=initial_dir,
-        filetypes=(("image files", "*.png *.jpg *jpeg *.webp"),)
+        filetypes=(("image files", "*.png *.jpg *jpeg *.webp"),),
     )
+
+
+def copy_to_clipboard(status_bar, content):
+    try:
+        pyperclip.copy(content)
+    except:
+        print("Copy error")
+    else:
+        status_bar.clipboard()
 
 
 def get_canvas_total_size(canvas):
@@ -41,7 +56,9 @@ def get_canvas_total_size(canvas):
 
     if all_elements_bbox:
         # Get the maximum X and Y coordinates from the bounding box information of all elements to get the total size
-        total_size = max(all_elements_bbox[2], canvas_width), max(all_elements_bbox[3], canvas_height)
+        total_size = max(all_elements_bbox[2], canvas_width), max(
+            all_elements_bbox[3], canvas_height
+        )
     else:
         # If there are no elements, return the actual width and height of the canvas
         total_size = canvas_width, canvas_height
@@ -104,3 +121,26 @@ def ease_in_out(t, b, c, d):
         return c / 2 * t * t * t + b
     t -= 2
     return c / 2 * (t * t * t + 2) + b
+
+
+def merge_str_to_tuple(item1, item2):
+    if not isinstance(item1, tuple):
+        item1 = (item1,)
+    if not isinstance(item2, tuple):
+        item2 = (item2,)
+    return item1 + item2
+
+
+def merge_dict(dict1, dict2):
+    dict3 = dict1.copy()
+    for k, v in dict2.items():
+        dict3[k] = merge_str_to_tuple(v, dict3[k]) if k in dict3 else v
+    return dict3
+
+
+def remove_quotes(string):
+    return str(string).replace('"', "").replace("'", "")
+
+
+def add_quotes(string):
+    return '"' + str(string) + '"'

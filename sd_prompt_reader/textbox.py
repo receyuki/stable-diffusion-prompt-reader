@@ -1,8 +1,7 @@
-# -*- encoding:utf-8 -*-
-__author__ = 'receyuki'
-__filename__ = 'textbox.py'
-__copyright__ = 'Copyright 2023'
-__email__ = 'receyuki@gmail.com'
+__author__ = "receyuki"
+__filename__ = "textbox.py"
+__copyright__ = "Copyright 2023"
+__email__ = "receyuki@gmail.com"
 
 from typing import Union, Tuple, Optional
 
@@ -12,46 +11,45 @@ from sd_prompt_reader.constants import EDITABLE, ACCESSIBLE_GRAY
 
 
 class STkTextbox(CTkTextbox):
-    def __init__(self,
-                 master: any,
-                 width: int = 200,
-                 height: int = 200,
-                 corner_radius: Optional[int] = None,
-                 border_width: Optional[int] = None,
-                 border_spacing: int = 3,
-
-                 bg_color: Union[str, Tuple[str, str]] = "transparent",
-                 fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-                 border_color: Optional[Union[str, Tuple[str, str]]] = None,
-                 text_color: Optional[Union[str, str]] = None,
-                 scrollbar_button_color: Optional[Union[str, Tuple[str, str]]] = None,
-                 scrollbar_button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
-
-                 font: Optional[Union[tuple, CTkFont]] = None,
-                 activate_scrollbars: bool = True,
-
-                 text: str = "",
-                 **kwargs):
+    def __init__(
+        self,
+        master: any,
+        width: int = 200,
+        height: int = 200,
+        corner_radius: Optional[int] = None,
+        border_width: Optional[int] = None,
+        border_spacing: int = 3,
+        bg_color: Union[str, Tuple[str, str]] = "transparent",
+        fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        text_color: Optional[Union[str, str]] = None,
+        scrollbar_button_color: Optional[Union[str, Tuple[str, str]]] = None,
+        scrollbar_button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+        font: Optional[Union[tuple, CTkFont]] = None,
+        activate_scrollbars: bool = True,
+        text: str = "",
+        **kwargs
+    ):
         self._text = text
         self.current_text = text
 
-        super().__init__(master=master,
-                         width=width,
-                         height=height,
-                         corner_radius=corner_radius,
-                         border_width=border_width,
-                         border_spacing=border_spacing,
-
-                         bg_color=bg_color,
-                         fg_color=fg_color,
-                         border_color=border_color,
-                         text_color=text_color,
-                         scrollbar_button_color=scrollbar_button_color,
-                         scrollbar_button_hover_color=scrollbar_button_hover_color,
-
-                         font=font,
-                         activate_scrollbars=activate_scrollbars,
-                         **kwargs)
+        super().__init__(
+            master=master,
+            width=width,
+            height=height,
+            corner_radius=corner_radius,
+            border_width=border_width,
+            border_spacing=border_spacing,
+            bg_color=bg_color,
+            fg_color=fg_color,
+            border_color=border_color,
+            text_color=text_color,
+            scrollbar_button_color=scrollbar_button_color,
+            scrollbar_button_hover_color=scrollbar_button_hover_color,
+            font=font,
+            activate_scrollbars=activate_scrollbars,
+            **kwargs
+        )
 
         if text:
             self.insert("end", text)
@@ -75,8 +73,19 @@ class STkTextbox(CTkTextbox):
         self.configure(state="disabled")
 
     def view_vertical(self):
-        text = ",\n".join(list(filter(None, list(map(lambda x: x.lstrip(" "),
-                                                     self._text.replace("\n", "").split(","))))))
+        text = ",\n".join(
+            list(
+                filter(
+                    None,
+                    list(
+                        map(
+                            lambda x: x.lstrip(" "),
+                            self._text.replace("\n", "").split(","),
+                        )
+                    ),
+                )
+            )
+        )
         self.current_text = text
         self.configure(state="normal")
         self.delete("1.0", "end")
@@ -98,7 +107,9 @@ class STkTextbox(CTkTextbox):
         self.configure(state="disabled")
 
     def sort_des(self):
-        text = "\n".join(list(filter(None, sorted(self.current_text.split("\n"), reverse=True))))
+        text = "\n".join(
+            list(filter(None, sorted(self.current_text.split("\n"), reverse=True)))
+        )
         self.configure(state="normal")
         self.delete("1.0", "end")
         self.insert("end", text)
