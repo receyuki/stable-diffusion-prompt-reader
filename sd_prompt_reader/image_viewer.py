@@ -473,8 +473,14 @@ class ImageViewer:
         self.parent.grid_columnconfigure(2, weight=1)
 
         # single image view
-        self.image_label = CTkLabel(self.parent, width=560, text=MESSAGE["drop"][0],
-                                    image=self.drop_image, compound="top", text_color=ACCESSIBLE_GRAY)
+        self.image_label = CTkLabel(
+            self.parent,
+            width=560,
+            text="\n" + MESSAGE["drop"][0],
+            image=self.icon_image,
+            compound="top",
+            text_color=ACCESSIBLE_GRAY,
+        )
 
         self.image_label.bind(
             "<Button-1>",
