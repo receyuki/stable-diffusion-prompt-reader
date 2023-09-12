@@ -21,12 +21,12 @@ from customtkinter import (
 from PIL import Image
 import sys
 
-from sd_prompt_reader.image_data_reader import ImageDataReader
+from .image_data_reader import ImageDataReader
 from tkinterdnd2.TkinterDnD import DnDEvent
 
-from sd_prompt_reader.constants import *
-from sd_prompt_reader.button import STkButton
-from sd_prompt_reader.utility import (
+from .constants import *
+from .button import STkButton
+from .utility import (
     load_icon,
     get_images,
     select_image,

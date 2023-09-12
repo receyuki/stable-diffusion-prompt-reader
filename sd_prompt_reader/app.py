@@ -20,17 +20,17 @@ from customtkinter import (
 )
 from tkinterdnd2 import DND_FILES
 
-from sd_prompt_reader.button import *
-from sd_prompt_reader.constants import *
-from sd_prompt_reader.ctkdnd import Tk
-from sd_prompt_reader.image_data_reader import ImageDataReader
-from sd_prompt_reader.parameter_viewer import ParameterViewer
-from sd_prompt_reader.prompt_viewer import PromptViewer
-from sd_prompt_reader.status_bar import StatusBar
-from sd_prompt_reader.textbox import STkTextbox
-from sd_prompt_reader.image_viewer import ImageViewer
-from sd_prompt_reader.utility import load_icon
-from sd_prompt_reader.update_checker import UpdateChecker
+from .button import *
+from .constants import *
+from .ctkdnd import Tk
+from .image_data_reader import ImageDataReader
+from .parameter_viewer import ParameterViewer
+from .prompt_viewer import PromptViewer
+from .status_bar import StatusBar
+from .textbox import STkTextbox
+from .image_viewer import ImageViewer
+from .utility import load_icon
+from .update_checker import UpdateChecker
 
 
 class App(Tk):
