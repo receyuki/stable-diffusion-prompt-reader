@@ -1,15 +1,23 @@
-# -*- encoding:utf-8 -*-
-__author__ = 'receyuki'
-__filename__ = 'image_viewer.py'
-__copyright__ = 'Copyright 2023'
-__email__ = 'receyuki@gmail.com'
+__author__ = "receyuki"
+__filename__ = "image_viewer.py"
+__copyright__ = "Copyright 2023"
+__email__ = "receyuki@gmail.com"
 
 import re
 import threading
 from datetime import datetime
 
-from customtkinter import CTkScrollableFrame, StringVar, CTkButton, CTk, CTkLabel, CTkImage, filedialog, ThemeManager, \
-    CTkFrame
+from customtkinter import (
+    CTkScrollableFrame,
+    StringVar,
+    CTkButton,
+    CTk,
+    CTkLabel,
+    CTkImage,
+    filedialog,
+    ThemeManager,
+    CTkFrame,
+)
 from PIL import Image
 import sys
 
@@ -17,7 +25,14 @@ from sd_prompt_reader.image_data_reader import ImageDataReader
 from tkinterdnd2.TkinterDnD import DnDEvent
 
 from sd_prompt_reader.constants import *
-from sd_prompt_reader.utility import get_images, select_image, get_canvas_total_size, ease_out, ease_in, ease_in_out
+from sd_prompt_reader.utility import (
+    get_images,
+    select_image,
+    get_canvas_total_size,
+    ease_out,
+    ease_in,
+    ease_in_out,
+)
 
 
 class GalleryViewer(CTkScrollableFrame):
@@ -36,7 +51,13 @@ class GalleryViewer(CTkScrollableFrame):
         self.index = 0
         self.parent = parent
         self.init = True
-        self.label_names = ["format_label", "file_size_label", "size_label", "time_label", "name_label"]
+        self.label_names = [
+            "format_label",
+            "file_size_label",
+            "size_label",
+            "time_label",
+            "name_label",
+        ]
 
         self.bind_all("<KeyPress-Shift_L>", lambda: self.test(), add="+")
         self.bind_all("<KeyPress-Left>", self.move, add="+")
@@ -75,7 +96,6 @@ class GalleryViewer(CTkScrollableFrame):
                 self.after(1)
 
         elif event.keysym == "Left" and self.index > 0:
-
             x_change = (((self.index - 2) * 130 + 15) / self.total_width) - last_x
             steps = int(abs(x_change) / 0.01)
             print(last_x, x_change)
@@ -111,23 +131,40 @@ class GalleryViewer(CTkScrollableFrame):
         # self.after(1)
 
         label_conf = [
-            lambda: self.label_list[item.index]["file_size_label"].configure(text=item.file_size,
-                                                                             fg_color=BUTTON_HOVER),
-            lambda: self.label_list[item.index]["size_label"].configure(text=item.size_str, fg_color=BUTTON_HOVER),
-            lambda: self.label_list[item.index]["time_label"].configure(text=item.time, fg_color=BUTTON_HOVER),
-            lambda: self.label_list[item.index]["name_label"].configure(text=item.name, fg_color=BUTTON_HOVER)
+            lambda: self.label_list[item.index]["file_size_label"].configure(
+                text=item.file_size, fg_color=BUTTON_HOVER
+            ),
+            lambda: self.label_list[item.index]["size_label"].configure(
+                text=item.size_str, fg_color=BUTTON_HOVER
+            ),
+            lambda: self.label_list[item.index]["time_label"].configure(
+                text=item.time, fg_color=BUTTON_HOVER
+            ),
+            lambda: self.label_list[item.index]["name_label"].configure(
+                text=item.name, fg_color=BUTTON_HOVER
+            ),
         ]
 
         label_grid = [
-            lambda: self.label_list[item.index]["file_size_label"].grid(row=0, column=1, padx=2, pady=(0, 10)),
-            lambda: self.label_list[item.index]["size_label"].grid(row=0, column=2, padx=2, pady=(0, 10)),
-            lambda: self.label_list[item.index]["time_label"].grid(row=0, column=3, padx=2, pady=(0, 10)),
-            lambda: self.label_list[item.index]["name_label"].grid(row=3, column=0, columnspan=4, pady=(10, 0))
+            lambda: self.label_list[item.index]["file_size_label"].grid(
+                row=0, column=1, padx=2, pady=(0, 10)
+            ),
+            lambda: self.label_list[item.index]["size_label"].grid(
+                row=0, column=2, padx=2, pady=(0, 10)
+            ),
+            lambda: self.label_list[item.index]["time_label"].grid(
+                row=0, column=3, padx=2, pady=(0, 10)
+            ),
+            lambda: self.label_list[item.index]["name_label"].grid(
+                row=3, column=0, columnspan=4, pady=(10, 0)
+            ),
         ]
 
         if not self.init:
             for label in self.label_names:
-                self.label_list[self.index][label].configure(text="", fg_color="transparent")
+                self.label_list[self.index][label].configure(
+                    text="", fg_color="transparent"
+                )
 
         ease_step = 6
         for t in range(ease_step):
@@ -141,8 +178,18 @@ class GalleryViewer(CTkScrollableFrame):
             # self.update_idletasks()
             # self.after(1)
 
-            current_size = (int(ease_out(t, item.size_s[0], item.size_l[0] - item.size_s[0], ease_step)),
-                            int(ease_out(t, item.size_s[1], item.size_l[1] - item.size_s[1], ease_step)))
+            current_size = (
+                int(
+                    ease_out(
+                        t, item.size_s[0], item.size_l[0] - item.size_s[0], ease_step
+                    )
+                ),
+                int(
+                    ease_out(
+                        t, item.size_s[1], item.size_l[1] - item.size_s[1], ease_step
+                    )
+                ),
+            )
             image.configure(size=current_size)
 
             frame_width = int(ease_out(t, 120, 320 - 120, ease_step))
@@ -153,9 +200,26 @@ class GalleryViewer(CTkScrollableFrame):
             if not self.init:
                 last_item = self.item_list[self.index]
                 last_item_current_size = (
-                int(ease_out(t, last_item.size_l[0], last_item.size_s[0] - last_item.size_l[0], ease_step)),
-                int(ease_out(t, last_item.size_l[1], last_item.size_s[1] - last_item.size_l[1], ease_step)))
-                self.button_list[self.index].cget("image").configure(size=last_item_current_size)
+                    int(
+                        ease_out(
+                            t,
+                            last_item.size_l[0],
+                            last_item.size_s[0] - last_item.size_l[0],
+                            ease_step,
+                        )
+                    ),
+                    int(
+                        ease_out(
+                            t,
+                            last_item.size_l[1],
+                            last_item.size_s[1] - last_item.size_l[1],
+                            ease_step,
+                        )
+                    ),
+                )
+                self.button_list[self.index].cget("image").configure(
+                    size=last_item_current_size
+                )
 
                 last_frame_width = int(ease_out(t, 320, 120 - 320, ease_step))
 
@@ -211,7 +275,7 @@ class GalleryViewer(CTkScrollableFrame):
 
         self.update_idletasks()
         self.after(1)
-        current_size_old = (self.button_list[self.index].cget("image").cget("size"))
+        current_size_old = self.button_list[self.index].cget("image").cget("size")
         old_item = self.item_list[self.index]
 
         # for t in range(6):
@@ -228,7 +292,9 @@ class GalleryViewer(CTkScrollableFrame):
         #     self.button_list[self.index].cget("image").configure(size=current_size_old)
         #     self.update_idletasks()
         #     self.after(1)
-        self.button_list[self.index].cget("image").configure(size=self.item_list[self.index].size_s)
+        self.button_list[self.index].cget("image").configure(
+            size=self.item_list[self.index].size_s
+        )
 
         self.index = item.index
         self.after(1)
@@ -237,7 +303,6 @@ class GalleryViewer(CTkScrollableFrame):
             self.display_thread.join()
         self.display_thread = threading.Thread(target=self.display(item.path))
         self.display_thread.start()
-
 
     def add_item(self, item, image=None):
         frame = CTkFrame(self, fg_color="transparent", width=120, height=400)
@@ -257,24 +322,66 @@ class GalleryViewer(CTkScrollableFrame):
         #                       corner_radius=5)
         # name_label = CTkLabel(frame, text=item.name, compound="left", padx=5, anchor="w", fg_color=BUTTON_HOVER,
         #                       corner_radius=5)
-        format_label = CTkLabel(frame, text="", compound="left", padx=5, anchor="w", fg_color="transparent",
-                                corner_radius=5)
-        file_size_label = CTkLabel(frame, text="", compound="left", padx=5, anchor="w",
-                                   fg_color="transparent",
-                                   corner_radius=5)
-        size_label = CTkLabel(frame, text="", compound="left", padx=5, anchor="w", fg_color="transparent",
-                              corner_radius=5)
-        time_label = CTkLabel(frame, text="", compound="left", padx=5, anchor="w", fg_color="transparent",
-                              corner_radius=5)
-        name_label = CTkLabel(frame, text="", compound="left", padx=5, anchor="w", fg_color="transparent",
-                              corner_radius=5)
+        format_label = CTkLabel(
+            frame,
+            text="",
+            compound="left",
+            padx=5,
+            anchor="w",
+            fg_color="transparent",
+            corner_radius=5,
+        )
+        file_size_label = CTkLabel(
+            frame,
+            text="",
+            compound="left",
+            padx=5,
+            anchor="w",
+            fg_color="transparent",
+            corner_radius=5,
+        )
+        size_label = CTkLabel(
+            frame,
+            text="",
+            compound="left",
+            padx=5,
+            anchor="w",
+            fg_color="transparent",
+            corner_radius=5,
+        )
+        time_label = CTkLabel(
+            frame,
+            text="",
+            compound="left",
+            padx=5,
+            anchor="w",
+            fg_color="transparent",
+            corner_radius=5,
+        )
+        name_label = CTkLabel(
+            frame,
+            text="",
+            compound="left",
+            padx=5,
+            anchor="w",
+            fg_color="transparent",
+            corner_radius=5,
+        )
 
         file_size_label.grid(row=0, column=1, padx=2, pady=(0, 10)),
         size_label.grid(row=0, column=2, padx=2, pady=(0, 10)),
         time_label.grid(row=0, column=3, padx=2, pady=(0, 10)),
         name_label.grid(row=3, column=0, columnspan=4, pady=(10, 0))
 
-        button = CTkButton(frame, text="", image=image, width=120, height=120, border_spacing=0, fg_color="transparent")
+        button = CTkButton(
+            frame,
+            text="",
+            image=image,
+            width=120,
+            height=120,
+            border_spacing=0,
+            fg_color="transparent",
+        )
         # if self.command is not None:
         #
         button.configure(command=lambda: self.select(item, image))
@@ -309,7 +416,9 @@ class GalleryViewer(CTkScrollableFrame):
     def clear_item(self):
         print(self.button_list)
         # for label, button in list(zip(self.label_list, self.button_list)):
-        for button, label, frame, item in list(zip(self.button_list, self.label_list, self.frame_list, self.item_list)):
+        for button, label, frame, item in list(
+            zip(self.button_list, self.label_list, self.frame_list, self.item_list)
+        ):
             print(button)
             for label_name in self.label_names:
                 label[label_name].destroy()
@@ -347,6 +456,7 @@ class GalleryViewer(CTkScrollableFrame):
 class ImageViewer:
     def __init__(self, parent, update_idletasks, display_info, status_bar):
         self.drop_image = CTkImage(Image.open(DROP_FILE), size=(48, 48))
+        self.icon_image = CTkImage(Image.open(ICON_FILE), size=(128, 128))
         self.parent = parent
         self.display_info = display_info
         self.file_path = None
@@ -366,8 +476,10 @@ class ImageViewer:
         self.image_label = CTkLabel(self.parent, width=560, text=MESSAGE["drop"][0],
                                     image=self.drop_image, compound="top", text_color=ACCESSIBLE_GRAY)
 
-        self.image_label.bind("<Button-1>", lambda e: self.display_info(select_image(self.file_path),
-                                                                        is_selected=True))
+        self.image_label.bind(
+            "<Button-1>",
+            lambda e: self.display_info(select_image(self.file_path), is_selected=True),
+        )
         self.image_label.grid(row=1, column=1)
         # self.image_label.pack(fill="both", expand=True)
 
@@ -378,13 +490,17 @@ class ImageViewer:
 
         # create scrollable label and button frame
         # current_dir = os.path.dirname(os.path.abspath(__file__))
-        self.gallery_viewer = GalleryViewer(master=self.parent, width=560, height=450,
-                                            command=self.single_image,
-                                            corner_radius=0,
-                                            images=self.images,
-                                            orientation="horizontal",
-                                            parent=self.parent,
-                                            display=self.display_info)
+        self.gallery_viewer = GalleryViewer(
+            master=self.parent,
+            width=560,
+            height=450,
+            command=self.single_image,
+            corner_radius=0,
+            images=self.images,
+            orientation="horizontal",
+            parent=self.parent,
+            display=self.display_info,
+        )
 
     def single_image(self, file):
         self.image_label.grid(row=1, column=1)
@@ -399,7 +515,9 @@ class ImageViewer:
     def multi_image(self, image_list):
         self.status_bar.info("Loading images")
         # self.gallery_viewer.update_idletasks()
-        self.gallery_viewer.grid(row=0, column=0, columnspan=3, padx=0, pady=0, sticky="nsew")
+        self.gallery_viewer.grid(
+            row=0, column=0, columnspan=3, padx=0, pady=0, sticky="nsew"
+        )
         self.image_label.grid_forget()
         self.parent.configure(fg_color="transparent")
         self.gallery_viewer.update_idletasks()
@@ -407,7 +525,9 @@ class ImageViewer:
 
         for i in range(len(image_list)):  # add items with images
             with Image.open(image_list[i]) as f:
-                image_info = self.ImageInfo(index=i, path=image_list[i], size=f.size, file_format=f.format)
+                image_info = self.ImageInfo(
+                    index=i, path=image_list[i], size=f.size, file_format=f.format
+                )
                 f.thumbnail(image_info.size_l)
                 # if f.width >= f.height:
                 #     size_s = (100, int(f.height / f.width * 100))
@@ -425,7 +545,9 @@ class ImageViewer:
         self.gallery_viewer._parent_canvas.xview_moveto(0)
         self.status_bar.success(str(len(image_list)) + " images loaded")
 
-        self.gallery_viewer.total_width = get_canvas_total_size(self.gallery_viewer._parent_canvas)[0]
+        self.gallery_viewer.total_width = get_canvas_total_size(
+            self.gallery_viewer._parent_canvas
+        )[0]
         print(self.gallery_viewer.frame_list[0])
 
     def clear_image(self):
@@ -456,7 +578,9 @@ class ImageViewer:
 
             # dir separated by space
             space_pattern = r"(?<!\\)\s"
-            path_list += map(lambda x: x.replace("\\", ""), re.split(space_pattern, path_raw))
+            path_list += map(
+                lambda x: x.replace("\\", ""), re.split(space_pattern, path_raw)
+            )
             path_list = list(map(lambda x: Path(x), filter(None, path_list)))
 
         # for e in self.file_list:
@@ -485,7 +609,9 @@ class ImageViewer:
             self.size = size
             self.file_size = "{:.2f}".format(path.stat().st_size / 1000000) + " MB"
             self.format = file_format
-            self.time = str(datetime.fromtimestamp(path.stat().st_mtime).strftime('%Y-%m-%d %H:%M'))
+            self.time = str(
+                datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+            )
             if size[0] >= size[1]:
                 self.size_s = (100, int(size[1] / size[0] * 100))
             elif size[0] < size[1]:
