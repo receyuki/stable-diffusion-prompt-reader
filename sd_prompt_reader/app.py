@@ -97,9 +97,13 @@ class App(Tk):
 
         # image display
         self.image_frame = CTkFrame(self)
-        self.image_frame.grid(row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20)
+        self.image_frame.grid(
+            row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20
+        )
 
-        self.image_viewer = ImageViewer(self.image_frame, self.update_idletasks, self.display_info, self.status_bar)
+        self.image_viewer = ImageViewer(
+            self.image_frame, self.update_idletasks, self.display_info, self.status_bar
+        )
 
         self.image = None
         self.image_tk = None
@@ -479,7 +483,7 @@ class App(Tk):
         new_path = image
 
         if not image:
-            self.unsupported_format(["Reading", "Reading"])
+            self.unsupported_format(["Loading", "Loading"])
 
         # detect suffix and read
         elif new_path.suffix in SUPPORTED_FORMATS:
@@ -555,7 +559,9 @@ class App(Tk):
         self.positive_box.all_off()
         self.negative_box.all_off()
         if reset_image:
-            self.image_viewer.image_label.configure(image=self.image_viewer.drop_image, text=MESSAGE["drop"][0])
+            self.image_viewer.image_label.configure(
+                image=self.image_viewer.drop_image, text=MESSAGE["drop"][0]
+            )
             self.image = None
         else:
             self.button_edit.enable()

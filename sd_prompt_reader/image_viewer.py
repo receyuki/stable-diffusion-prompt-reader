@@ -51,11 +51,11 @@ class GalleryViewer:
             display,
             self.lightbox,
             width=width,
-            height=100,
+            height=70,
             command=command,
             **kwargs
         )
-        self.lightbox.image_frame.grid(row=0, column=0)
+        self.lightbox.image_frame.grid(row=0, column=0, pady=5)
         self.thumbnail_carousel.grid(row=1, column=0)
 
     class Lightbox:
@@ -138,10 +138,10 @@ class GalleryViewer:
                 corner_radius=5,
             )
 
-            self.file_size_label.grid(row=0, column=1, padx=2, pady=10)
-            self.size_label.grid(row=0, column=2, padx=2, pady=10)
-            self.time_label.grid(row=0, column=3, padx=2, pady=10)
-            self.name_label.grid(row=2, column=1, columnspan=3, pady=10)
+            self.file_size_label.grid(row=0, column=1, padx=2, pady=5)
+            self.size_label.grid(row=0, column=2, padx=2, pady=5)
+            self.time_label.grid(row=0, column=3, padx=2, pady=5)
+            self.name_label.grid(row=2, column=1, columnspan=3, pady=5)
 
             self.image_label.grid(row=1, column=1, columnspan=3)
             self.left_button.grid(row=1, column=0, sticky="sn")
@@ -231,7 +231,7 @@ class GalleryViewer:
             print(self.index)
 
         def select(self, item, image):
-            self.display(None)
+            # self.display(None)
             print(self.index)
             if self.index == item.index and not self.init:
                 return
@@ -433,7 +433,7 @@ class GalleryViewer:
             self.display_thread.start()
 
         def add_item(self, item, image=None):
-            frame = CTkFrame(self, fg_color="transparent", width=120, height=400)
+            frame = CTkFrame(self, fg_color="transparent", width=70, height=70)
 
             frame.grid_rowconfigure(0, weight=1)
             # frame.grid_rowconfigure(1, weight=1)
@@ -505,8 +505,8 @@ class GalleryViewer:
                 frame,
                 text="",
                 image=ctk_image,
-                width=90,
-                height=90,
+                width=70,
+                height=70,
                 border_spacing=0,
                 fg_color="transparent",
             )
@@ -514,9 +514,7 @@ class GalleryViewer:
             #
             button.configure(command=lambda: self.select(item, image))
 
-            frame.grid(
-                row=0, column=len(self.button_list), pady=10, padx=5, sticky="ew"
-            )
+            frame.grid(row=0, column=len(self.button_list), pady=5, padx=0, sticky="ew")
             button.grid(row=1, column=0, columnspan=4, pady=0, padx=0, sticky="ns")
 
             # if len(self.item_list) == 1:
@@ -616,7 +614,7 @@ class ImageViewer:
 
         self.image_label.bind(
             "<Button-1>",
-            lambda e: self.display_info(select_image(self.file_path), is_selected=True),
+            lambda e: self.display_info(select_image(self.file_path)),
         )
         # self.image_label.grid(row=1, column=1)
 
@@ -637,6 +635,10 @@ class ImageViewer:
             orientation="horizontal",
             parent=self.parent,
             display=self.display_info,
+        )
+        self.gallery_viewer.lightbox.image_label.bind(
+            "<Button-1>",
+            lambda e: self.display_info(select_image(self.file_path)),
         )
         self.gallery_viewer.viewer_frame.grid(
             row=0, column=0, columnspan=3, padx=0, pady=0, sticky="nsew"
@@ -758,7 +760,7 @@ class ImageViewer:
                 self.size_s = (THUMBNAIL_SIZE, int(size[1] / size[0] * THUMBNAIL_SIZE))
             elif size[0] < size[1]:
                 self.size_s = (int(size[0] / size[1] * THUMBNAIL_SIZE), THUMBNAIL_SIZE)
-            self.size_l = (self.size_s[0] * 4, self.size_s[1] * 4)
+            self.size_l = (self.size_s[0] * 5, self.size_s[1] * 5)
             self.size_str = str(size[0]) + "×" + str(size[1])
             if len(path.name) > 30:
                 self.name = path.name[:29] + "..."
