@@ -5,8 +5,8 @@ __email__ = "receyuki@gmail.com"
 
 import json
 
-from sd_prompt_reader.format.base_format import BaseFormat
-from sd_prompt_reader.utility import remove_quotes, merge_dict
+from ..format.base_format import BaseFormat
+from ..utility import remove_quotes, merge_dict
 
 # comfyui node types
 KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]

@@ -8,8 +8,8 @@ import threading
 import requests
 from packaging import version
 
-from sd_prompt_reader.__version__ import VERSION
-from sd_prompt_reader.constants import RELEASE_URL
+from .__version__ import VERSION
+from .constants import RELEASE_URL
 
 
 class UpdateChecker:

@@ -7,10 +7,10 @@ __email__ = "receyuki@gmail.com"
 from CTkToolTip import *
 from customtkinter import CTkFrame, CTkLabel, ThemeManager
 
-from sd_prompt_reader.button import STkButton, SortMode, ViewMode, PromptMode, EditMode
-from sd_prompt_reader.constants import *
-from sd_prompt_reader.textbox import STkTextbox
-from sd_prompt_reader.utility import load_icon, copy_to_clipboard
+from .button import STkButton, SortMode, ViewMode, PromptMode, EditMode
+from .constants import *
+from .textbox import STkTextbox
+from .utility import load_icon, copy_to_clipboard
 
 
 class PromptViewer:

@@ -11,8 +11,8 @@ import piexif.helper
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
-from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
-from sd_prompt_reader.format import (
+from .constants import PARAMETER_PLACEHOLDER
+from .format import (
     A1111,
     EasyDiffusion,
     InvokeAI,

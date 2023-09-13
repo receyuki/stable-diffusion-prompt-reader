@@ -5,7 +5,7 @@ __email__ = "receyuki@gmail.com"
 
 import json
 
-from sd_prompt_reader.format.base_format import BaseFormat
+from ..format.base_format import BaseFormat
 
 
 class NovelAI(BaseFormat):

@@ -9,7 +9,7 @@ from typing import Union, Tuple, Callable, Optional
 
 from customtkinter import CTkButton, CTkImage, CTkFont, CTkLabel
 
-from sd_prompt_reader.constants import ACCESSIBLE_GRAY, INACCESSIBLE_GRAY, BUTTON_HOVER
+from .constants import ACCESSIBLE_GRAY, INACCESSIBLE_GRAY, BUTTON_HOVER
 
 
 class STkButton(CTkButton):

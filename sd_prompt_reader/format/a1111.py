@@ -3,8 +3,8 @@ __filename__ = "a1111.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
-from sd_prompt_reader.format.base_format import BaseFormat
-from sd_prompt_reader.utility import add_quotes
+from ..format.base_format import BaseFormat
+from ..utility import add_quotes
 
 PROMPT_MAPPING = {
     # "Model":                    ("sd_model",            True),

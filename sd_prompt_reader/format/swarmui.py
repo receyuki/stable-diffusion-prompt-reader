@@ -3,8 +3,8 @@ __filename__ = "swarmui.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
-from sd_prompt_reader.format.base_format import BaseFormat
-from sd_prompt_reader.utility import remove_quotes
+from ..format.base_format import BaseFormat
+from ..utility import remove_quotes
 
 
 class SwarmUI(BaseFormat):

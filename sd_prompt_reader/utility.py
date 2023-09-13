@@ -8,7 +8,7 @@ from customtkinter import filedialog
 from PIL import Image
 from customtkinter import CTkImage
 from pathlib import Path
-from sd_prompt_reader.constants import *
+from .constants import *
 import pyperclip
 
 

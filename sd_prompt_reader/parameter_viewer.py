@@ -6,7 +6,7 @@ __email__ = "receyuki@gmail.com"
 import pyperclip as pyperclip
 from customtkinter import CTkFrame, CTkLabel
 
-from sd_prompt_reader.constants import (
+from .constants import (
     BUTTON_HOVER,
     PARAMETER_PLACEHOLDER,
     PARAMETER_WIDTH,

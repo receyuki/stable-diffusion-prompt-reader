@@ -3,7 +3,7 @@ __filename__ = "base_format.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
-from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
+from ..constants import PARAMETER_PLACEHOLDER
 
 
 class BaseFormat:

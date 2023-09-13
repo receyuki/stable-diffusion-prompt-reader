@@ -7,7 +7,7 @@ from typing import Union, Tuple, Optional
 
 from customtkinter import CTkTextbox, CTkFont
 
-from sd_prompt_reader.constants import EDITABLE, ACCESSIBLE_GRAY
+from .constants import EDITABLE, ACCESSIBLE_GRAY
 
 
 class STkTextbox(CTkTextbox):

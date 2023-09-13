@@ -6,8 +6,8 @@ __email__ = "receyuki@gmail.com"
 import json
 from pathlib import PureWindowsPath, PurePosixPath
 
-from sd_prompt_reader.format.base_format import BaseFormat
-from sd_prompt_reader.utility import remove_quotes
+from ..format.base_format import BaseFormat
+from ..utility import remove_quotes
 
 # easy diffusion mapping table
 EASYDIFFUSION_MAPPING_A = {
