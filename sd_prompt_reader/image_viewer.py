@@ -25,7 +25,9 @@ from sd_prompt_reader.image_data_reader import ImageDataReader
 from tkinterdnd2.TkinterDnD import DnDEvent
 
 from sd_prompt_reader.constants import *
+from sd_prompt_reader.button import STkButton
 from sd_prompt_reader.utility import (
+    load_icon,
     get_images,
     select_image,
     get_canvas_total_size,
@@ -39,7 +41,7 @@ class GalleryViewer:
     def __init__(
         self, master, parent, images, display, width, height, command=None, **kwargs
     ):
-        self.viewer_frame = CTkFrame(master, width, height, fg_color="transparent")
+        self.viewer_frame = CTkFrame(master, width, height, fg_color=BUTTON_HOVER)
         self.lightbox = self.Lightbox(self.viewer_frame, parent)
 
         self.thumbnail_carousel = self.ThumbnailCarousel(
@@ -49,7 +51,7 @@ class GalleryViewer:
             display,
             self.lightbox,
             width=width,
-            height=120,
+            height=100,
             command=command,
             **kwargs
         )
@@ -58,18 +60,29 @@ class GalleryViewer:
 
     class Lightbox:
         def __init__(self, master, parent):
+            self.left_image = load_icon(LEFT_FILE, (48, 48))
+            self.right_image = load_icon(RIGHT_FILE, (48, 48))
             self.image = None
             self.image_frame = CTkFrame(master)
+            self.left_button = STkButton(
+                self.image_frame,
+                width=48,
+                height=48,
+                image=self.left_image,
+                text="",
+            )
+            self.right_button = STkButton(
+                self.image_frame, width=48, height=48, image=self.right_image, text=""
+            )
             self.image_label = CTkLabel(
                 self.image_frame,
-                width=560,
+                width=330,
                 height=330,
                 text="",
                 # image=self.icon_image,
                 compound="top",
-                text_color=ACCESSIBLE_GRAY,
+                text_color=INACCESSIBLE_GRAY,
             )
-            self.image_label.grid(row=2, column=0, columnspan=4, pady=(10, 0))
 
             self.label_names = [
                 "format_label",
@@ -85,7 +98,7 @@ class GalleryViewer:
                 compound="left",
                 padx=5,
                 anchor="w",
-                fg_color=BUTTON_HOVER,
+                fg_color=BUTTON_HOVER_TOP,
                 corner_radius=5,
             )
             self.file_size_label = CTkLabel(
@@ -94,7 +107,7 @@ class GalleryViewer:
                 compound="left",
                 padx=5,
                 anchor="w",
-                fg_color=BUTTON_HOVER,
+                fg_color=BUTTON_HOVER_TOP,
                 corner_radius=5,
             )
             self.size_label = CTkLabel(
@@ -103,7 +116,7 @@ class GalleryViewer:
                 compound="left",
                 padx=5,
                 anchor="w",
-                fg_color=BUTTON_HOVER,
+                fg_color=BUTTON_HOVER_TOP,
                 corner_radius=5,
             )
             self.time_label = CTkLabel(
@@ -112,7 +125,7 @@ class GalleryViewer:
                 compound="left",
                 padx=5,
                 anchor="w",
-                fg_color=BUTTON_HOVER,
+                fg_color=BUTTON_HOVER_TOP,
                 corner_radius=5,
             )
             self.name_label = CTkLabel(
@@ -121,18 +134,21 @@ class GalleryViewer:
                 compound="left",
                 padx=5,
                 anchor="w",
-                fg_color=BUTTON_HOVER,
+                fg_color=BUTTON_HOVER_TOP,
                 corner_radius=5,
             )
 
-            self.file_size_label.grid(row=0, column=1, padx=2, pady=(0, 10))
-            self.size_label.grid(row=0, column=2, padx=2, pady=(0, 10))
-            self.time_label.grid(row=0, column=3, padx=2, pady=(0, 10))
-            self.name_label.grid(row=3, column=0, columnspan=4, pady=(10, 0))
+            self.file_size_label.grid(row=0, column=1, padx=2, pady=10)
+            self.size_label.grid(row=0, column=2, padx=2, pady=10)
+            self.time_label.grid(row=0, column=3, padx=2, pady=10)
+            self.name_label.grid(row=2, column=1, columnspan=3, pady=10)
+
+            self.image_label.grid(row=1, column=1, columnspan=3)
+            self.left_button.grid(row=1, column=0, sticky="sn")
+            self.right_button.grid(row=1, column=5, sticky="sn")
 
         def select(self, item, image):
             self.image = CTkImage(image, size=item.size_l)
-            # self.image.configure(image=image, size=item.size_l)
             self.image_label.configure(image=self.image)
             self.file_size_label.configure(text=item.size_str)
             self.size_label.configure(text=item.file_size)
@@ -219,6 +235,11 @@ class GalleryViewer:
             print(self.index)
             if self.index == item.index and not self.init:
                 return
+
+            for button in self.button_list:
+                button.configure(fg_color="transparent")
+
+            self.button_list[item.index].configure(fg_color=BUTTON_HOVER_TOP)
 
             self.lightbox.select(item, image)
             # self.label_list[item.index]["file_size_label"].grid(row=0, column=1, padx=2, pady=(0, 10))
@@ -484,8 +505,8 @@ class GalleryViewer:
                 frame,
                 text="",
                 image=ctk_image,
-                width=120,
-                height=120,
+                width=90,
+                height=90,
                 border_spacing=0,
                 fg_color="transparent",
             )
@@ -734,10 +755,10 @@ class ImageViewer:
                 datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
             )
             if size[0] >= size[1]:
-                self.size_s = (100, int(size[1] / size[0] * 100))
+                self.size_s = (THUMBNAIL_SIZE, int(size[1] / size[0] * THUMBNAIL_SIZE))
             elif size[0] < size[1]:
-                self.size_s = (int(size[0] / size[1] * 100), 100)
-            self.size_l = (self.size_s[0] * 3, self.size_s[1] * 3)
+                self.size_s = (int(size[0] / size[1] * THUMBNAIL_SIZE), THUMBNAIL_SIZE)
+            self.size_l = (self.size_s[0] * 4, self.size_s[1] * 4)
             self.size_str = str(size[0]) + "×" + str(size[1])
             if len(path.name) > 30:
                 self.name = path.name[:29] + "..."

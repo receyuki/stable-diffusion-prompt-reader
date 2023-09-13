@@ -56,6 +56,14 @@ VIEW_TAB_FILE = (
     Path(RESOURCE_DIR, "view_sidebar_20.png"),
     Path(RESOURCE_DIR, "view_sidebar_20_alpha.png"),
 )
+LEFT_FILE = (
+    Path(RESOURCE_DIR, "chevron_left_48.png"),
+    Path(RESOURCE_DIR, "chevron_left_48_alpha.png"),
+)
+RIGHT_FILE = (
+    Path(RESOURCE_DIR, "chevron_right_48.png"),
+    Path(RESOURCE_DIR, "chevron_right_48_alpha.png"),
+)
 ICON_FILE = Path(RESOURCE_DIR, "icon.png")
 ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
 MESSAGE = {
@@ -102,6 +110,7 @@ ACCESSIBLE_GRAY = ("#6C6C70", "#AEAEB2")
 INACCESSIBLE_GRAY = ("gray60", "gray45")
 EDITABLE = ("gray10", "#DCE4EE")
 BUTTON_HOVER = ("gray86", "gray17")
+BUTTON_HOVER_TOP = ("gray81", "gray20")
 TOOLTIP_DELAY = 1.5
 BUTTON_WIDTH_L = 40
 BUTTON_HEIGHT_L = 40
@@ -111,5 +120,6 @@ LABEL_HEIGHT = 20
 ARROW_WIDTH_L = 28
 STATUS_BAR_IPAD = 5
 PARAMETER_WIDTH = 280
+THUMBNAIL_SIZE = 80
 STATUS_BAR_HEIGHT = BUTTON_HEIGHT_L + LABEL_HEIGHT - STATUS_BAR_IPAD * 2
 PARAMETER_PLACEHOLDER = "                    "
