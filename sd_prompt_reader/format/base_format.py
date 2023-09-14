@@ -5,6 +5,8 @@ __email__ = "receyuki@gmail.com"
 
 
 class BaseFormat:
+    PARAMETER_KEY = ["model", "sampler", "seed", "cfg", "steps", "size"]
+
     def __init__(
         self, info: dict = None, raw: str = "", width: int = None, height: int = None
     ):
@@ -17,8 +19,7 @@ class BaseFormat:
         self._negative_sdxl = {}
         self._setting = ""
         self._raw = raw
-        self._parameter_key = ["model", "sampler", "seed", "cfg", "steps", "size"]
-        self._parameter = dict.fromkeys(self._parameter_key, "")
+        self._parameter = dict.fromkeys(BaseFormat.PARAMETER_KEY, "")
         self._is_sdxl = False
 
     @property

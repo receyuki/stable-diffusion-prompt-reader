@@ -67,7 +67,7 @@ class A1111(BaseFormat):
         pattern = r"\s*([^:,]+):\s*([^,]+)"
         setting_dict = dict(re.findall(pattern, self._setting))
 
-        for p, s in zip(self._parameter_key, A1111.SETTING_KEY):
+        for p, s in zip(super().PARAMETER_KEY, A1111.SETTING_KEY):
             self._parameter[p] = setting_dict.get(s)
 
     def prompt_to_line(self):
