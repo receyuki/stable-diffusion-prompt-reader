@@ -3,8 +3,6 @@ __filename__ = "base_format.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
-from ..constants import PARAMETER_PLACEHOLDER
-
 
 class BaseFormat:
     def __init__(
@@ -20,7 +18,7 @@ class BaseFormat:
         self._setting = ""
         self._raw = raw
         self._parameter_key = ["model", "sampler", "seed", "cfg", "steps", "size"]
-        self._parameter = dict.fromkeys(self._parameter_key, PARAMETER_PLACEHOLDER)
+        self._parameter = dict.fromkeys(self._parameter_key, "")
         self._is_sdxl = False
 
     @property
