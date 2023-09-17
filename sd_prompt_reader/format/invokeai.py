@@ -29,17 +29,24 @@ class InvokeAI(BaseFormat):
 
         # w/ neg
         if -1 not in prompt_index:
-            self._positive = prompt[: prompt_index[0]]
-            self._negative = prompt[prompt_index[0] + 1 : prompt_index[1]]
+            self._positive = prompt[: prompt_index[0]].strip()
+            self._negative = prompt[prompt_index[0] + 1 : prompt_index[1]].strip()
         # w/o neg
         else:
-            self._positive = prompt
+            self._positive = prompt.strip()
 
-        self._raw += self._positive
-        self._raw += "\n" + self.negative
-        self._raw += (
-            "\n" + self._info.get("Dream") + "\n" + self._info.get("sd-metadata")
-        )
+        self._raw = "\n".join(
+            [
+                self._positive,
+                self.negative,
+                self._info.get("Dream"),
+                self._info.get("sd-metadata"),
+            ]
+        ).strip()
+
+        self._width = str(image.get("width"))
+        self._height = str(image.get("height"))
+
         self._setting = (
             f"Steps: {image.get('steps')}"
             f", Sampler: {image.get('sampler')}"
@@ -55,13 +62,13 @@ class InvokeAI(BaseFormat):
             f", Type: {image.get('type')}"
             f", Postprocessing: {remove_quotes(image.get('postprocessing'))}"
             f", Variations: {image.get('variations')}"
-        )
+        ).strip()
 
-        self._parameter["model"] = metadata.get("model_weights")
-        self._parameter["sampler"] = image.get("sampler")
-        self._parameter["seed"] = image.get("seed")
-        self._parameter["cfg"] = image.get("cfg_scale")
-        self._parameter["steps"] = image.get("steps")
+        self._parameter["model"] = str(metadata.get("model_weights"))
+        self._parameter["sampler"] = str(image.get("sampler"))
+        self._parameter["seed"] = str(image.get("seed"))
+        self._parameter["cfg"] = str(image.get("cfg_scale"))
+        self._parameter["steps"] = str(image.get("steps"))
         self._parameter["size"] = (
             str(image.get("width")) + "x" + str(image.get("height"))
         )

@@ -71,13 +71,16 @@ class EasyDiffusion(BaseFormat):
             file = PurePosixPath(data_json.get(ed["use_stable_diffusion_model"])).name
 
         self._setting = (
-            remove_quotes(data_json).replace("{", "").replace("}", "").strip()
-        )
+            remove_quotes(str(data_json)).replace("{", "").replace("}", "")
+        ).strip()
+
+        self._width = str(data_json.get(ed["width"]))
+        self._height = str(data_json.get(ed["height"]))
 
         for p, s in zip(super().PARAMETER_KEY, EasyDiffusion.SETTING_KEY):
             match p:
                 case "model":
-                    self._parameter["model"] = file
+                    self._parameter["model"] = str(file)
                 case "size":
                     self._parameter["size"] = (
                         str(data_json.get(ed["width"]))
@@ -85,4 +88,4 @@ class EasyDiffusion(BaseFormat):
                         + str(data_json.get(ed["height"]))
                     )
                 case _:
-                    self._parameter[p] = data_json.get(s)
+                    self._parameter[p] = str(data_json.get(s))

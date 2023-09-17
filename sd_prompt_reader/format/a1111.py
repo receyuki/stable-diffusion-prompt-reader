@@ -67,6 +67,8 @@ class A1111(BaseFormat):
         pattern = r"\s*([^:,]+):\s*([^,]+)"
         setting_dict = dict(re.findall(pattern, self._setting))
 
+        [self._width, self._height] = setting_dict.get("Size").split("x")
+
         for p, s in zip(super().PARAMETER_KEY, A1111.SETTING_KEY):
             self._parameter[p] = setting_dict.get(s)
 

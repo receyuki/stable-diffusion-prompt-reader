@@ -31,6 +31,8 @@ class Fooocus(BaseFormat):
         data_json.pop("prompt")
         data_json.pop("negative_prompt")
         self._setting = remove_quotes(str(data_json)[1:-1]).strip()
+        self._width = str(data_json.get("width"))
+        self._height = str(data_json.get("height"))
 
         for p, s in zip(super().PARAMETER_KEY, Fooocus.SETTING_KEY):
             match p:

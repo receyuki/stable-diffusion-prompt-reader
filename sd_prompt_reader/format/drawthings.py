@@ -24,6 +24,7 @@ class DrawThings(BaseFormat):
         data_json.pop("c")
         data_json.pop("uc")
         self._setting = remove_quotes(str(data_json)[1:-1]).strip()
+        [self._width, self._height] = data_json.get("size").split("x")
 
         for p, s in zip(super().PARAMETER_KEY, DrawThings.SETTING_KEY):
-            self._parameter[p] = data_json.get(s)
+            self._parameter[p] = str(data_json.get(s))

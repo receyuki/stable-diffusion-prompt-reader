@@ -20,6 +20,8 @@ class SwarmUI(BaseFormat):
         data_json.pop("prompt")
         data_json.pop("negativeprompt")
         self._setting = remove_quotes(str(data_json)[1:-1])
+        self._width = str(data_json.get("width"))
+        self._height = str(data_json.get("height"))
 
         self._parameter["model"] = data_json.get("model")
         comfyuisampler = data_json.get("comfyuisampler")
@@ -30,9 +32,9 @@ class SwarmUI(BaseFormat):
             )
         else:
             self._parameter["sampler"] = str(comfyuisampler or autowebuisampler)
-        self._parameter["seed"] = data_json.get("seed")
-        self._parameter["cfg"] = data_json.get("cfgscale")
-        self._parameter["steps"] = data_json.get("steps")
+        self._parameter["seed"] = str(data_json.get("seed"))
+        self._parameter["cfg"] = str(data_json.get("cfgscale"))
+        self._parameter["steps"] = str(data_json.get("steps"))
         self._parameter["size"] = (
             str(data_json.get("width")) + "x" + str(data_json.get("height"))
         )
