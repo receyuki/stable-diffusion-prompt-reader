@@ -41,4 +41,4 @@ class Fooocus(BaseFormat):
                         str(data_json.get("width")) + "x" + str(data_json.get("height"))
                     )
                 case _:
-                    self._parameter[p] = data_json.get(s)
+                    self._parameter[p] = str(data_json.get(s))
