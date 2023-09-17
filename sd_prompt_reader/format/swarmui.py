@@ -8,6 +8,8 @@ from ..utility import remove_quotes
 
 
 class SwarmUI(BaseFormat):
+    SETTING_KEY = ["model", "", "seed", "cfgscale", "steps", ""]
+
     def __init__(self, info: dict = None, raw: str = ""):
         super().__init__(info, raw)
         self._ss_format()
@@ -23,18 +25,19 @@ class SwarmUI(BaseFormat):
         self._width = str(data_json.get("width"))
         self._height = str(data_json.get("height"))
 
-        self._parameter["model"] = data_json.get("model")
-        comfyuisampler = data_json.get("comfyuisampler")
-        autowebuisampler = data_json.get("autowebuisampler")
-        if comfyuisampler and autowebuisampler:
-            self._parameter["sampler"] = str(
-                remove_quotes((comfyuisampler, autowebuisampler))
-            )
-        else:
-            self._parameter["sampler"] = str(comfyuisampler or autowebuisampler)
-        self._parameter["seed"] = str(data_json.get("seed"))
-        self._parameter["cfg"] = str(data_json.get("cfgscale"))
-        self._parameter["steps"] = str(data_json.get("steps"))
-        self._parameter["size"] = (
-            str(data_json.get("width")) + "x" + str(data_json.get("height"))
-        )
+        for p, s in zip(super().PARAMETER_KEY, SwarmUI.SETTING_KEY):
+            match p:
+                case "sampler":
+                    comfyuisampler = data_json.get("comfyuisampler")
+                    autowebuisampler = data_json.get("autowebuisampler")
+                    self._parameter["sampler"] = str(
+                        remove_quotes((comfyuisampler, autowebuisampler))
+                        if comfyuisampler and autowebuisampler
+                        else comfyuisampler or autowebuisampler
+                    )
+                case "size":
+                    self._parameter["size"] = (
+                        str(data_json.get("width")) + "x" + str(data_json.get("height"))
+                    )
+                case _:
+                    self._parameter[p] = str(data_json.get(s))
