@@ -138,12 +138,12 @@ class ParameterViewer:
         )
 
     def update_text(self, parameter):
-        self.setting_model.configure(text=parameter["model"])
-        self.setting_sampler.configure(text=parameter["sampler"])
-        self.setting_seed.configure(text=parameter["seed"])
-        self.setting_cfg.configure(text=parameter["cfg"])
-        self.setting_steps.configure(text=parameter["steps"])
-        self.setting_size.configure(text=parameter["size"])
+        self.setting_model.configure(text=str(parameter["model"]))
+        self.setting_sampler.configure(text=str(parameter["sampler"]))
+        self.setting_seed.configure(text=str(parameter["seed"]))
+        self.setting_cfg.configure(text=str(parameter["cfg"]))
+        self.setting_steps.configure(text=str(parameter["steps"]))
+        self.setting_size.configure(text=str(parameter["size"]))
 
     def reset_text(self):
         parameters = [
