@@ -80,6 +80,5 @@ class BaseFormat:
             "height": self._height,
             "width": self._width,
             "setting": self._setting,
-            "raw": self._raw,
         }
         return str(json.dumps(properties))
