@@ -106,6 +106,23 @@ class ComfyUI(BaseFormat):
         self._parameter["steps"] = str(longest_flow.get("steps"))
         self._parameter["size"] = str(self._width) + "x" + str(self._height)
 
+        if self._is_sdxl:
+            if not self._positive and self.positive_sdxl:
+                self._positive = self.merge_clip(self.positive_sdxl)
+
+            if not self._negative and self.negative_sdxl:
+                self._negative = self.merge_clip(self.negative_sdxl)
+
+    @staticmethod
+    def merge_clip(data: dict):
+        clip_g = data.get("Clip G").strip(",")
+        clip_l = data.get("Clip L").strip(",")
+
+        if clip_g == clip_l:
+            return clip_g
+        else:
+            return ",\n".join([clip_g, clip_l])
+
     def _comfy_traverse(self, prompt, end_node):
         flow = {}
         node = [end_node]
