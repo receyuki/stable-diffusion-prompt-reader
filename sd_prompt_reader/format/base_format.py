@@ -3,6 +3,8 @@ __filename__ = "base_format.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
+import json
+
 
 class BaseFormat:
     PARAMETER_KEY = ["model", "sampler", "seed", "cfg", "steps", "size"]
@@ -65,3 +67,19 @@ class BaseFormat:
     @property
     def is_sdxl(self):
         return self._is_sdxl
+
+    @property
+    def props(self):
+        properties = {
+            "positive": self._positive,
+            "negative": self._negative,
+            "positive_sdxl": self._positive_sdxl,
+            "negative_sdxl": self._negative_sdxl,
+            "is_sdxl": self._is_sdxl,
+            **self._parameter,
+            "height": self._height,
+            "width": self._width,
+            "setting": self._setting,
+            "raw": self._raw,
+        }
+        return str(json.dumps(properties))

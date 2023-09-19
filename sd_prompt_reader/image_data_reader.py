@@ -248,3 +248,7 @@ class ImageDataReader:
     @property
     def is_sdxl(self):
         return self._parser.is_sdxl
+
+    @property
+    def props(self):
+        return self._parser.props
