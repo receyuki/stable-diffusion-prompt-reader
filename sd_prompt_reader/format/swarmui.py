@@ -16,12 +16,12 @@ class SwarmUI(BaseFormat):
 
     def _ss_format(self):
         data_json = self._info.get("sui_image_params")
-        self._positive = data_json.get("prompt")
-        self._negative = data_json.get("negativeprompt")
-        self._raw = "\n".join([self._positive, self._negative, str(data_json)])
+        self._positive = data_json.get("prompt").strip()
+        self._negative = data_json.get("negativeprompt").strip()
+        self._raw = "\n".join([self._positive, self._negative, str(data_json)]).strip()
         data_json.pop("prompt")
         data_json.pop("negativeprompt")
-        self._setting = remove_quotes(str(data_json)[1:-1])
+        self._setting = remove_quotes(str(data_json).strip("{ }"))
         self._width = str(data_json.get("width"))
         self._height = str(data_json.get("height"))
 

@@ -27,17 +27,7 @@ class EasyDiffusion(BaseFormat):
     }
 
     EASYDIFFUSION_MAPPING_B = {
-        "prompt": "prompt",
-        "negative_prompt": "negative_prompt",
-        "seed": "seed",
-        "use_stable_diffusion_model": "use_stable_diffusion_model",
-        "clip_skip": "clip_skip",
-        "use_vae_model": "use_vae_model",
-        "sampler_name": "sampler_name",
-        "width": "width",
-        "height": "height",
-        "num_inference_steps": "num_inference_steps",
-        "guidance_scale": "guidance_scale",
+        key: key for key, value in EASYDIFFUSION_MAPPING_A.items()
     }
 
     SETTING_KEY = [
@@ -57,10 +47,11 @@ class EasyDiffusion(BaseFormat):
 
     def _ed_format(self):
         data_json = json.loads(self._raw)
-        if data_json.get("prompt"):
-            ed = EasyDiffusion.EASYDIFFUSION_MAPPING_B
-        else:
-            ed = EasyDiffusion.EASYDIFFUSION_MAPPING_A
+        ed = (
+            EasyDiffusion.EASYDIFFUSION_MAPPING_B
+            if data_json.get("prompt")
+            else EasyDiffusion.EASYDIFFUSION_MAPPING_A
+        )
         self._positive = data_json.get(ed["prompt"]).strip()
         data_json.pop(ed["prompt"])
         self._negative = data_json.get(ed["negative_prompt"]).strip()
