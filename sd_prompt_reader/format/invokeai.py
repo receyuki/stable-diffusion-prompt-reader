@@ -70,7 +70,7 @@ class InvokeAI(BaseFormat):
                         else str(data_json.get("model").get("model_name"))
                     )
                 case "seed":
-                    self._parameter["seed"] = data_json.get("seed")
+                    self._parameter["seed"] = str(data_json.get("seed"))
                 case "size":
                     self._parameter["size"] = (
                         str(data_json.get("width")) + "x" + str(data_json.get("height"))
