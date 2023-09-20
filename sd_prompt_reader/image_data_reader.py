@@ -88,7 +88,9 @@ class ImageDataReader:
                     # novelai format
                     elif self._info.get("Software") == "NovelAI":
                         self._tool = "NovelAI"
-                        self._parser = NovelAI(info=self._info)
+                        self._parser = NovelAI(
+                            info=self._info, width=self._width, height=self._height
+                        )
                     # comfyui format
                     elif "prompt" in self._info:
                         self._tool = "ComfyUI"

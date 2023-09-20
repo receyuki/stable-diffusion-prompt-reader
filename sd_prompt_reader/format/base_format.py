@@ -10,10 +10,10 @@ class BaseFormat:
     PARAMETER_KEY = ["model", "sampler", "seed", "cfg", "steps", "size"]
 
     def __init__(
-        self, info: dict = None, raw: str = "", width: int = None, height: int = None
+        self, info: dict = None, raw: str = "", width: int = 0, height: int = 0
     ):
-        self._height = height
-        self._width = width
+        self._height = str(height)
+        self._width = str(width)
         self._info = info
         self._positive = ""
         self._negative = ""

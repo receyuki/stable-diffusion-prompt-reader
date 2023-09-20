@@ -11,16 +11,18 @@ from ..utility import remove_quotes
 
 class NovelAI(BaseFormat):
     SETTING_KEY = [
+        "",
         "sampler",
-        "sampler_name",
         "seed",
         "scale",
         "steps",
         "",
     ]
 
-    def __init__(self, info: dict = None, raw: str = ""):
-        super().__init__(info, raw)
+    def __init__(
+        self, info: dict = None, raw: str = "", width: int = 0, height: int = 0
+    ):
+        super().__init__(info, raw, width, height)
         self._nai_png()
 
     def _nai_png(self):
