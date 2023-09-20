@@ -4,115 +4,175 @@ __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
 import json
+import re
 
 from ..format.base_format import BaseFormat
 from ..utility import remove_quotes
 
 
 class InvokeAI(BaseFormat):
+    SETTING_KEY_INVOKEAI_METADATA = [
+        "",
+        ("scheduler", "refiner_scheduler"),
+        "seed",
+        ("cfg_scale", "refiner_cfg_scale"),
+        ("steps", "refiner_steps"),
+        "",
+    ]
+    SETTING_KEY_METADATA = [
+        "model_weights",
+        "sampler",
+        "seed",
+        "cfg_scale",
+        "steps",
+        "",
+    ]
+    SETTING_KEY_DREAM = ["", "A", "S", "C", "s", ""]
+    DREAM_MAPPING = {
+        "Steps": "s",
+        "Seed": "S",
+        "Size": "",
+        "CFG scale": "C",
+        "Sampler": "A",
+    }
+
     def __init__(self, info: dict = None, raw: str = ""):
         super().__init__(info, raw)
-        if "sd-metadata" in self._info:
+        if "invokeai_metadata" in self._info:
+            self._invoke_invoke_metadata()
+        elif "sd-metadata" in self._info:
             self._invoke_metadata()
         elif "Dream" in self._info:
             self._invoke_dream()
 
+    def _invoke_invoke_metadata(self):
+        data_json = json.loads(self._info.get("invokeai_metadata"))
+        self._positive = data_json.pop("positive_prompt").strip()
+        self._negative = data_json.pop("negative_prompt").strip()
+        self._raw = "\n".join([self._positive, self._negative, str(data_json)])
+        self._setting = remove_quotes(str(data_json)).strip("{ }")
+        self._width = str(data_json.get("width"))
+        self._height = str(data_json.get("height"))
+
+        has_refiner = True if "refiner_model" in data_json else False
+
+        for p, s in zip(super().PARAMETER_KEY, InvokeAI.SETTING_KEY_INVOKEAI_METADATA):
+            match p:
+                case "model":
+                    self._parameter[p] = remove_quotes(
+                        str(
+                            (
+                                data_json.get("model").get("model_name"),
+                                data_json.get("refiner_model").get("model_name"),
+                            )
+                        )
+                        if has_refiner
+                        else str(data_json.get("model").get("model_name"))
+                    )
+                case "seed":
+                    self._parameter["seed"] = data_json.get("seed")
+                case "size":
+                    self._parameter["size"] = (
+                        str(data_json.get("width")) + "x" + str(data_json.get("height"))
+                    )
+                case _:
+                    self._parameter[p] = remove_quotes(
+                        str((data_json.get(s[0]), data_json.get(s[1])))
+                        if has_refiner
+                        else str(data_json.get(s[0]))
+                    )
+
     def _invoke_metadata(self):
-        metadata = json.loads(self._info.get("sd-metadata"))
-        image = metadata.get("image")
+        data_json = json.loads(self._info.get("sd-metadata"))
+        image = data_json.pop("image")
         prompt = (
             image.get("prompt")[0].get("prompt")
             if isinstance(image.get("prompt"), list)
             else image.get("prompt")
         )
-        prompt_index = [prompt.rfind("["), prompt.rfind("]")]
 
-        # w/ neg
-        if -1 not in prompt_index:
-            self._positive = prompt[: prompt_index[0]].strip()
-            self._negative = prompt[prompt_index[0] + 1 : prompt_index[1]].strip()
-        # w/o neg
-        else:
-            self._positive = prompt.strip()
+        self._positive, self._negative = self.split_prompt(prompt)
 
-        self._raw = "\n".join(
-            [
+        raw_list = [
+            item
+            for item in [
                 self._positive,
-                self.negative,
+                self._negative,
                 self._info.get("Dream"),
                 self._info.get("sd-metadata"),
             ]
-        ).strip()
+            if item != ""
+        ]
+
+        self._raw = "\n".join(raw_list).strip()
+
+        image.pop("prompt")
+        self._setting = remove_quotes(
+            ", ".join([str(data_json).strip("{ }"), str(image).strip("{ }")])
+        )
 
         self._width = str(image.get("width"))
         self._height = str(image.get("height"))
 
-        self._setting = (
-            f"Steps: {image.get('steps')}"
-            f", Sampler: {image.get('sampler')}"
-            f", CFG scale: {image.get('cfg_scale')}"
-            f", Seed: {image.get('seed')}"
-            f", Size: {image.get('width')}x{image.get('height')}"
-            f", Model hash: {metadata.get('model_hash')}"
-            f", Model: {metadata.get('model_weights')}"
-            f", Threshold: {image.get('threshold')}"
-            f", Perlin: {image.get('perlin')}"
-            f", Hires fix: {image.get('hires_fix')}"
-            f", Seamless: {image.get('seamless')}"
-            f", Type: {image.get('type')}"
-            f", Postprocessing: {remove_quotes(image.get('postprocessing'))}"
-            f", Variations: {image.get('variations')}"
-        ).strip()
-
-        self._parameter["model"] = str(metadata.get("model_weights"))
-        self._parameter["sampler"] = str(image.get("sampler"))
-        self._parameter["seed"] = str(image.get("seed"))
-        self._parameter["cfg"] = str(image.get("cfg_scale"))
-        self._parameter["steps"] = str(image.get("steps"))
-        self._parameter["size"] = (
-            str(image.get("width")) + "x" + str(image.get("height"))
-        )
+        for p, s in zip(super().PARAMETER_KEY, InvokeAI.SETTING_KEY_METADATA):
+            match p:
+                case "model":
+                    self._parameter["model"] = data_json.get(s)
+                case "size":
+                    self._parameter["size"] = (
+                        str(image.get("width")) + "x" + str(image.get("height"))
+                    )
+                case _:
+                    self._parameter[p] = str(image.get(s))
 
     def _invoke_dream(self):
-        dream = self._info.get("Dream")
-        prompt_index = dream.rfind('"')
-        neg_index = [dream.rfind("["), dream.rfind("]")]
+        data = self._info.get("Dream")
 
-        # w/ neg
-        if -1 not in neg_index:
-            self._positive = dream[1 : neg_index[0]]
-            self._negative = dream[neg_index[0] + 1 : neg_index[1]]
-        # w/o neg
+        # match parameters like '"Prompt"Setting'
+        pattern = r'"(.*?)"\s*(.*?)$'
+        prompt, setting = re.search(pattern, data).groups()
+        self._positive, self._negative = self.split_prompt(prompt.strip('" '))
+
+        self._raw = "\n".join([self._positive, self.negative, self._info.get("Dream")])
+
+        # match parameters like "-s 30"
+        pattern = r"-(\w+)\s+([\w.-]+)"
+        setting_dict = dict(re.findall(pattern, setting))
+        setting_list = []
+        for key, value in InvokeAI.DREAM_MAPPING.items():
+            if key == "Size":
+                setting_list.append(
+                    key + ": " + setting_dict.get("W") + "x" + setting_dict.get("H")
+                )
+            else:
+                setting_list.append(key + ": " + setting_dict.get(value))
+        self._setting = ", ".join(setting_list)
+
+        self._width = str(setting_dict.get("W"))
+        self._height = str(setting_dict.get("H"))
+
+        for p, s in zip(super().PARAMETER_KEY, InvokeAI.SETTING_KEY_DREAM):
+            match p:
+                case "model":
+                    self._parameter["model"] = ""
+                case "size":
+                    self._parameter["size"] = (
+                        str(setting_dict.get("W")) + "x" + str(setting_dict.get("H"))
+                    )
+                case _:
+                    self._parameter[p] = setting_dict.get(s)
+
+    @staticmethod
+    def split_prompt(prompt: str):
+        # match parameters like "Positive[Negative]"
+        pattern = r"^(.*?)\[(.*?)\]$"
+        match = re.match(pattern, prompt)
+
+        if match:
+            positive, negative = match.groups()
+            positive = positive.strip()
+            negative = negative.strip()
         else:
-            self._positive = dream[1:prompt_index]
-
-        self._raw += self._positive
-        self._raw += "\n" + self.negative
-        self._raw += "\n" + self._info.get("Dream")
-
-        setting_index = [
-            dream.rfind("-s"),
-            dream.rfind("-S"),
-            dream.rfind("-W"),
-            dream.rfind("-H"),
-            dream.rfind("-C"),
-            dream.rfind("-A"),
-        ]
-        self._setting = (
-            f"Steps: {dream[setting_index[0] + 3:setting_index[1] - 1]}"
-            f", Sampler: {dream[setting_index[5] + 3:].split()[0]}"
-            f", CFG scale: {dream[setting_index[4] + 3:setting_index[5] - 1]}"
-            f", Seed: {dream[setting_index[1] + 3:setting_index[2] - 1]}"
-            f", Size: {dream[setting_index[2] + 3:setting_index[3] - 1]}"
-            f"x{dream[setting_index[3] + 3:setting_index[4] - 1]}"
-        )
-
-        self._parameter["sampler"] = dream[setting_index[5] + 3 :].split()[0]
-        self._parameter["seed"] = dream[setting_index[1] + 3 : setting_index[2] - 1]
-        self._parameter["cfg"] = dream[setting_index[4] + 3 : setting_index[5] - 1]
-        self._parameter["steps"] = dream[setting_index[0] + 3 : setting_index[1] - 1]
-        self._parameter["size"] = (
-            str(dream[setting_index[2] + 3 : setting_index[3] - 1])
-            + "x"
-            + str(dream[setting_index[3] + 3 : setting_index[4] - 1])
-        )
+            positive = prompt.strip()
+            negative = ""
+        return positive, negative

@@ -73,7 +73,11 @@ class ImageDataReader:
                     ):
                         self._tool = "Easy Diffusion"
                         self._parser = EasyDiffusion(info=self._info)
-                    # invokeai metadata format
+                    # invokeai3 format
+                    elif "invokeai_metadata" in self._info:
+                        self._tool = "InvokeAI"
+                        self._parser = InvokeAI(info=self._info)
+                    # invokeai2 format
                     elif "sd-metadata" in self._info:
                         self._tool = "InvokeAI"
                         self._parser = InvokeAI(info=self._info)
