@@ -115,8 +115,8 @@ class ComfyUI(BaseFormat):
 
     @staticmethod
     def merge_clip(data: dict):
-        clip_g = data.get("Clip G").strip(",")
-        clip_l = data.get("Clip L").strip(",")
+        clip_g = data.get("Clip G").strip(" ,")
+        clip_l = data.get("Clip L").strip(" ,")
 
         if clip_g == clip_l:
             return clip_g
