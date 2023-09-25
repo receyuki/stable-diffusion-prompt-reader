@@ -150,7 +150,7 @@ class ComfyUI(BaseFormat):
                         add_noise,
                         seed,
                         f"Size: {self._width}x{self._height}",
-                        f"Model: {remove_quotes(longest_flow.get('ckpt_name'))}",
+                        f"Model: {remove_quotes(longest_flow.get('model'))}",
                         f"Scheduler: {remove_quotes(longest_flow.get('scheduler'))}",
                         start_at_step,
                         end_at_step,
@@ -215,37 +215,63 @@ class ComfyUI(BaseFormat):
                     print("comfyUI SaveImage error")
             case node_type if node_type in KSAMPLER_TYPES:
                 try:
-                    flow = inputs
-                    last_flow1, last_node1 = self._comfy_traverse(
-                        prompt, inputs["model"][0]
-                    )
-                    last_flow2, last_node2 = self._comfy_traverse(
-                        prompt, inputs["latent_image"][0]
-                    )
-                    positive = self._comfy_traverse(prompt, inputs["positive"][0])
-                    if isinstance(positive, str):
-                        self._positive = positive
-                    elif isinstance(positive, dict):
-                        self._positive_sdxl.update(positive)
-                    negative = self._comfy_traverse(prompt, inputs["negative"][0])
-                    if isinstance(negative, str):
-                        self._negative = negative
-                    elif isinstance(negative, dict):
-                        self._negative_sdxl.update(negative)
                     seed = None
-                    # handle "CR Seed"
-                    if inputs.get("seed") and isinstance(inputs.get("seed"), list):
-                        seed = {"seed": self._comfy_traverse(prompt, inputs["seed"][0])}
-                    elif inputs.get("noise_seed") and isinstance(
-                        inputs.get("noise_seed"), list
-                    ):
-                        seed = {
-                            "noise_seed": self._comfy_traverse(
-                                prompt, inputs["noise_seed"][0]
-                            )
-                        }
-                    if seed:
-                        flow.update(seed)
+                    flow = inputs
+                    last_flow1, last_node1, last_flow2, last_node2 = {}, [], {}, []
+                    for key, value in inputs.items():
+                        match key:
+                            case "model":
+                                traverse_result = self._comfy_traverse(prompt, value[0])
+                                if isinstance(traverse_result, tuple):
+                                    last_flow1, last_node1 = traverse_result
+                                elif isinstance(traverse_result, dict):
+                                    flow.update({key: traverse_result.get("ckpt_name")})
+                            case "latent_image":
+                                last_flow2, last_node2 = self._comfy_traverse(
+                                    prompt, value[0]
+                                )
+                            case "positive":
+                                positive = self._comfy_traverse(prompt, value[0])
+                                if isinstance(positive, str):
+                                    self._positive = positive
+                                elif isinstance(positive, dict):
+                                    if positive_prompt := positive.get("positive"):
+                                        self._positive = positive_prompt
+                                    else:
+                                        self._positive_sdxl.update(positive)
+                            case "negative":
+                                negative = self._comfy_traverse(prompt, value[0])
+                                if isinstance(negative, str):
+                                    self._negative = negative
+                                elif isinstance(negative, dict):
+                                    if negative_prompt := negative.get("negative"):
+                                        self._negative = negative_prompt
+                                    else:
+                                        self._negative_sdxl.update(negative)
+                            case key_name if key_name in ("seed", "noise_seed"):
+                                # handle "CR Seed"
+                                if isinstance(value, list):
+                                    traverse_result = self._comfy_traverse(
+                                        prompt, value[0]
+                                    )
+                                    if isinstance(traverse_result, dict):
+                                        seed = {key_name: traverse_result.get("seed")}
+                                    else:
+                                        seed = {key_name: traverse_result}
+                                if seed:
+                                    flow.update(seed)
+                            case _ as key_name:
+                                print(flow)
+
+                                if isinstance(value, list):
+                                    traverse_result = self._comfy_traverse(
+                                        prompt, value[0]
+                                    )
+                                    if isinstance(traverse_result, dict):
+                                        flow.update(
+                                            {key_name: traverse_result.get(key_name)}
+                                        )
+
                     flow = merge_dict(flow, last_flow1)
                     flow = merge_dict(flow, last_flow2)
                     node += last_node1 + last_node2
@@ -255,12 +281,17 @@ class ComfyUI(BaseFormat):
                 try:
                     match node_type:
                         case "CLIPTextEncode":
-                            # SDXLPromptStyler
+                            # SDXLPromptStyler & SDPromptReader
                             if isinstance(inputs["text"], list):
                                 text = int(inputs["text"][0])
-                                prompt_styler = self._comfy_traverse(prompt, str(text))
-                                self._positive = prompt_styler[0]
-                                self._negative = prompt_styler[1]
+                                traverse_result = self._comfy_traverse(
+                                    prompt, str(text)
+                                )
+                                if isinstance(traverse_result, tuple):
+                                    self._positive = traverse_result[0]
+                                    self._negative = traverse_result[1]
+                                elif isinstance(traverse_result, dict):
+                                    return traverse_result
                                 return
                             elif isinstance(inputs["text"], str):
                                 return inputs.get("text")
@@ -383,6 +414,17 @@ class ComfyUI(BaseFormat):
                     node += last_node1 + last_node2
                 except:
                     print("comfyUI ConditioningCombine error")
+            # SD Prompt Reader Node
+            case "SDPromptReader":
+                try:
+                    return json.loads(prompt[end_node]["is_changed"][0])
+                except:
+                    print("comfyUI SDPromptReader error")
+            case "SDParameterGenerator":
+                try:
+                    return inputs
+                except:
+                    print("comfyUI SDParameterGenerator error")
             # custom nodes
             case "SDXLPromptStyler":
                 try:
