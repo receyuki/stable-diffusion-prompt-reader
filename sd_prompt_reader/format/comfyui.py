@@ -22,10 +22,19 @@ CLIP_TEXT_ENCODE_TYPE = [
     "CLIPTextEncodeSDXL",
     "CLIPTextEncodeSDXLRefiner",
 ]
-SAVE_IMAGE_TYPE = ["SaveImage", "Image Save"]
+SAVE_IMAGE_TYPE = ["SaveImage", "Image Save", "SDPromptSaver"]
 
 
 class ComfyUI(BaseFormat):
+    SETTING_KEY = [
+        "ckpt_name",
+        "sampler_name",
+        "",
+        "cfg",
+        "steps",
+        "",
+    ]
+
     def __init__(
         self, info: dict = None, raw: str = "", width: int = None, height: int = None
     ):
@@ -33,8 +42,8 @@ class ComfyUI(BaseFormat):
         self._comfy_png()
 
     def _comfy_png(self):
-        prompt = self._info.get("prompt") or {}
-        workflow = self._info.get("workflow") or {}
+        prompt = self._info.get("prompt", {})
+        workflow = self._info.get("workflow", {})
         prompt_json = json.loads(prompt)
 
         # find end node of each flow
@@ -58,58 +67,120 @@ class ComfyUI(BaseFormat):
                 longest_flow_len = len(nodes)
 
         if not self._is_sdxl:
-            self._raw += self._positive
-            self._raw += "\n" + self._negative or ""
+            self._raw = "\n".join(
+                [
+                    self._positive.strip(),
+                    self._negative.strip(),
+                ]
+            ).strip()
         else:
-            self._raw += self._positive_sdxl.get("Clip G") or ""
-            self._raw += "\n" + (self._positive_sdxl.get("Clip L") or "")
-            self._raw += "\n" + (self._positive_sdxl.get("Refiner") or "")
-            self._raw += "\n" + (self._negative_sdxl.get("Clip G") or "")
-            self._raw += "\n" + (self._negative_sdxl.get("Clip L") or "")
-            self._raw += "\n" + (self._negative_sdxl.get("Refiner") or "")
+            sdxl_keys = ["Clip G", "Clip L", "Refiner"]
+            self._raw = "\n".join(
+                [
+                    self._positive_sdxl.get(key).strip()
+                    for key in sdxl_keys
+                    if self._positive_sdxl.get(key)
+                ]
+                + [
+                    self._negative_sdxl.get(key).strip()
+                    for key in sdxl_keys
+                    if self._negative_sdxl.get(key)
+                ]
+            )
         self._raw += "\n" + str(prompt)
         if workflow:
             self._raw += "\n" + str(workflow)
 
-        seed = str(
-            longest_flow.get("seed")
+        add_noise = (
+            f"Add noise: {remove_quotes(longest_flow.get('add_noise'))}"
+            if longest_flow.get("add_noise")
+            else ""
+        )
+
+        seed = (
+            f"Seed: {longest_flow.get('seed')}"
             if longest_flow.get("seed")
-            else longest_flow.get("noise_seed")
+            else f"Noise seed: {longest_flow.get('noise_seed')}"
         )
 
-        self._setting = (
-            f"Steps: {longest_flow.get('steps')}"
-            f", Sampler: {remove_quotes(longest_flow.get('sampler_name'))}"
-            f", CFG scale: {longest_flow.get('cfg')}"
-            f", Seed: {seed}"
-            f", Size: {self._width}x{self._height}"
-            f", Model: {remove_quotes(longest_flow.get('ckpt_name'))}"
-            f", Scheduler: {remove_quotes(longest_flow.get('scheduler'))}"
+        start_at_step = (
+            f"Start at step: {longest_flow.get('start_at_step')}"
+            if longest_flow.get("start_at_step")
+            else ""
         )
-        if "denoise" in longest_flow:
-            self._setting += f", Denoise: {longest_flow.get('denoise')}"
-        if "upscale_method" in longest_flow:
-            self._setting += (
-                f", Upscale method: {remove_quotes(longest_flow.get('upscale_method'))}"
-            )
-        if "upscaler" in longest_flow:
-            self._setting += (
-                f", Upscale model: {remove_quotes(longest_flow.get('upscaler'))}"
-            )
 
-        self._parameter["model"] = str(remove_quotes(longest_flow.get("ckpt_name")))
-        self._parameter["sampler"] = str(
-            remove_quotes(longest_flow.get("sampler_name"))
+        end_at_step = (
+            f"End at step: {longest_flow.get('end_at_step')}"
+            if longest_flow.get("end_at_step")
+            else ""
         )
-        self._parameter["seed"] = seed
-        self._parameter["cfg"] = str(longest_flow.get("cfg"))
-        self._parameter["steps"] = str(longest_flow.get("steps"))
-        self._parameter["size"] = str(self._width) + "x" + str(self._height)
+
+        return_with_left_over_noise = (
+            f"Return with left over noise: {longest_flow.get('return_with_left_over_noise')}"
+            if longest_flow.get("return_with_left_over_noise")
+            else ""
+        )
+
+        denoise = (
+            f"Denoise: {longest_flow.get('denoise')}"
+            if longest_flow.get("denoise")
+            else ""
+        )
+
+        upscale_method = (
+            f"Upscale method: {remove_quotes(longest_flow.get('upscale_method'))}"
+            if longest_flow.get("upscale_method")
+            else ""
+        )
+
+        upscaler = (
+            f"Upscaler: {remove_quotes(longest_flow.get('upscaler'))}"
+            if longest_flow.get("upscaler")
+            else ""
+        )
+
+        self._setting = ", ".join(
+            list(
+                filter(
+                    lambda item: item != "",
+                    [
+                        f"Steps: {longest_flow.get('steps')}",
+                        f"Sampler: {remove_quotes(longest_flow.get('sampler_name'))}",
+                        f"CFG scale: {longest_flow.get('cfg')}",
+                        add_noise,
+                        seed,
+                        f"Size: {self._width}x{self._height}",
+                        f"Model: {remove_quotes(longest_flow.get('ckpt_name'))}",
+                        f"Scheduler: {remove_quotes(longest_flow.get('scheduler'))}",
+                        start_at_step,
+                        end_at_step,
+                        return_with_left_over_noise,
+                        denoise,
+                        upscale_method,
+                        upscaler,
+                    ],
+                )
+            )
+        )
+
+        for p, s in zip(super().PARAMETER_KEY, ComfyUI.SETTING_KEY):
+            match p:
+                case k if k in ("model", "sampler"):
+                    self._parameter[p] = str(remove_quotes(longest_flow.get(s)))
+                case "seed":
+                    self._parameter[p] = (
+                        str(longest_flow.get("seed"))
+                        if longest_flow.get("seed")
+                        else str(longest_flow.get("noise_seed"))
+                    )
+                case "size":
+                    self._parameter["size"] = str(self._width) + "x" + str(self._height)
+                case _:
+                    self._parameter[p] = str(longest_flow.get(s))
 
         if self._is_sdxl:
             if not self._positive and self.positive_sdxl:
                 self._positive = self.merge_clip(self.positive_sdxl)
-
             if not self._negative and self.negative_sdxl:
                 self._negative = self.merge_clip(self.negative_sdxl)
 
