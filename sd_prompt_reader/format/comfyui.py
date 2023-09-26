@@ -8,24 +8,24 @@ import json
 from ..format.base_format import BaseFormat
 from ..utility import remove_quotes, merge_dict
 
-# comfyui node types
-KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
-VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
-CHECKPOINT_LOADER_TYPE = [
-    "CheckpointLoader",
-    "CheckpointLoaderSimple",
-    "unCLIPCheckpointLoader",
-    "Checkpoint Loader (Simple)",
-]
-CLIP_TEXT_ENCODE_TYPE = [
-    "CLIPTextEncode",
-    "CLIPTextEncodeSDXL",
-    "CLIPTextEncodeSDXLRefiner",
-]
-SAVE_IMAGE_TYPE = ["SaveImage", "Image Save", "SDPromptSaver"]
-
 
 class ComfyUI(BaseFormat):
+    # comfyui node types
+    KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
+    VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
+    CHECKPOINT_LOADER_TYPE = [
+        "CheckpointLoader",
+        "CheckpointLoaderSimple",
+        "unCLIPCheckpointLoader",
+        "Checkpoint Loader (Simple)",
+    ]
+    CLIP_TEXT_ENCODE_TYPE = [
+        "CLIPTextEncode",
+        "CLIPTextEncodeSDXL",
+        "CLIPTextEncodeSDXLRefiner",
+    ]
+    SAVE_IMAGE_TYPE = ["SaveImage", "Image Save", "SDPromptSaver"]
+
     SETTING_KEY = [
         "ckpt_name",
         "sampler_name",
@@ -50,7 +50,7 @@ class ComfyUI(BaseFormat):
         end_nodes = list(
             filter(
                 lambda item: item[-1].get("class_type")
-                in ["SaveImage"] + KSAMPLER_TYPES,
+                in ["SaveImage"] + ComfyUI.KSAMPLER_TYPES,
                 prompt_json.items(),
             )
         )
@@ -204,7 +204,7 @@ class ComfyUI(BaseFormat):
             print("node error")
             return flow, node
         match prompt[end_node]["class_type"]:
-            case node_type if node_type in SAVE_IMAGE_TYPE:
+            case node_type if node_type in ComfyUI.SAVE_IMAGE_TYPE:
                 try:
                     last_flow, last_node = self._comfy_traverse(
                         prompt, inputs["images"][0]
@@ -213,7 +213,7 @@ class ComfyUI(BaseFormat):
                     node += last_node
                 except:
                     print("comfyUI SaveImage error")
-            case node_type if node_type in KSAMPLER_TYPES:
+            case node_type if node_type in ComfyUI.KSAMPLER_TYPES:
                 try:
                     seed = None
                     flow = inputs
@@ -261,8 +261,6 @@ class ComfyUI(BaseFormat):
                                 if seed:
                                     flow.update(seed)
                             case _ as key_name:
-                                print(flow)
-
                                 if isinstance(value, list):
                                     traverse_result = self._comfy_traverse(
                                         prompt, value[0]
@@ -277,7 +275,7 @@ class ComfyUI(BaseFormat):
                     node += last_node1 + last_node2
                 except:
                     print("comfyUI KSampler error")
-            case node_type if node_type in CLIP_TEXT_ENCODE_TYPE:
+            case node_type if node_type in ComfyUI.CLIP_TEXT_ENCODE_TYPE:
                 try:
                     match node_type:
                         case "CLIPTextEncode":
@@ -340,12 +338,12 @@ class ComfyUI(BaseFormat):
                     node += last_node
                 except:
                     print("comfyUI LoraLoader error")
-            case node_type if node_type in CHECKPOINT_LOADER_TYPE:
+            case node_type if node_type in ComfyUI.CHECKPOINT_LOADER_TYPE:
                 try:
                     return inputs, node
                 except:
                     print("comfyUI CheckpointLoader error")
-            case node_type if node_type in VAE_ENCODE_TYPE:
+            case node_type if node_type in ComfyUI.VAE_ENCODE_TYPE:
                 try:
                     last_flow, last_node = self._comfy_traverse(
                         prompt, inputs["pixels"][0]
