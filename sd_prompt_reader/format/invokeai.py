@@ -54,7 +54,7 @@ class InvokeAI(BaseFormat):
         self._width = str(data_json.get("width"))
         self._height = str(data_json.get("height"))
 
-        has_refiner = True if "refiner_model" in data_json else False
+        has_refiner = True if data_json.get("refiner_model") else False
 
         for p, s in zip(super().PARAMETER_KEY, InvokeAI.SETTING_KEY_INVOKEAI_METADATA):
             match p:
