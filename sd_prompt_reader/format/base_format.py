@@ -3,15 +3,17 @@ __filename__ = "base_format.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
-from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
+import json
 
 
 class BaseFormat:
+    PARAMETER_KEY = ["model", "sampler", "seed", "cfg", "steps", "size"]
+
     def __init__(
-        self, info: dict = None, raw: str = "", width: int = None, height: int = None
+        self, info: dict = None, raw: str = "", width: int = 0, height: int = 0
     ):
-        self._height = height
-        self._width = width
+        self._height = str(height)
+        self._width = str(width)
         self._info = info
         self._positive = ""
         self._negative = ""
@@ -19,8 +21,7 @@ class BaseFormat:
         self._negative_sdxl = {}
         self._setting = ""
         self._raw = raw
-        self._parameter_key = ["model", "sampler", "seed", "cfg", "steps", "size"]
-        self._parameter = dict.fromkeys(self._parameter_key, PARAMETER_PLACEHOLDER)
+        self._parameter = dict.fromkeys(BaseFormat.PARAMETER_KEY, "")
         self._is_sdxl = False
 
     @property
@@ -66,3 +67,18 @@ class BaseFormat:
     @property
     def is_sdxl(self):
         return self._is_sdxl
+
+    @property
+    def props(self):
+        properties = {
+            "positive": self._positive,
+            "negative": self._negative,
+            "positive_sdxl": self._positive_sdxl,
+            "negative_sdxl": self._negative_sdxl,
+            "is_sdxl": self._is_sdxl,
+            **self._parameter,
+            "height": self._height,
+            "width": self._width,
+            "setting": self._setting,
+        }
+        return str(json.dumps(properties))

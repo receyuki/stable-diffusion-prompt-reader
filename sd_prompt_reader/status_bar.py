@@ -8,7 +8,7 @@ import webbrowser
 from PIL import Image
 from customtkinter import CTkImage, CTkFrame, CTkLabel, LEFT
 
-from sd_prompt_reader.constants import *
+from .constants import *
 
 
 class StatusBar:

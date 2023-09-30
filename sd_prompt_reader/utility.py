@@ -3,13 +3,17 @@ __filename__ = "utility.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
-from customtkinter import filedialog
-
-from PIL import Image
-from customtkinter import CTkImage
+# Make the Image Data Reader capable of running in a minimal environment.
 from pathlib import Path
-from sd_prompt_reader.constants import *
-import pyperclip
+
+try:
+    from PIL import Image
+    from customtkinter import CTkImage, filedialog
+    import pyperclip
+except ImportError:
+    pass
+
+from .constants import *
 
 
 def load_icon(icon_file, size):

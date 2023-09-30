@@ -11,8 +11,8 @@ import piexif.helper
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
-from sd_prompt_reader.constants import PARAMETER_PLACEHOLDER
-from sd_prompt_reader.format import (
+from .constants import PARAMETER_PLACEHOLDER
+from .format import (
     A1111,
     EasyDiffusion,
     InvokeAI,
@@ -73,7 +73,11 @@ class ImageDataReader:
                     ):
                         self._tool = "Easy Diffusion"
                         self._parser = EasyDiffusion(info=self._info)
-                    # invokeai metadata format
+                    # invokeai3 format
+                    elif "invokeai_metadata" in self._info:
+                        self._tool = "InvokeAI"
+                        self._parser = InvokeAI(info=self._info)
+                    # invokeai2 format
                     elif "sd-metadata" in self._info:
                         self._tool = "InvokeAI"
                         self._parser = InvokeAI(info=self._info)
@@ -84,7 +88,9 @@ class ImageDataReader:
                     # novelai format
                     elif self._info.get("Software") == "NovelAI":
                         self._tool = "NovelAI"
-                        self._parser = NovelAI(info=self._info)
+                        self._parser = NovelAI(
+                            info=self._info, width=self._width, height=self._height
+                        )
                     # comfyui format
                     elif "prompt" in self._info:
                         self._tool = "ComfyUI"
@@ -248,3 +254,7 @@ class ImageDataReader:
     @property
     def is_sdxl(self):
         return self._parser.is_sdxl
+
+    @property
+    def props(self):
+        return self._parser.props
