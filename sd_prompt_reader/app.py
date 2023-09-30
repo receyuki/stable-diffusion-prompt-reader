@@ -96,7 +96,7 @@ class App(Tk):
         )
 
         # image display
-        self.image_frame = CTkFrame(self)
+        self.image_frame = CTkFrame(self, fg_color="transparent")
         self.image_frame.grid(
             row=0, column=0, rowspan=4, sticky="news", padx=20, pady=20
         )

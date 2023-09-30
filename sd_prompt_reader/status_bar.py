@@ -22,7 +22,7 @@ class StatusBar:
         self.status_frame = CTkFrame(parent)
         self.status_label = CTkLabel(
             self.status_frame,
-            width=230,
+            width=200,
             height=STATUS_BAR_HEIGHT,
             text=MESSAGE["default"][0],
             text_color=ACCESSIBLE_GRAY,

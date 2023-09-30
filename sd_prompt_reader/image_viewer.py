@@ -17,6 +17,7 @@ from customtkinter import (
     filedialog,
     ThemeManager,
     CTkFrame,
+    CTkOptionMenu,
 )
 from PIL import Image
 import sys
@@ -42,7 +43,8 @@ class GalleryViewer:
         self, master, parent, images, display, width, height, command=None, **kwargs
     ):
         self.viewer_frame = CTkFrame(master, width, height, fg_color=BUTTON_HOVER)
-        self.lightbox = self.Lightbox(self.viewer_frame, parent)
+        self.lightbox = self.Lightbox(self.viewer_frame, self)
+        self.button_bar = self.ButtonBar(master, self, fg_color="transparent")
 
         self.thumbnail_carousel = self.ThumbnailCarousel(
             self.viewer_frame,
@@ -55,24 +57,42 @@ class GalleryViewer:
             command=command,
             **kwargs
         )
-        self.lightbox.image_frame.grid(row=0, column=0, pady=5)
-        self.thumbnail_carousel.grid(row=1, column=0)
+        # self.lightbox.image_frame.grid(row=0, column=0, pady=5)
+        # self.thumbnail_carousel.grid(row=1, column=0)
+        self.lightbox.image_frame.pack(side="top", fill="both", pady=5)
+        self.thumbnail_carousel.pack(side="top", fill="x")
+        self.button_bar.pack(side="bottom", fill="x", pady=5)
+
+        self.fullscreen_image = None
 
     class Lightbox:
         def __init__(self, master, parent):
-            self.left_image = load_icon(LEFT_FILE, (48, 48))
-            self.right_image = load_icon(RIGHT_FILE, (48, 48))
+            self.left_image = load_icon(LEFT_FILE_L, (48, 48))
+            self.right_image = load_icon(RIGHT_FILE_L, (48, 48))
             self.image = None
             self.image_frame = CTkFrame(master)
+
+            self.image_frame.rowconfigure(tuple(range(3)), weight=1)
+            self.image_frame.columnconfigure(tuple(range(5)), weight=1)
+            self.image_frame.columnconfigure(0, weight=3)
+            self.image_frame.columnconfigure(5, weight=3)
+            self.image_frame.rowconfigure(1, weight=6)
+
             self.left_button = STkButton(
                 self.image_frame,
                 width=48,
                 height=48,
                 image=self.left_image,
                 text="",
+                hover_color=BUTTON_HOVER_TOP,
             )
             self.right_button = STkButton(
-                self.image_frame, width=48, height=48, image=self.right_image, text=""
+                self.image_frame,
+                width=48,
+                height=48,
+                image=self.right_image,
+                text="",
+                hover_color=BUTTON_HOVER_TOP,
             )
             self.image_label = CTkLabel(
                 self.image_frame,
@@ -144,8 +164,8 @@ class GalleryViewer:
             self.name_label.grid(row=2, column=1, columnspan=3, pady=5)
 
             self.image_label.grid(row=1, column=1, columnspan=3)
-            self.left_button.grid(row=1, column=0, sticky="sn")
-            self.right_button.grid(row=1, column=5, sticky="sn")
+            self.left_button.grid(row=0, column=0, rowspan=3, sticky="sn")
+            self.right_button.grid(row=0, column=5, rowspan=3, sticky="sn")
 
         def select(self, item, image):
             self.image = CTkImage(image, size=item.size_l)
@@ -582,6 +602,144 @@ class GalleryViewer:
                     if self._parent_canvas.xview() != (0.0, 1.0):
                         self._parent_canvas.xview("scroll", -event.delta, "units")
 
+    class ButtonBar(CTkFrame):
+        def __init__(self, master, parent, **kwargs):
+            super().__init__(master, **kwargs)
+            self.batch_image = load_icon(BATCH_FILE, (24, 24))
+            self.filter_image = load_icon(FILTER_FILE, (24, 24))
+            self.sort_image = load_icon(SORT_LIST_FILE, (24, 24))
+            self.clear_image = load_icon(CLEAR_LIST_FILE, (24, 24))
+            self.fullscreen_image = load_icon(FULLSCREEN_FILE, (24, 24))
+            self.left_image = load_icon(LEFT_FILE_S, (24, 24))
+            self.right_image = load_icon(RIGHT_FILE_S, (24, 24))
+            self.fullscreen_image = load_icon(FULLSCREEN_FILE, (24, 24))
+
+            self.parent = parent
+
+            self.batch_button = STkButton(
+                self,
+                width=BUTTON_WIDTH_L,
+                height=BUTTON_HEIGHT_L,
+                image=self.batch_image,
+                text="",
+            )
+            self.filter_button = STkButton(
+                self,
+                width=BUTTON_WIDTH_L,
+                height=BUTTON_HEIGHT_L,
+                image=self.filter_image,
+                text="",
+            )
+            self.sort_button = STkButton(
+                self,
+                width=BUTTON_WIDTH_L,
+                height=BUTTON_HEIGHT_L,
+                image=self.sort_image,
+                text="",
+            )
+            self.clear_button = STkButton(
+                self,
+                width=BUTTON_WIDTH_L,
+                height=BUTTON_HEIGHT_L,
+                image=self.clear_image,
+                text="",
+            )
+            self.fullscreen_image = STkButton(
+                self,
+                width=BUTTON_WIDTH_L,
+                height=BUTTON_HEIGHT_L,
+                image=self.fullscreen_image,
+                text="",
+                command=lambda: self.fullscreen(),
+            )
+            self.left_button = STkButton(
+                self,
+                width=BUTTON_WIDTH_L,
+                height=BUTTON_HEIGHT_L,
+                image=self.left_image,
+                text="",
+            )
+            self.right_image = STkButton(
+                self,
+                width=BUTTON_WIDTH_L,
+                height=BUTTON_HEIGHT_L,
+                image=self.right_image,
+                text="",
+            )
+            self.page_select = STkButton(
+                self,
+                width=BUTTON_WIDTH_L,
+                height=BUTTON_HEIGHT_L,
+                text="1",
+                fg_color=BUTTON_HOVER,
+                command=lambda: self.select_page(),
+            )
+            self.page_dropdown = CTkOptionMenu(
+                self,
+                width=BUTTON_WIDTH_L,
+                height=BUTTON_HEIGHT_L,
+                values=["1", "2", "3"],
+                command=self.page_dropdown_callback,
+            )
+            self.load_counter_label = CTkLabel(
+                self,
+                text="1 - 10 of 100",
+                padx=10,
+                anchor="center",
+            )
+
+            self.columnconfigure(tuple(range(9)), weight=1)
+            self.columnconfigure(8, weight=3)
+
+            self.batch_button.grid(row=0, column=0, sticky="w")
+            self.filter_button.grid(row=0, column=1, sticky="w")
+            self.sort_button.grid(row=0, column=2, sticky="w")
+            self.clear_button.grid(row=0, column=3, sticky="w")
+
+            self.left_button.grid(row=0, column=4)
+            self.page_select.grid(row=0, column=5)
+            self.right_image.grid(row=0, column=6)
+
+            self.fullscreen_image.grid(row=0, column=7, sticky="e")
+            self.load_counter_label.grid(row=0, column=8, sticky="e")
+
+        def select_page(self):
+            self.page_dropdown._dropdown_menu.open(
+                self.page_select.winfo_rootx(),
+                self.page_select.winfo_rooty()
+                + self.page_select._apply_widget_scaling(
+                    self.page_select._current_height + 0
+                ),
+            )
+
+        def page_dropdown_callback(self, choice):
+            self.page_select.configure(text=choice)
+
+        def fullscreen(self):
+            print(
+                self.parent.thumbnail_carousel.item_list[
+                    self.parent.thumbnail_carousel.index
+                ].path
+            )
+            self.parent.fullscreen_display(
+                self.parent.thumbnail_carousel.item_list[
+                    self.parent.thumbnail_carousel.index
+                ].path
+            )
+
+    def fullscreen_display(self, file_path):
+        image_window = CTk()
+        image_window.title("Image Viewer")
+        screen_width = image_window.winfo_screenwidth()
+        screen_height = image_window.winfo_screenheight()
+
+        f = Image.open(file_path)
+        self.fullscreen_image = CTkImage(f, size=(screen_height, screen_height))
+
+        panel = CTkLabel(image_window, text="aaaaa", image=self.fullscreen_image)
+        panel.image = self.fullscreen_image
+        panel.pack()
+
 
 class ImageViewer:
     def __init__(self, parent, update_idletasks, display_info, status_bar):
@@ -640,9 +798,7 @@ class ImageViewer:
             "<Button-1>",
             lambda e: self.display_info(select_image(self.file_path)),
         )
-        self.gallery_viewer.viewer_frame.grid(
-            row=0, column=0, columnspan=3, padx=0, pady=0, sticky="nsew"
-        )
+        self.gallery_viewer.viewer_frame.pack(fill="both", expand=True)
 
     def single_image(self, file):
         self.image_label.grid(row=1, column=1)
@@ -657,9 +813,7 @@ class ImageViewer:
     def multi_image(self, image_list):
         self.status_bar.info("Loading images")
         # self.gallery_viewer.update_idletasks()
-        self.gallery_viewer.viewer_frame.grid(
-            row=0, column=0, columnspan=3, padx=0, pady=0, sticky="nsew"
-        )
+        self.gallery_viewer.viewer_frame.pack(fill="both", expand=True)
         self.image_label.grid_forget()
         self.parent.configure(fg_color="transparent")
         self.gallery_viewer.thumbnail_carousel.update_idletasks()
@@ -751,7 +905,12 @@ class ImageViewer:
             self.index = index
             self.path = path
             self.size = size
-            self.file_size = "{:.2f}".format(path.stat().st_size / 1000000) + " MB"
+            self.file_size = (
+                "{:.2f}".format(
+                    max(round(path.stat().st_size / (KILO * KILO), 2), 0.01)
+                )
+                + " MB"
+            )
             self.format = file_format
             self.time = str(
                 datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
