@@ -3,6 +3,7 @@ __filename__ = "constants.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
+import platform
 from importlib import resources
 from pathlib import Path
 from . import resources as res
@@ -56,13 +57,49 @@ VIEW_TAB_FILE = (
     Path(RESOURCE_DIR, "view_sidebar_20.png"),
     Path(RESOURCE_DIR, "view_sidebar_20_alpha.png"),
 )
-LEFT_FILE = (
+LEFT_FILE_L = (
     Path(RESOURCE_DIR, "chevron_left_48.png"),
     Path(RESOURCE_DIR, "chevron_left_48_alpha.png"),
 )
-RIGHT_FILE = (
+RIGHT_FILE_L = (
     Path(RESOURCE_DIR, "chevron_right_48.png"),
     Path(RESOURCE_DIR, "chevron_right_48_alpha.png"),
+)
+LEFT_FILE_S = (
+    Path(RESOURCE_DIR, "chevron_left_24.png"),
+    Path(RESOURCE_DIR, "chevron_left_24_alpha.png"),
+)
+RIGHT_FILE_S = (
+    Path(RESOURCE_DIR, "chevron_right_24.png"),
+    Path(RESOURCE_DIR, "chevron_right_24_alpha.png"),
+)
+BATCH_FILE = (
+    Path(RESOURCE_DIR, "batch_24.png"),
+    Path(RESOURCE_DIR, "batch_24_alpha.png"),
+)
+FILTER_FILE = (
+    Path(RESOURCE_DIR, "filter_24.png"),
+    Path(RESOURCE_DIR, "filter_24_alpha.png"),
+)
+SORT_LIST_FILE = (
+    Path(RESOURCE_DIR, "sort_24.png"),
+    Path(RESOURCE_DIR, "sort_24_alpha.png"),
+)
+CLEAR_LIST_FILE = (
+    Path(RESOURCE_DIR, "playlist_remove_24.png"),
+    Path(RESOURCE_DIR, "playlist_remove_24_alpha.png"),
+)
+FULLSCREEN_FILE = (
+    Path(RESOURCE_DIR, "fullscreen_24.png"),
+    Path(RESOURCE_DIR, "fullscreen_24_alpha.png"),
+)
+VIEW_FILE = (
+    Path(RESOURCE_DIR, "gallery_thumbnail_24.png"),
+    Path(RESOURCE_DIR, "gallery_thumbnail_24_alpha.png"),
+)
+SETTING_FILE = (
+    Path(RESOURCE_DIR, "settings_24.png"),
+    Path(RESOURCE_DIR, "settings_24_alpha.png"),
 )
 ICON_FILE = Path(RESOURCE_DIR, "icon.png")
 ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
@@ -123,3 +160,7 @@ PARAMETER_WIDTH = 280
 THUMBNAIL_SIZE = 60
 STATUS_BAR_HEIGHT = BUTTON_HEIGHT_L + LABEL_HEIGHT - STATUS_BAR_IPAD * 2
 PARAMETER_PLACEHOLDER = "                    "
+if platform.system() == "Windows":
+    KILO = 1024
+else:
+    KILO = 1000
