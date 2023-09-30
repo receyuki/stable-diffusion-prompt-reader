@@ -29,6 +29,9 @@
     <img src="./images/screenshot_v132.png">
 </div>
 
+>SD Prompt Reader 现在可作为 ComfyUI 节点使用。查看 
+>[ComfyUI Prompt Reader Node](https://github.com/receyuki/comfyui-prompt-reader-node) 了解更多信息。
+
 ## 功能
 - 支持 macOS、 Windows 和 Linux
 - 简单的拖放交互
@@ -57,6 +60,9 @@
 \* 见[格式限制](#TXT).
 
 如果你使用的工具或格式不在这个列表中, 请帮助我支持你的格式: 将你的工具生成的原始图片文件上传到 issues, 谢谢.
+
+对于 ComfyUI 用户，SD Prompt Reader 现在可作为 ComfyUI 节点使用。
+[ComfyUI Prompt Reader Node](https://github.com/receyuki/comfyui-prompt-reader-node) 是本项目的一个子项目，建议在你的工作流程中嵌入其中的 [Prompt Saver node](https://github.com/receyuki/comfyui-prompt-reader-node#prompt-saver-node--parameter-generator-node) 以确保最大的兼容性。
 
 ## 下载
 ### Windows 用户
@@ -175,6 +181,8 @@ StableSwarmUI 依然处于 Alpha 测试状态，其格式未来可能会发生�
 (e.g. 在一个流程中同时生成原图和 hires. fix 后的图像)
 SD Prompt Reader 会遍历所有的流程和分支，并显示拥有完整的输入和输出的最长分支.
 3. [ComfyUI SDXL 流程](https://github.com/receyuki/stable-diffusion-prompt-reader/blob/master/README.zh-Hans.md#comfyui-sdxl-%E6%B5%81%E7%A8%8B)
+4. 当流程过于复杂或者使用自定义节点时，SD Prompt Reader 有很大概率无法正确显示元数据。这是由于 ComfyUI 并不储存元数据，而是储存完整的流程。
+建议在你的工作流程中嵌入 [ComfyUI Prompt Reader Node](https://github.com/receyuki/comfyui-prompt-reader-node) 中的 [Prompt Saver node](https://github.com/receyuki/comfyui-prompt-reader-node#prompt-saver-node--parameter-generator-node) 以确保最大的兼容性。
 ### Easy Diffusion
 默认设置下, Easy Diffusion 不会将 prompt 写入图片. 请更改设置中的 _Metadata format_ 为 _embed_ 来写入 prompt 到图片中.
 ### Fooocus-MRE
