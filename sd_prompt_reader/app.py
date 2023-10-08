@@ -29,6 +29,7 @@ from .prompt_viewer import PromptViewer
 from .status_bar import StatusBar
 from .textbox import STkTextbox
 from .update_checker import UpdateChecker
+from .__version__ import VERSION
 
 
 class App(Tk):
@@ -64,9 +65,10 @@ class App(Tk):
         self.expand_image = self.load_icon(EXPAND_FILE, (12, 24))
         self.sort_image = self.load_icon(SORT_FILE, (20, 20))
         self.view_image = self.load_icon(LIGHTBULB_FILE, (20, 20))
+        self.icon_image = CTkImage(Image.open(ICON_FILE), size=(100, 100))
 
-        self.icon_image = PhotoImage(file=ICON_FILE)
-        self.iconphoto(False, self.icon_image)
+        self.icon_image_pi = PhotoImage(file=ICON_FILE)
+        self.iconphoto(False, self.icon_image_pi)
         if platform.system() == "Windows":
             self.iconbitmap(ICO_FILE)
 
@@ -88,8 +90,8 @@ class App(Tk):
         self.image_label = CTkLabel(
             self.image_frame,
             width=560,
-            text=MESSAGE["drop"][0],
-            image=self.drop_image,
+            text=VERSION + "\n\n" + MESSAGE["drop"][0],
+            image=self.icon_image,
             compound="top",
             text_color=ACCESSIBLE_GRAY,
         )
