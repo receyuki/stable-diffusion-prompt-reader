@@ -150,7 +150,7 @@ class ComfyUI(BaseFormat):
                         add_noise,
                         seed,
                         f"Size: {self._width}x{self._height}",
-                        f"Model: {remove_quotes(longest_flow.get('model'))}",
+                        f"Model: {remove_quotes(longest_flow.get('ckpt_name'))}",
                         f"Scheduler: {remove_quotes(longest_flow.get('scheduler'))}",
                         start_at_step,
                         end_at_step,
