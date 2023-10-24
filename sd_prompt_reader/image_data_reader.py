@@ -64,7 +64,10 @@ class ImageDataReader:
                 if f.format == "PNG":
                     # a1111 png format
                     if "parameters" in self._info:
-                        self._tool = "A1111 webUI"
+                        if "prompt" in self._info:
+                            self._tool = "ComfyUI\n(A1111 compatible)"
+                        else:
+                            self._tool = "A1111 webUI"
                         self._parser = A1111(info=self._info)
                     # easydiff png format
                     elif (
