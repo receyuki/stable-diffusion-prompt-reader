@@ -26,7 +26,7 @@
     <a href="#常见问题">常见问题</a> •
     <a href="#credits">Credits</a>
   </p>
-    <img src="./images/screenshot_v132.png">
+    <img src="./images/screenshot_v134.png">
 </div>
 
 >SD Prompt Reader 现在可作为 ComfyUI 节点使用。查看 
