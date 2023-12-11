@@ -54,7 +54,7 @@ class ImageDataReader:
             self._height = f.height
             self._info = f.info
             self._format = f.format
-            # swarm format
+            # swarm legacy format
             try:
                 exif = json.loads(f.getexif().get(0x0110))
                 if "sui_image_params" in exif:
@@ -62,13 +62,18 @@ class ImageDataReader:
                     self._parser = SwarmUI(info=exif)
             except TypeError:
                 if f.format == "PNG":
-                    # a1111 png format
                     if "parameters" in self._info:
-                        if "prompt" in self._info:
-                            self._tool = "ComfyUI\n(A1111 compatible)"
+                        # swarm format
+                        if "sui_image_params" in self._info.get("parameters"):
+                            self._tool = "StableSwarmUI"
+                            self._parser = SwarmUI(raw=self._info.get("parameters"))
+                        # a1111 png compatible format
                         else:
-                            self._tool = "A1111 webUI"
-                        self._parser = A1111(info=self._info)
+                            if "prompt" in self._info:
+                                self._tool = "ComfyUI\n(A1111 compatible)"
+                            else:
+                                self._tool = "A1111 webUI"
+                            self._parser = A1111(info=self._info)
                     # easydiff png format
                     elif (
                         "negative_prompt" in self._info
@@ -127,7 +132,7 @@ class ImageDataReader:
                         else:
                             self._tool = "Draw Things"
                             self._parser = DrawThings(info=data_json)
-                elif f.format == "JPEG" or f.format == "WEBP":
+                elif f.format in ["JPEG", "WEBP"]:
                     # fooocus jpeg format
                     if "comment" in self._info:
                         try:
@@ -140,22 +145,30 @@ class ImageDataReader:
                     else:
                         try:
                             exif = piexif.load(self._info.get("exif")) or {}
-                            self._raw = piexif.helper.UserComment.load(
-                                exif.get("Exif").get(piexif.ExifIFD.UserComment)
+                            user_comment = exif.get("Exif").get(
+                                piexif.ExifIFD.UserComment
                             )
                         except TypeError:
                             print("empty jpeg")
                         except Exception:
                             pass
                         else:
-                            # easydiff jpeg and webp format
-                            if self._raw[0] == "{":
-                                self._tool = "Easy Diffusion"
-                                self._parser = EasyDiffusion(raw=self._raw)
-                            # a1111 jpeg and webp format
+                            # swarm format
+                            if "sui_image_params" in user_comment[8:].decode("utf-16"):
+                                self._tool = "StableSwarmUI"
+                                self._parser = SwarmUI(
+                                    raw=user_comment[8:].decode("utf-16")
+                                )
                             else:
-                                self._tool = "A1111 webUI"
-                                self._parser = A1111(raw=self._raw)
+                                self._raw = piexif.helper.UserComment.load(user_comment)
+                                # easydiff jpeg and webp format
+                                if self._raw[0] == "{":
+                                    self._tool = "Easy Diffusion"
+                                    self._parser = EasyDiffusion(raw=self._raw)
+                                # a1111 jpeg and webp format
+                                else:
+                                    self._tool = "A1111 webUI"
+                                    self._parser = A1111(raw=self._raw)
 
     @staticmethod
     def remove_data(image_file):

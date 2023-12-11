@@ -3,6 +3,8 @@ __filename__ = "swarmui.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
+import json
+
 from ..format.base_format import BaseFormat
 from ..utility import remove_quotes
 
@@ -12,6 +14,8 @@ class SwarmUI(BaseFormat):
 
     def __init__(self, info: dict = None, raw: str = ""):
         super().__init__(info, raw)
+        if not self._info:
+            self._info = json.loads(self._raw)
         self._ss_format()
 
     def _ss_format(self):
