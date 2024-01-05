@@ -22,7 +22,7 @@ class DrawThings(BaseFormat):
         self._negative = data_json.pop("uc").strip()
         self._raw = "\n".join([self._positive, self._negative, str(data_json)])
         self._setting = remove_quotes(str(data_json).strip("{ }"))
-        [self._width, self._height] = data_json.get("size").split("x")
+        [self._width, self._height] = data_json.get("size", "0x0").split("x")
 
         for p, s in zip(super().PARAMETER_KEY, DrawThings.SETTING_KEY):
             self._parameter[p] = str(data_json.get(s))
