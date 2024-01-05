@@ -65,7 +65,11 @@ class A1111(BaseFormat):
 
         # match parameters like "Steps: x",
         pattern = r"\s*([^:,]+):\s*([^,]+)"
-        setting_dict = dict(re.findall(pattern, self._setting))
+        matches = re.findall(pattern, self._setting)
+        setting_dict = {}
+        for key, value in matches:
+            if key not in setting_dict:
+                setting_dict[key] = value
 
         [self._width, self._height] = setting_dict.get("Size", "0x0").split("x")
 
