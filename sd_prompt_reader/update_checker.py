@@ -9,7 +9,7 @@ import requests
 from packaging import version
 
 from .__version__ import VERSION
-from .constants import RELEASE_URL
+from .constants import URL
 
 
 class UpdateChecker:
@@ -22,18 +22,18 @@ class UpdateChecker:
     # check update from GitHub release
     def check_update(self):
         try:
-            response = requests.get(RELEASE_URL, timeout=3).json()
+            response = requests.get(URL["release"], timeout=3).json()
         except Exception:
             print("Github api connection error")
         else:
             latest = response["name"]
             if version.parse(latest) > version.parse(VERSION):
                 download_url = response["html_url"]
-                self.status_bar.update(download_url)
+                self.status_bar.link(download_url, is_update=True)
 
     # clean up threads that are no longer in use
     def close_thread(self):
         if self._update_check:
             self._update_check = False
-            self.status_bar.stop_update()
+            self.status_bar.unbind()
             self.update_thread.join()

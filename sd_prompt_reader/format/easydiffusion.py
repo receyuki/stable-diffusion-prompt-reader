@@ -41,6 +41,8 @@ class EasyDiffusion(BaseFormat):
 
     def __init__(self, info: dict = None, raw: str = ""):
         super().__init__(info, raw)
+
+    def _process(self):
         if not self._raw:
             self._raw = str(self._info).replace("'", '"')
         self._ed_format()

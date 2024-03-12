@@ -4,6 +4,7 @@ __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
 import json
+from enum import Enum
 
 
 class BaseFormat:
@@ -23,6 +24,21 @@ class BaseFormat:
         self._raw = raw
         self._parameter = dict.fromkeys(BaseFormat.PARAMETER_KEY, "")
         self._is_sdxl = False
+        self._status = self.Status.UNREAD
+
+    def parse(self):
+        try:
+            self._process()
+        except Exception as e:
+            print(e)
+            self._status = self.Status.FORMAT_ERROR
+            return self._status
+        else:
+            self._status = self.Status.READ_SUCCESS
+            return self._status
+
+    def _process(self):
+        pass
 
     @property
     def height(self):
@@ -69,6 +85,10 @@ class BaseFormat:
         return self._is_sdxl
 
     @property
+    def status(self):
+        return self._status
+
+    @property
     def props(self):
         properties = {
             "positive": self._positive,
@@ -82,3 +102,9 @@ class BaseFormat:
             "setting": self._setting,
         }
         return str(json.dumps(properties))
+
+    class Status(Enum):
+        UNREAD = 1
+        READ_SUCCESS = 2
+        FORMAT_ERROR = 3
+        COMFYUI_ERROR = 4

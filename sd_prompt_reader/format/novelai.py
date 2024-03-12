@@ -23,6 +23,8 @@ class NovelAI(BaseFormat):
         self, info: dict = None, raw: str = "", width: int = 0, height: int = 0
     ):
         super().__init__(info, raw, width, height)
+
+    def _process(self):
         self._nai_png()
 
     def _nai_png(self):

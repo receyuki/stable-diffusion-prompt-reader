@@ -481,6 +481,7 @@ class App(Tk):
         self.display_info(args[0], is_selected=True)
 
     def display_info(self, event, is_selected=False):
+        self.status_bar.unbind()
         # stop update thread when reading first image
         self.update_checker.close_thread()
         # selected or drag and drop
@@ -496,8 +497,15 @@ class App(Tk):
             self.file_path = new_path
             with open(self.file_path, "rb") as f:
                 self.image_data = ImageDataReader(f)
-                if not self.image_data.tool:
+                if (
+                    not self.image_data.tool
+                    or self.image_data.status.name == "FORMAT_ERROR"
+                ):
                     self.unsupported_format(MESSAGE["format_error"])
+                elif self.image_data.status.name == "COMFYUI_ERROR":
+                    self.unsupported_format(
+                        MESSAGE["comfyui_error"], url=URL["comfyui"]
+                    )
                 else:
                     self.readable = True
                     # insert prompt
@@ -554,11 +562,11 @@ class App(Tk):
                     box.edit_off()
             self.button_edit.disable()
 
-    def unsupported_format(self, message, reset_image=False):
+    def unsupported_format(self, message, reset_image=False, url=""):
         self.readable = False
-        self.setting_box.text = message[0]
-        self.positive_box.display(message[0])
-        self.negative_box.display(message[0])
+        self.setting_box.text = ""
+        self.positive_box.display("")
+        self.negative_box.display("")
         self.setting_box_parameter.reset_text()
         for button in self.function_buttons:
             button.disable()
@@ -570,6 +578,8 @@ class App(Tk):
         else:
             self.button_edit.enable()
         self.status_bar.warning(message[-1])
+        if url:
+            self.status_bar.link(url)
 
     def resize_image(self, event=None):
         # resize image to window size

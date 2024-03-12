@@ -20,6 +20,8 @@ class Fooocus(BaseFormat):
 
     def __init__(self, info: dict = None, raw: str = ""):
         super().__init__(info, raw)
+
+    def _process(self):
         self._fc_format()
 
     def _fc_format(self):

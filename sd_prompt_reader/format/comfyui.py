@@ -39,6 +39,26 @@ class ComfyUI(BaseFormat):
         self, info: dict = None, raw: str = "", width: int = None, height: int = None
     ):
         super().__init__(info, raw, width, height)
+
+    def parse(self):
+        try:
+            self._process()
+        except Exception as e:
+            print(e)
+            self._status = self.Status.COMFYUI_ERROR
+            self._positive = ""
+            self._negative = ""
+            self._positive_sdxl = {}
+            self._negative_sdxl = {}
+            self._setting = ""
+            self._parameter = dict.fromkeys(BaseFormat.PARAMETER_KEY, "")
+            self._is_sdxl = False
+            return self._status
+        else:
+            self._status = self.Status.READ_SUCCESS
+            return self._status
+
+    def _process(self):
         self._comfy_png()
 
     def _comfy_png(self):

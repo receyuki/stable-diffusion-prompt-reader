@@ -38,6 +38,8 @@ class InvokeAI(BaseFormat):
 
     def __init__(self, info: dict = None, raw: str = ""):
         super().__init__(info, raw)
+
+    def _process(self):
         if "invokeai_metadata" in self._info:
             self._invoke_invoke_metadata()
         elif "sd-metadata" in self._info:

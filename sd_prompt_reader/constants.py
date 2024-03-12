@@ -7,7 +7,6 @@ from importlib import resources
 from pathlib import Path
 from . import resources as res
 
-RELEASE_URL = "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest"
 RESOURCE_DIR = str(resources.files(res))
 SUPPORTED_FORMATS = [".png", ".jpg", ".jpeg", ".webp"]
 COLOR_THEME = Path(RESOURCE_DIR, "gray.json")
@@ -82,6 +81,10 @@ MESSAGE = {
     "sort": ["Ascending order", "Descending order", "Original order"],
     "view_prompt": ["Vertical orientation", "Horizontal orientation"],
     "view_setting": ["Simple mode", "Normal mode"],
+    "comfyui_error": [
+        "The ComfyUI workflow is overly complex, or unsupported custom nodes have been used",
+        "Failed to parse ComfyUI data, click here for more info",
+    ],
 }
 TOOLTIP = {
     "edit": "Edit image metadata",
@@ -96,6 +99,13 @@ TOOLTIP = {
     "view_setting": "View setting in simple mode",
     "view_separate": "View Clip G, Clip L and Refiner prompt in separate textbox",
     "view_tab": "View Clip G, Clip L and Refiner prompt in one textbox",
+}
+URL = {
+    "release": "https://api.github.com/repos/receyuki/stable-diffusion-prompt-reader/releases/latest",
+    "format": (
+        "https://github.com/receyuki/stable-diffusion-prompt-reader#supported-formats"
+    ),
+    "comfyui": "https://github.com/receyuki/stable-diffusion-prompt-reader#comfyui",
 }
 DEFAULT_GRAY = "#8E8E93"
 ACCESSIBLE_GRAY = ("#6C6C70", "#AEAEB2")

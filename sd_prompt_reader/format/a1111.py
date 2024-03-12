@@ -30,6 +30,8 @@ class A1111(BaseFormat):
 
     def __init__(self, info: dict = None, raw: str = ""):
         super().__init__(info, raw)
+
+    def _process(self):
         if not self._raw:
             self._raw = self._info.get("parameters")
         self._sd_format()

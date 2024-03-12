@@ -16,6 +16,8 @@ class SwarmUI(BaseFormat):
         super().__init__(info, raw)
         if not self._info:
             self._info = json.loads(self._raw)
+
+    def _process(self):
         self._ss_format()
 
     def _ss_format(self):

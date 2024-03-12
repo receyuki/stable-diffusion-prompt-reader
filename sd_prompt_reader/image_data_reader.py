@@ -13,6 +13,7 @@ from PIL.PngImagePlugin import PngInfo
 
 from .constants import PARAMETER_PLACEHOLDER
 from .format import (
+    BaseFormat,
     A1111,
     EasyDiffusion,
     InvokeAI,
@@ -42,6 +43,7 @@ class ImageDataReader:
         self._is_sdxl = False
         self._format = ""
         self._parser = None
+        self._status = BaseFormat.Status.UNREAD
         self.read_data(file)
 
     def read_data(self, file):
@@ -112,7 +114,7 @@ class ImageDataReader:
                             self._parser = Fooocus(
                                 info=json.loads(self._info.get("Comment"))
                             )
-                        except:
+                        except Exception:
                             print("Fooocus format error")
                     # drawthings format
                     elif "XML:com.adobe.xmp" in self._info:
@@ -127,8 +129,9 @@ class ImageDataReader:
                                 .childNodes[0]
                                 .data
                             )
-                        except:
+                        except Exception:
                             print("Draw things format error")
+                            self._status = BaseFormat.Status.FORMAT_ERROR
                         else:
                             self._tool = "Draw Things"
                             self._parser = DrawThings(info=data_json)
@@ -140,8 +143,9 @@ class ImageDataReader:
                             self._parser = Fooocus(
                                 info=json.loads(self._info.get("comment"))
                             )
-                        except:
+                        except Exception:
                             print("Fooocus format error")
+                            self._status = BaseFormat.Status.FORMAT_ERROR
                     else:
                         try:
                             exif = piexif.load(self._info.get("exif")) or {}
@@ -150,25 +154,36 @@ class ImageDataReader:
                             )
                         except TypeError:
                             print("empty jpeg")
+                            self._status = BaseFormat.Status.FORMAT_ERROR
                         except Exception:
                             pass
                         else:
-                            # swarm format
-                            if "sui_image_params" in user_comment[8:].decode("utf-16"):
-                                self._tool = "StableSwarmUI"
-                                self._parser = SwarmUI(
-                                    raw=user_comment[8:].decode("utf-16")
-                                )
-                            else:
-                                self._raw = piexif.helper.UserComment.load(user_comment)
-                                # easydiff jpeg and webp format
-                                if self._raw[0] == "{":
-                                    self._tool = "Easy Diffusion"
-                                    self._parser = EasyDiffusion(raw=self._raw)
-                                # a1111 jpeg and webp format
+                            try:
+                                # swarm format
+                                if "sui_image_params" in user_comment[8:].decode(
+                                    "utf-16"
+                                ):
+                                    self._tool = "StableSwarmUI"
+                                    self._parser = SwarmUI(
+                                        raw=user_comment[8:].decode("utf-16")
+                                    )
                                 else:
-                                    self._tool = "A1111 webUI"
-                                    self._parser = A1111(raw=self._raw)
+                                    self._raw = piexif.helper.UserComment.load(
+                                        user_comment
+                                    )
+                                    # easydiff jpeg and webp format
+                                    if self._raw[0] == "{":
+                                        self._tool = "Easy Diffusion"
+                                        self._parser = EasyDiffusion(raw=self._raw)
+                                    # a1111 jpeg and webp format
+                                    else:
+                                        self._tool = "A1111 webUI"
+                                        self._parser = A1111(raw=self._raw)
+                            except Exception:
+                                self._status = BaseFormat.Status.FORMAT_ERROR
+            if self._tool:
+                self._status = self._parser.parse()
+                print(self._status.name)
 
     @staticmethod
     def remove_data(image_file):
@@ -190,8 +205,10 @@ class ImageDataReader:
                     metadata = piexif.dump(
                         {
                             "Exif": {
-                                piexif.ExifIFD.UserComment: piexif.helper.UserComment.dump(
-                                    data, encoding="unicode"
+                                piexif.ExifIFD.UserComment: (
+                                    piexif.helper.UserComment.dump(
+                                        data, encoding="unicode"
+                                    )
                                 )
                             },
                         }
@@ -213,7 +230,7 @@ class ImageDataReader:
                         f.save(new_path, quality=100, lossless=True)
                         if data:
                             piexif.insert(metadata, str(new_path))
-            except:
+            except Exception:
                 print("Save error")
 
     def prompt_to_line(self):
@@ -221,11 +238,11 @@ class ImageDataReader:
 
     @property
     def height(self):
-        return self._parser.height
+        return self._parser.height if self._tool else self._height
 
     @property
     def width(self):
-        return self._parser.width
+        return self._parser.width if self._tool else self._width
 
     @property
     def info(self):
@@ -274,3 +291,7 @@ class ImageDataReader:
     @property
     def props(self):
         return self._parser.props
+
+    @property
+    def status(self):
+        return self._parser.status

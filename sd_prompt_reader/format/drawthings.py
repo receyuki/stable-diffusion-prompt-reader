@@ -13,6 +13,8 @@ class DrawThings(BaseFormat):
 
     def __init__(self, info: dict = None, raw: str = ""):
         super().__init__(info, raw)
+
+    def _process(self):
         self._dt_format()
 
     def _dt_format(self):

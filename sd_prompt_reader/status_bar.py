@@ -65,15 +65,14 @@ class StatusBar:
             case "select directory":
                 self.info(MESSAGE["remove_select"][0])
 
-    def update(self, download_url):
-        self.status_label.configure(
-            image=self.available_updates_image, text=MESSAGE["update"][0]
-        )
-        self.status_label.bind(
-            "<Button-1>", lambda e: webbrowser.open_new(download_url)
-        )
+    def link(self, url, is_update=False):
+        if is_update:
+            self.status_label.configure(
+                image=self.available_updates_image, text=MESSAGE["update"][0]
+            )
+        self.status_label.bind("<Button-1>", lambda e: webbrowser.open_new(url))
 
-    def stop_update(self):
+    def unbind(self):
         self.status_label.unbind("<Button-1>")
 
     @staticmethod
