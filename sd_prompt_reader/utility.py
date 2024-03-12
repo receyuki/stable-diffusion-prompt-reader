@@ -44,7 +44,7 @@ def select_image(file_path=None):
 def copy_to_clipboard(status_bar, content):
     try:
         pyperclip.copy(content)
-    except:
+    except Exception:
         print("Copy error")
     else:
         status_bar.clipboard()
@@ -147,4 +147,8 @@ def remove_quotes(string):
 
 
 def add_quotes(string):
-    return '"' + str(string) + '"'
+    return f'"{str(string)}"'
+
+
+def concat_strings(base, addition, separator=", "):
+    return f"{base}{separator}{addition}" if base else addition

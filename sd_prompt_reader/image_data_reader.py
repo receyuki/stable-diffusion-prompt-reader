@@ -76,6 +76,9 @@ class ImageDataReader:
                             else:
                                 self._tool = "A1111 webUI"
                             self._parser = A1111(info=self._info)
+                    elif "postprocessing" in self._info:
+                        self._tool = "A1111 webUI\n(Postprocessing)"
+                        self._parser = A1111(info=self._info)
                     # easydiff png format
                     elif (
                         "negative_prompt" in self._info

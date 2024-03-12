@@ -6,7 +6,7 @@ __email__ = "receyuki@gmail.com"
 import re
 
 from ..format.base_format import BaseFormat
-from ..utility import add_quotes
+from ..utility import add_quotes, concat_strings
 
 
 class A1111(BaseFormat):
@@ -30,15 +30,16 @@ class A1111(BaseFormat):
 
     def __init__(self, info: dict = None, raw: str = ""):
         super().__init__(info, raw)
+        self._extra = ""
 
     def _process(self):
         if not self._raw:
-            self._raw = self._info.get("parameters")
+            self._raw = self._info.get("parameters", "")
+            self._extra = self._info.get("postprocessing", "")
         self._sd_format()
 
     def _sd_format(self):
-        if not self._raw:
-            self._raw = ""
+        if not self._raw and not self._extra:
             return
 
         steps_index = self._raw.find("\nSteps:")
@@ -77,6 +78,10 @@ class A1111(BaseFormat):
 
         for p, s in zip(super().PARAMETER_KEY, A1111.SETTING_KEY):
             self._parameter[p] = setting_dict.get(s)
+
+        if self._extra:
+            self._raw = concat_strings(self._raw, self._extra)
+            self._setting = concat_strings(self._setting, self._extra)
 
     def prompt_to_line(self):
         if not self._setting:
