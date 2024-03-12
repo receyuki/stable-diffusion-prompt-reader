@@ -492,7 +492,7 @@ class App(Tk):
             new_path = Path(event.data.replace("}", "").replace("{", ""))
 
         # detect suffix and read
-        if new_path.suffix in SUPPORTED_FORMATS:
+        if new_path.suffix.lower() in SUPPORTED_FORMATS:
             self.file_path = new_path
             with open(self.file_path, "rb") as f:
                 self.image_data = ImageDataReader(f)
