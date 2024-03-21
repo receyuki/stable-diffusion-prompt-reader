@@ -42,6 +42,7 @@ class ImageDataReader:
         self._is_txt = is_txt
         self._is_sdxl = False
         self._format = ""
+        self._props = ""
         self._parser = None
         self._status = BaseFormat.Status.UNREAD
         self.read_data(file)
@@ -253,27 +254,27 @@ class ImageDataReader:
 
     @property
     def positive(self):
-        return self._parser.positive
+        return self._parser.positive if self._tool else self._positive
 
     @property
     def negative(self):
-        return self._parser.negative
+        return self._parser.negative if self._tool else self._negative
 
     @property
     def positive_sdxl(self):
-        return self._parser.positive_sdxl
+        return self._parser.positive_sdxl if self._tool else self._positive_sdxl
 
     @property
     def negative_sdxl(self):
-        return self._parser.negative_sdxl
+        return self._parser.negative_sdxl if self._tool else self._negative_sdxl
 
     @property
     def setting(self):
-        return self._parser.setting
+        return self._parser.setting if self._tool else self._setting
 
     @property
     def raw(self):
-        return self._parser.raw
+        return self._parser.raw or self._raw
 
     @property
     def tool(self):
@@ -281,7 +282,7 @@ class ImageDataReader:
 
     @property
     def parameter(self):
-        return self._parser.parameter
+        return self._parser.parameter if self._tool else self._parameter
 
     @property
     def format(self):
@@ -289,11 +290,11 @@ class ImageDataReader:
 
     @property
     def is_sdxl(self):
-        return self._parser.is_sdxl
+        return self._parser.is_sdxl if self._tool else self._is_sdxl
 
     @property
     def props(self):
-        return self._parser.props
+        return self._parser.props if self._tool else self._props
 
     @property
     def status(self):
