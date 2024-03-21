@@ -184,9 +184,9 @@ class ImageDataReader:
                                         self._parser = A1111(raw=self._raw)
                             except Exception:
                                 self._status = BaseFormat.Status.FORMAT_ERROR
-            if self._tool:
+            if self._tool and self._status == BaseFormat.Status.UNREAD:
                 self._status = self._parser.parse()
-                print(self._status.name)
+            print(self._status.name)
 
     @staticmethod
     def remove_data(image_file):
@@ -297,4 +297,4 @@ class ImageDataReader:
 
     @property
     def status(self):
-        return self._parser.status
+        return self._status
