@@ -201,11 +201,11 @@ class ImageDataReader:
     def save_image(image_path, new_path, image_format, data=None):
         metadata = None
         if data:
-            match image_format:
+            match image_format.upper():
                 case "PNG":
                     metadata = PngInfo()
                     metadata.add_text("parameters", data)
-                case "JPEG" | "WEBP":
+                case "JPEG" | "JPG" | "WEBP":
                     metadata = piexif.dump(
                         {
                             "Exif": {
@@ -220,13 +220,13 @@ class ImageDataReader:
 
         with Image.open(image_path) as f:
             try:
-                match image_format:
+                match image_format.upper():
                     case "PNG":
                         if data:
                             f.save(new_path, pnginfo=metadata)
                         else:
                             f.save(new_path)
-                    case "JPEG":
+                    case "JPEG" | "JPG":
                         f.save(new_path, quality="keep")
                         if data:
                             piexif.insert(metadata, str(new_path))
@@ -236,6 +236,19 @@ class ImageDataReader:
                             piexif.insert(metadata, str(new_path))
             except Exception:
                 print("Save error")
+
+    @staticmethod
+    def construct_data(positive, negative, setting):
+        return "\n".join(
+            filter(
+                None,
+                [
+                    f"{positive}" if positive else "",
+                    f"Negative prompt: {negative}" if negative else "",
+                    f"{setting}" if setting else "",
+                ],
+            )
+        )
 
     def prompt_to_line(self):
         return self._parser.prompt_to_line()
