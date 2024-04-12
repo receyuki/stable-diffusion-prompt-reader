@@ -1,4 +1,4 @@
-Pillow==10.2.0
+Pillow==10.3.0
 pyinstaller~=5.13.0; platform_system == "Windows"
 pyinstaller-hooks-contrib~=2023.2; platform_system == "Windows"
 tkinterdnd2-universal~=1.7.3
@@ -12,3 +12,4 @@ pefile~=2023.2.7
 requests~=2.31.0
 toml~=0.10.2
 CTkToolTip~=0.8
+click~=8.1.7

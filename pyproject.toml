@@ -24,6 +24,7 @@ python = "^3.10"
 
 [tool.poetry.scripts]
 sd-prompt-reader = "sd_prompt_reader.app:main"
+sd-prompt-reader-cli = "sd_prompt_reader.cli:cli"
 
 [build-system]
 requires = ["poetry-core"]
