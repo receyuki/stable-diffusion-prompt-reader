@@ -11,6 +11,7 @@ import piexif.helper
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
+from .logger import Logger
 from .constants import PARAMETER_PLACEHOLDER
 from .format import (
     BaseFormat,
@@ -45,6 +46,7 @@ class ImageDataReader:
         self._props = ""
         self._parser = None
         self._status = BaseFormat.Status.UNREAD
+        self._logger = Logger("SD_Prompt_Reader.ImageDataReader")
         self.read_data(file)
 
     def read_data(self, file):
@@ -119,7 +121,7 @@ class ImageDataReader:
                                 info=json.loads(self._info.get("Comment"))
                             )
                         except Exception:
-                            print("Fooocus format error")
+                            self._logger.warn("Fooocus format error")
                     # drawthings format
                     elif "XML:com.adobe.xmp" in self._info:
                         try:
@@ -134,7 +136,7 @@ class ImageDataReader:
                                 .data
                             )
                         except Exception:
-                            print("Draw things format error")
+                            self._logger.warn("Draw things format error")
                             self._status = BaseFormat.Status.FORMAT_ERROR
                         else:
                             self._tool = "Draw Things"
@@ -148,7 +150,7 @@ class ImageDataReader:
                                 info=json.loads(self._info.get("comment"))
                             )
                         except Exception:
-                            print("Fooocus format error")
+                            self._logger.warn("Fooocus format error")
                             self._status = BaseFormat.Status.FORMAT_ERROR
                     else:
                         try:
@@ -157,7 +159,7 @@ class ImageDataReader:
                                 piexif.ExifIFD.UserComment
                             )
                         except TypeError:
-                            print("empty jpeg")
+                            self._logger.warn("Empty jpeg")
                             self._status = BaseFormat.Status.FORMAT_ERROR
                         except Exception:
                             pass
@@ -186,8 +188,9 @@ class ImageDataReader:
                             except Exception:
                                 self._status = BaseFormat.Status.FORMAT_ERROR
             if self._tool and self._status == BaseFormat.Status.UNREAD:
+                self._logger.debug(f"Format: {self._tool}")
                 self._status = self._parser.parse()
-            print(self._status.name)
+            self._logger.debug(f"Reading Status: {self._status.name}")
 
     @staticmethod
     def remove_data(image_file):

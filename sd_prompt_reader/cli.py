@@ -6,38 +6,10 @@ __email__ = "receyuki@gmail.com"
 import json
 from pathlib import Path
 
-import logging
 import click
 from .image_data_reader import ImageDataReader
 from .constants import SUPPORTED_FORMATS
-
-logger = logging.getLogger("SD_Prompt_Reader.Cli")
-
-
-def configure_logging(log_level):
-    logger = logging.getLogger()
-    logger.setLevel(log_level)
-
-    ch = logging.StreamHandler()
-    ch.setLevel(log_level)
-
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
-
-    ch.setFormatter(formatter)
-
-    logger.addHandler(ch)
-
-
-def get_log_level(level_name):
-    levels = {
-        "DEBUG": logging.DEBUG,
-        "INFO": logging.INFO,
-        "WARN": logging.WARNING,
-        "ERROR": logging.ERROR,
-    }
-    return levels.get(level_name.upper())
+from .logger import Logger
 
 
 @click.command()
@@ -48,14 +20,14 @@ def get_log_level(level_name):
 @click.option("-w", "--write", "operation", flag_value="write", help="Write mode")
 @click.option("-c", "--clear", "operation", flag_value="clear", help="Clear mode")
 # Option
+@click.option("-i", "--input-path", type=str, help="Input path", required=True)
+@click.option("-o", "--output-path", type=str, help="Output path")
 @click.option(
     "-f",
     "--format-type",
     default="TXT",
     type=click.Choice(["TXT", "JSON"], case_sensitive=False),
 )
-@click.option("-i", "--input-path", type=str, help="Input path", required=True)
-@click.option("-o", "--output-path", type=str, help="Output path")
 @click.option("-m", "--metadata", type=str, help="Metadata file")
 @click.option("-p", "--positive", type=str, help="Positive prompt")
 @click.option("-n", "--negative", type=str, help="Negative prompt")
@@ -64,7 +36,9 @@ def get_log_level(level_name):
     "-l",
     "--log-level",
     default="INFO",
-    type=click.Choice(["DEBUG", "INFO", "WARN", "ERROR"], case_sensitive=False),
+    type=click.Choice(
+        ["DEBUG", "INFO", "WARN", "ERROR"], case_sensitive=False, help="Log level"
+    ),
 )
 def cli(
     operation,
@@ -77,14 +51,16 @@ def cli(
     format_type,
     log_level,
 ):
-    log_level_const = get_log_level(log_level)
-    configure_logging(log_level_const)
 
+    logger = Logger("SD_Prompt_Reader.Cli")
+    Logger.configure_global_logger(log_level)
+
+    # Ensure the input path exists
     source = Path(input_path)
     logger.debug(f"Input: {source}")
-    file_list = []
     if not source.exists():
-        logger.debug("Input doesn't exist")
+        logger.error("Input doesn't exist")
+        raise click.UsageError("The specified input path does not exist.")
     elif source.is_file():
         logger.debug("Input is a file")
         file_list = [input_path]
@@ -107,7 +83,6 @@ def cli(
                 logger.debug(f"Reading file: {file}")
                 with open(file, "rb") as f:
                     image_data = ImageDataReader(f)
-                    logger.debug(f"Reading status: {image_data.status.name}")
                     if image_data.status.name == "READ_SUCCESS":
                         logger.debug("Read successfully")
                         success_count += 1
@@ -131,6 +106,7 @@ def cli(
                 target = Path(output_path)
                 logger.debug(f"Output: {target}")
                 for file, image_data in read_list.items():
+                    logger.debug(f"Exporting file: {file}")
                     file_path = Path(file)
                     if target.is_dir():
                         logger.debug("Output folder exists")

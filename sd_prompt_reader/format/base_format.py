@@ -5,6 +5,7 @@ __email__ = "receyuki@gmail.com"
 
 import json
 from enum import Enum
+from ..logger import Logger
 
 
 class BaseFormat:
@@ -25,12 +26,13 @@ class BaseFormat:
         self._parameter = dict.fromkeys(BaseFormat.PARAMETER_KEY, "")
         self._is_sdxl = False
         self._status = self.Status.UNREAD
+        self._logger = Logger("SD_Prompt_Reader.Parser")
 
     def parse(self):
         try:
             self._process()
         except Exception as e:
-            print(e)
+            self._logger.error(e)
             self._status = self.Status.FORMAT_ERROR
             return self._status
         else:

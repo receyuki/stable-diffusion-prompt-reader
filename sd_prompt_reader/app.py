@@ -30,12 +30,15 @@ from .status_bar import StatusBar
 from .textbox import STkTextbox
 from .update_checker import UpdateChecker
 from .__version__ import VERSION
+from .logger import Logger
 
 
 class App(Tk):
     def __init__(self):
         super().__init__()
 
+        logger = Logger("SD_Prompt_Reader.App")
+        Logger.configure_global_logger("INFO")
         # window = TkinterDnD.Tk()
         # window = Tk()
         self.title("SD Prompt Reader")
