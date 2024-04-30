@@ -101,7 +101,7 @@ class ImageDataReader:
                     elif "Dream" in self._info:
                         self._tool = "InvokeAI"
                         self._parser = InvokeAI(info=self._info)
-                    # novelai format
+                    # novelai legacy format
                     elif self._info.get("Software") == "NovelAI":
                         self._tool = "NovelAI"
                         self._parser = NovelAI(
@@ -141,6 +141,23 @@ class ImageDataReader:
                         else:
                             self._tool = "Draw Things"
                             self._parser = DrawThings(info=data_json)
+                    # novelai stealth pnginfo format
+                    elif f.mode == "RGBA":
+                        try:
+                            reader = NovelAI.LSBExtractor(f)
+                            magic = "stealth_pngcomp"
+                            read_magic = reader.get_next_n_bytes(len(magic)).decode(
+                                "utf-8"
+                            )
+                            assert (
+                                magic == read_magic
+                            ), "NovelAI stealth png info magic number error"
+                        except Exception as e:
+                            self._logger.warn(e)
+                            self._status = BaseFormat.Status.FORMAT_ERROR
+                        else:
+                            self._tool = "NovelAI"
+                            self._parser = NovelAI(extractor=reader)
                 elif f.format in ["JPEG", "WEBP"]:
                     # fooocus jpeg format
                     if "comment" in self._info:
