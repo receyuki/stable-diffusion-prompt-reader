@@ -23,6 +23,8 @@ A simple standalone viewer for reading prompt from Stable Diffusion generated im
     <a href="#supported-formats">Supported Formats</a> •
     <a href="#download">Download</a> •
     <a href="#usage">Usage</a> •
+    <a href="https://github.com/receyuki/comfyui-prompt-reader-node">ComfyUI Node</a> •
+    <a href="#cli">CLI</a> •
     <a href="#faq">FAQ</a> •
     <a href="#credits">Credits</a>
   </p>
@@ -45,17 +47,21 @@ A simple standalone viewer for reading prompt from Stable Diffusion generated im
 - Dark and light mode support.
 
 ## Supported Formats
-|                                                                          | PNG | JPEG | WEBP | TXT* |
-|--------------------------------------------------------------------------|:---:|:----:|:----:|:----:|
-| [A1111's webUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) |  ✅  |  ✅   |  ✅   |  ✅   |
-| [Easy Diffusion](https://github.com/easydiffusion/easydiffusion)         |  ✅  |  ✅   |  ✅   |      |
-| [StableSwarmUI](https://github.com/Stability-AI/StableSwarmUI)*          |  ✅  |  ✅   |      |      |
-| [Fooocus-MRE](https://github.com/MoonRide303/Fooocus-MRE)*               |  ✅  |  ✅   |      |      |
-| [InvokeAI](https://github.com/invoke-ai/InvokeAI)                        |  ✅  |      |      |      |
-| [ComfyUI](https://github.com/comfyanonymous/ComfyUI)*                    |  ✅  |      |      |      |
-| [NovelAI](https://novelai.net/)                                          |  ✅  |      |      |      |
-| [Draw Things](https://drawthings.ai/)                                    |  ✅  |      |      |      |
-| Naifu(4chan)                                                             |  ✅  |      |      |      |
+|                                                                                        | PNG | JPEG | WEBP | TXT* |
+|----------------------------------------------------------------------------------------|:---:|:----:|:----:|:----:|
+| [A1111's webUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)               |  ✅  |  ✅   |  ✅   |  ✅   |
+| [Easy Diffusion](https://github.com/easydiffusion/easydiffusion)                       |  ✅  |  ✅   |  ✅   |      |
+| [StableSwarmUI](https://github.com/Stability-AI/StableSwarmUI)*                        |  ✅  |  ✅   |      |      |
+| [StableSwarmUI (prior to 0.5.8-alpha)](https://github.com/Stability-AI/StableSwarmUI)* |  ✅  |  ✅   |      |      |
+| [Fooocus-MRE](https://github.com/MoonRide303/Fooocus-MRE)*                             |  ✅  |  ✅   |      |      |
+| [InvokeAI](https://github.com/invoke-ai/InvokeAI)                                      |  ✅  |      |      |      |
+| [InvokeAI (prior to 2.3.5-post.2)](https://github.com/invoke-ai/InvokeAI)              |  ✅  |      |      |      |
+| [InvokeAI (prior to 1.15)](https://github.com/invoke-ai/InvokeAI)                      |  ✅  |      |      |      |
+| [ComfyUI](https://github.com/comfyanonymous/ComfyUI)*                                  |  ✅  |      |      |      |
+| [Draw Things](https://drawthings.ai/)                                                  |  ✅  |      |      |      |
+| [NovelAI (stealth pnginfo)](https://novelai.net/)                                      |  ✅  |      |      |      |
+| [NovelAI (legacy)](https://novelai.net/)                                               |  ✅  |      |      |      |
+| Naifu(4chan)                                                                           |  ✅  |      |      |      |
 
 \* Limitations apply. See [format limitations](#TXT).
 
@@ -168,6 +174,58 @@ If the image's workflow includes multiple sets of SDXL prompts,
 namely Clip G(text_g), Clip L(text_l), and Refiner, the SD Prompt Reader will switch to the multi-set prompt display mode as shown in the image below. 
 There are two interface options available for the multi-set prompt display mode, and you can switch between them using buttons.  
 ![comfyui_sdxl.png](https://github.com/receyuki/stable-diffusion-prompt-reader/raw/master/images/comfyui_sdxl.png)
+
+## CLI
+A CLI tool for reading, modifying, and clearing metadata is provided. 
+In order to use the CLI tool, please [install SD Prompt Reader via pip](#for-linux-users-not-regularly-tested).
+### Modes and Options
+#### Modes
+- Read Mode: Activated by `-r` or `--read` flag.
+- Write Mode: Activated by `-w` or `--write` flag.
+- Clear Mode: Activated by `-c` or `--clear` flag.
+#### General Options
+- `-i`, `--input-path`: Path to the input image file or directory containing image files, required parameter.
+- `-o`, `--output-path`: Path to the output file or directory where the processed files will be saved.
+- `-l`, `--log-level`: Specify the log verbosity level (e.g.DEBUG, INFO, WARN, ERROR).
+#### Read Options
+- `-f`, `--format-type`: Specifies the output metadata format, choices are "TXT" or "JSON". Default format is "TXT"
+#### Write Options
+- `-m`, `--metadata`: Provides a metadata file for writing.
+- `-p`, `--positive`: Provides a positive prompt string for writing.
+- `-n`, `--negative`: Provides a negative prompt string for writing.
+- `-s`, `--setting`: Provides a setting string for writing.
+### Basic Usage
+- If no output path is specified, the modified image will be saved in the current directory 
+with a suffix added to the original filename.  
+- To overwrite the source file, set the output path equal to the input path.
+- The write mode only supports modifications to a single image.
+#### Read Mode
+- Read metadata from an image.
+- Usage:  
+`sd-prompt-reader-cli [-r] -i <input_path> [--format-type <format>] [-o <output_path>]`
+- Examples:  
+`sd-prompt-reader-cli -i example.png`  
+`sd-prompt-reader-cli -i example.png -o metadata.txt`  
+`sd-prompt-reader-cli -r -i example.png -f TXT -o output_folder/`  
+`sd-prompt-reader-cli -r -i input_folder/ -f JSON -o output_folder/`
+#### Write Mode
+- Write metadata to an image.
+- Usage:  
+`sd-prompt-reader-cli -w -i <input_path> -m <metadata_path> [-o <output_path>]`
+- Examples:  
+`sd-prompt-reader-cli -w -i example.png -m new_metadata.txt`  
+`sd-prompt-reader-cli -w -i example.png -m new_metadata.txt -o output.png`  
+`sd-prompt-reader-cli -w -i example.png -m new_metadata.json -o output_folder/`
+#### Clear Mode
+- Remove all metadata from an image.
+- Usage:  
+`sd-prompt-reader-cli -c -i <input_path> [-o <output_path>]`
+- Examples:  
+`sd-prompt-reader-cli -c -i example.png`  
+`sd-prompt-reader-cli -c -i example.png -o output.png`  
+`sd-prompt-reader-cli -c -i example.png -o output_folder/`  
+`sd-prompt-reader-cli -c -i input_folder/ -o output_folder/`
+
 
 ## Format Limitations
 ### TXT
