@@ -41,13 +41,13 @@ class InvokeAI(BaseFormat):
 
     def _process(self):
         if "invokeai_metadata" in self._info:
-            self._invoke_invoke_metadata()
-        elif "sd-metadata" in self._info:
             self._invoke_metadata()
+        elif "sd-metadata" in self._info:
+            self._invoke_sd_metadata()
         elif "Dream" in self._info:
             self._invoke_dream()
 
-    def _invoke_invoke_metadata(self):
+    def _invoke_metadata(self):
         data_json = json.loads(self._info.get("invokeai_metadata"))
         self._positive = data_json.pop("positive_prompt").strip()
         self._negative = data_json.pop("negative_prompt").strip()
@@ -84,7 +84,7 @@ class InvokeAI(BaseFormat):
                         else str(data_json.get(s[0]))
                     )
 
-    def _invoke_metadata(self):
+    def _invoke_sd_metadata(self):
         data_json = json.loads(self._info.get("sd-metadata"))
         image = data_json.pop("image")
         prompt = (

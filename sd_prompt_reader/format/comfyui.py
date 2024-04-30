@@ -39,12 +39,14 @@ class ComfyUI(BaseFormat):
         self, info: dict = None, raw: str = "", width: int = None, height: int = None
     ):
         super().__init__(info, raw, width, height)
+        self._prompt = ""
+        self._workflow = ""
 
     def parse(self):
         try:
             self._process()
         except Exception as e:
-            print(e)
+            self._logger.error(e)
             self._status = self.Status.COMFYUI_ERROR
             self._positive = ""
             self._negative = ""
@@ -53,6 +55,7 @@ class ComfyUI(BaseFormat):
             self._setting = ""
             self._parameter = dict.fromkeys(BaseFormat.PARAMETER_KEY, "")
             self._is_sdxl = False
+            self._raw = "\n".join([self._prompt, self._workflow])
             return self._status
         else:
             self._status = self.Status.READ_SUCCESS
@@ -62,9 +65,9 @@ class ComfyUI(BaseFormat):
         self._comfy_png()
 
     def _comfy_png(self):
-        prompt = self._info.get("prompt", {})
-        workflow = self._info.get("workflow", {})
-        prompt_json = json.loads(prompt)
+        self._prompt = self._info.get("prompt", {})
+        self._workflow = self._info.get("workflow", {})
+        prompt_json = json.loads(str(self._prompt))
 
         # find end node of each flow
         end_nodes = list(
@@ -107,9 +110,9 @@ class ComfyUI(BaseFormat):
                     if self._negative_sdxl.get(key)
                 ]
             )
-        self._raw += "\n" + str(prompt)
-        if workflow:
-            self._raw += "\n" + str(workflow)
+        self._raw += "\n" + str(self._prompt)
+        if self._workflow:
+            self._raw += "\n" + str(self._workflow)
 
         add_noise = (
             f"Add noise: {remove_quotes(longest_flow.get('add_noise'))}"

@@ -6,7 +6,7 @@ pyperclip~=1.8.2
 customtkinter~=5.2.2
 pyobjus~=1.2.3; sys_platform == 'darwin'
 py2app~=0.28.6; sys_platform == 'darwin'
-pyobjc-framework-Cocoa==10.1; sys_platform == 'darwin'
+pyobjc-framework-Cocoa==10.2; sys_platform == 'darwin'
 piexif~=1.1.3
 pefile~=2023.2.7
 requests~=2.31.0
