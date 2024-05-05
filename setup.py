@@ -15,6 +15,7 @@ import platform
 import toml
 from pathlib import Path
 from packaging import version
+import os
 
 
 # from sd_prompt_reader.__version__ import VERSION
@@ -24,6 +25,13 @@ def get_version():
     path = Path(__file__).resolve().parents[0] / "pyproject.toml"
     pyproject = toml.loads(open(str(path)).read())
     return version.parse(pyproject["tool"]["poetry"]["version"])
+
+
+def prepend_to_file(filename, line):
+    with open(filename, "r+") as file:
+        content = file.read()
+        file.seek(0)
+        file.write(line + "\n" + content)
 
 
 VERSION = get_version().base_version
@@ -123,3 +131,25 @@ elif platform.system() == "Darwin":
     shutil.copy(
         "__error__.sh", "./dist/SD Prompt Reader.app/Contents/Resources/__error__.sh"
     )
+
+    # Update poetry dependencies
+    skip_packages = ["pyinstaller", "pyinstaller-hooks-contrib", "py2app"]
+
+    with open("requirements.txt", "r") as file:
+        lines = file.readlines()
+
+    for line in lines:
+        skip = any(skip_package in line for skip_package in skip_packages)
+        if not skip:
+            if "; sys_platform == 'darwin'" in line:
+                package_name = line.split(";")[0].strip()
+                command = f"poetry add {package_name} --platform darwin"
+            else:
+                package_details = line.split(";")[0].strip()
+                command = f"poetry add {package_details}"
+            os.system(command)
+            print(f"Added: {line.strip()}")
+        else:
+            print(f"Skipped: {line.strip()}")
+
+    print("Dependencies have been processed.")
