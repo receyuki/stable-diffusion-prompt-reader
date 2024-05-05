@@ -132,6 +132,11 @@ elif platform.system() == "Darwin":
         "__error__.sh", "./dist/SD Prompt Reader.app/Contents/Resources/__error__.sh"
     )
 
+    # Ignore warning about py2app in CLI
+    file_path = "./dist/SD Prompt Reader.app/Contents/Resources/__boot__.py"
+    line_to_add = 'import warnings\nwarnings.filterwarnings("ignore", category=DeprecationWarning)\n'
+    prepend_to_file(file_path, line_to_add)
+
     # Update poetry dependencies
     skip_packages = ["pyinstaller", "pyinstaller-hooks-contrib", "py2app"]
 

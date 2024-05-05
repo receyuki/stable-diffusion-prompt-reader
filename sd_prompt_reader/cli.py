@@ -36,9 +36,7 @@ from .logger import Logger
     "-l",
     "--log-level",
     default="INFO",
-    type=click.Choice(
-        ["DEBUG", "INFO", "WARN", "ERROR"], case_sensitive=False, help="Log level"
-    ),
+    type=click.Choice(["DEBUG", "INFO", "WARN", "ERROR"], case_sensitive=False),
 )
 def cli(
     operation,
