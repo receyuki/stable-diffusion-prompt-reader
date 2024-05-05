@@ -11,7 +11,7 @@ from ..utility import remove_quotes, merge_dict
 
 class ComfyUI(BaseFormat):
     # comfyui node types
-    KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced"]
+    KSAMPLER_TYPES = ["KSampler", "KSamplerAdvanced", "KSampler (Efficient)"]
     VAE_ENCODE_TYPE = ["VAEEncode", "VAEEncodeForInpaint"]
     CHECKPOINT_LOADER_TYPE = [
         "CheckpointLoader",
@@ -206,6 +206,16 @@ class ComfyUI(BaseFormat):
                 self._positive = self.merge_clip(self.positive_sdxl)
             if not self._negative and self.negative_sdxl:
                 self._negative = self.merge_clip(self.negative_sdxl)
+            empty_prompt = (0 if self._positive_sdxl else 1) + (
+                0 if self._negative_sdxl else 1
+            )
+        else:
+            empty_prompt = (0 if self._positive else 1) + (0 if self._negative else 1)
+
+        empty_param = sum(1 for x in self._parameter.values() if x == "None")
+
+        if empty_prompt + empty_param > (6 + 2) / 2 or empty_prompt == 2:
+            raise ValueError("More than half of the parameters cannot be parsed")
 
     @staticmethod
     def merge_clip(data: dict):
