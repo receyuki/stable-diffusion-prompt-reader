@@ -69,6 +69,7 @@ class App(Tk):
         self.sort_image = self.load_icon(SORT_FILE, (20, 20))
         self.view_image = self.load_icon(LIGHTBULB_FILE, (20, 20))
         self.icon_image = CTkImage(Image.open(ICON_FILE), size=(100, 100))
+        self.icon_cube_image = CTkImage(Image.open(ICON_CUBE_FILE), size=(100, 100))
 
         self.icon_image_pi = PhotoImage(file=ICON_FILE)
         self.iconphoto(False, self.icon_image_pi)
@@ -93,8 +94,8 @@ class App(Tk):
         self.image_label = CTkLabel(
             self.image_frame,
             width=560,
-            text=VERSION + "\n\n" + MESSAGE["drop"][0],
-            image=self.icon_image,
+            text="\n" + VERSION + "\n\n" + MESSAGE["drop"][0],
+            image=self.icon_cube_image,
             compound="top",
             text_color=ACCESSIBLE_GRAY,
         )

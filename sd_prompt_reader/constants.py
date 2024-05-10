@@ -56,7 +56,8 @@ VIEW_TAB_FILE = (
     Path(RESOURCE_DIR, "view_sidebar_20_alpha.png"),
 )
 ICON_FILE = Path(RESOURCE_DIR, "icon.png")
-ICO_FILE = Path(RESOURCE_DIR, "icon.ico")
+ICON_CUBE_FILE = Path(RESOURCE_DIR, "icon-cube.png")
+ICO_FILE = Path(RESOURCE_DIR, "icon-gui.ico")
 MESSAGE = {
     "drop": ["Drop image here or click to select"],
     "default": ["Drag and drop your image file into the window"],
