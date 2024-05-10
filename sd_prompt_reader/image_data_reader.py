@@ -27,6 +27,8 @@ from .format import (
 
 
 class ImageDataReader:
+    NOVELAI_MAGIC = "stealth_pngcomp"
+
     def __init__(self, file, is_txt: bool = False):
         self._height = None
         self._width = None
@@ -145,12 +147,11 @@ class ImageDataReader:
                     elif f.mode == "RGBA":
                         try:
                             reader = NovelAI.LSBExtractor(f)
-                            magic = "stealth_pngcomp"
-                            read_magic = reader.get_next_n_bytes(len(magic)).decode(
-                                "utf-8"
-                            )
+                            read_magic = reader.get_next_n_bytes(
+                                len(self.NOVELAI_MAGIC)
+                            ).decode("utf-8")
                             assert (
-                                magic == read_magic
+                                self.NOVELAI_MAGIC == read_magic
                             ), "NovelAI stealth png info magic number error"
                         except Exception as e:
                             self._logger.warn(e)
@@ -169,6 +170,21 @@ class ImageDataReader:
                         except Exception:
                             self._logger.warn("Fooocus format error")
                             self._status = BaseFormat.Status.FORMAT_ERROR
+                    elif f.mode == "RGBA":
+                        try:
+                            reader = NovelAI.LSBExtractor(f)
+                            read_magic = reader.get_next_n_bytes(
+                                len(self.NOVELAI_MAGIC)
+                            ).decode("utf-8")
+                            assert (
+                                self.NOVELAI_MAGIC == read_magic
+                            ), "NovelAI stealth png info magic number error"
+                        except Exception as e:
+                            self._logger.warn(e)
+                            self._status = BaseFormat.Status.FORMAT_ERROR
+                        else:
+                            self._tool = "NovelAI"
+                            self._parser = NovelAI(extractor=reader)
                     else:
                         try:
                             exif = piexif.load(self._info.get("exif")) or {}
