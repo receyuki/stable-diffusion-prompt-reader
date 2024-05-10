@@ -135,11 +135,11 @@ class App(Tk):
 
         self.setting_box = STkTextbox(self, wrap="word", height=80)
         self.setting_box.grid(
-            row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(0, 20)
+            row=2, column=1, columnspan=6, sticky="news", padx=(0, 20), pady=(1, 21)
         )
         self.setting_box.text = "Setting"
 
-        # textbox simple mode
+        # setting box simple mode
         self.setting_box_simple = CTkFrame(
             self, height=80, fg_color=self.textbox_fg_color
         )
@@ -814,7 +814,7 @@ class App(Tk):
                     columnspan=6,
                     sticky="news",
                     padx=(0, 20),
-                    pady=(0, 20),
+                    pady=(1, 21),
                 )
                 self.setting_box.grid_forget()
                 self.status_bar.info(MESSAGE["view_setting"][0])
@@ -826,7 +826,7 @@ class App(Tk):
                     columnspan=6,
                     sticky="news",
                     padx=(0, 20),
-                    pady=(0, 20),
+                    pady=(1, 21),
                 )
                 self.setting_box_simple.grid_forget()
                 self.status_bar.info(MESSAGE["view_setting"][-1])
