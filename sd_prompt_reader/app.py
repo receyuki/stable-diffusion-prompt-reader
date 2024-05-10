@@ -507,7 +507,7 @@ class App(Tk):
                     self.unsupported_format(MESSAGE["format_error"])
                 elif self.image_data.status.name == "COMFYUI_ERROR":
                     self.unsupported_format(
-                        MESSAGE["comfyui_error"], url=URL["comfyui"]
+                        MESSAGE["comfyui_error"], url=URL["comfyui"], raw=True
                     )
                 else:
                     self.readable = True
@@ -565,7 +565,7 @@ class App(Tk):
                     box.edit_off()
             self.button_edit.disable()
 
-    def unsupported_format(self, message, reset_image=False, url=""):
+    def unsupported_format(self, message, reset_image=False, url="", raw=False):
         self.readable = False
         self.setting_box.text = ""
         self.positive_box.display("")
@@ -583,6 +583,9 @@ class App(Tk):
         self.status_bar.warning(message[-1])
         if url:
             self.status_bar.link(url)
+        if raw:
+            self.button_raw.enable()
+            self.button_export.enable()
 
     def resize_image(self, event=None):
         # resize image to window size
