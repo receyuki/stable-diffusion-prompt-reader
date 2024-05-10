@@ -156,3 +156,4 @@ cython_debug/
 
 /tests/
 /pyinstaller/
+/material/
