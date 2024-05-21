@@ -1,6 +1,6 @@
-Pillow==10.3.0
-pyinstaller~=5.13.0; platform_system == "Windows"
-pyinstaller-hooks-contrib~=2023.2; platform_system == "Windows"
+Pillow~=10.3.0
+pyinstaller~=6.6.0; platform_system == "Windows"
+pyinstaller-hooks-contrib~=2024.6; platform_system == "Windows"
 tkinterdnd2-universal~=1.7.3
 pyperclip~=1.8.2
 customtkinter~=5.2.2
