@@ -25,7 +25,6 @@ A simple standalone viewer for reading prompt from Stable Diffusion generated im
     <a href="#usage">Usage</a> •
     <a href="#cli">CLI</a> •
     <a href="https://github.com/receyuki/comfyui-prompt-reader-node">ComfyUI Node</a> •
-    <a href="#cli">CLI</a> •
     <a href="#faq">FAQ</a> •
     <a href="#credits">Credits</a>
   </p>
