@@ -221,9 +221,9 @@ class ImageDataReader:
                             except Exception:
                                 self._status = BaseFormat.Status.FORMAT_ERROR
             if self._tool and self._status == BaseFormat.Status.UNREAD:
-                self._logger.debug(f"Format: {self._tool}")
+                self._logger.info(f"Format: {self._tool}")
                 self._status = self._parser.parse()
-            self._logger.debug(f"Reading Status: {self._status.name}")
+            self._logger.info(f"Reading Status: {self._status.name}")
 
     @staticmethod
     def remove_data(image_file):
