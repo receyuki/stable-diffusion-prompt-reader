@@ -9,7 +9,7 @@ py2app~=0.28.6; sys_platform == 'darwin'
 pyobjc-framework-Cocoa==10.2; sys_platform == 'darwin'
 piexif~=1.1.3
 pefile~=2023.2.7
-requests~=2.31.0
+requests~=2.32.1
 toml~=0.10.2
 CTkToolTip~=0.8
 click~=8.1.7
