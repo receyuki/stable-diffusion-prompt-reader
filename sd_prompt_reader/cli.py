@@ -35,7 +35,7 @@ from .logger import Logger
 @click.option(
     "-l",
     "--log-level",
-    default="INFO",
+    default="WARN",
     type=click.Choice(["DEBUG", "INFO", "WARN", "ERROR"], case_sensitive=False),
 )
 def cli(
