@@ -102,7 +102,8 @@ or
 ```bash
 pipx install sd-prompt-reader
 ```
-在终端内输入 `sd-prompt-reader` 来启动 app.
+在终端内输入 `sd-prompt-reader` 来启动图形界面.  
+在终端内输入 `sd-prompt-reader-cli` 来使用命令行.
 #### 手动运行源码
 1. Clone repo
     ```bash
@@ -116,7 +117,7 @@ pipx install sd-prompt-reader
     ```
 3. Run
     ```bash
-   python main.py
+   python -m sd_prompt_reader.app
    ```
 
 ## 使用方式

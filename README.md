@@ -103,7 +103,8 @@ or
 ```bash
 pipx install sd-prompt-reader
 ```
-To launch app just enter `sd-prompt-reader` in the terminal.
+To launch the GUI just enter `sd-prompt-reader` in the terminal.  
+For the CLI, please use `sd-prompt-reader-cli`.
 #### Run source code manually
 1. Clone this repo.
     ```bash
@@ -117,7 +118,7 @@ To launch app just enter `sd-prompt-reader` in the terminal.
     ```
 3. Run.
     ```bash
-   python main.py
+   python -m sd_prompt_reader.app
    ```
 
 ## Usage
