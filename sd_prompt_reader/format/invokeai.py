@@ -64,12 +64,12 @@ class InvokeAI(BaseFormat):
                     self._parameter[p] = remove_quotes(
                         str(
                             (
-                                data_json.get("model").get("model_name"),
-                                data_json.get("refiner_model").get("model_name"),
+                                data_json.get("model").get("name"),
+                                data_json.get("refiner_model").get("name"),
                             )
                         )
                         if has_refiner
-                        else str(data_json.get("model").get("model_name"))
+                        else str(data_json.get("model").get("name"))
                     )
                 case "seed":
                     self._parameter["seed"] = str(data_json.get("seed"))
