@@ -12,3 +12,4 @@ from .comfyui import ComfyUI
 from .drawthings import DrawThings
 from .swarmui import SwarmUI
 from .fooocus import Fooocus
+from .civitai import CivitaiComfyUIFormat
