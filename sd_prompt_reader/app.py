@@ -5,7 +5,10 @@ __email__ = "receyuki@gmail.com"
 
 import platform
 import sys
+import json
+from pathlib import Path
 from tkinter import PhotoImage, Menu
+from urllib.parse import unquote, urlparse
 
 import pyperclip as pyperclip
 from CTkToolTip import *
@@ -466,6 +469,8 @@ class App(Tk):
         self.button_save.disable()
         self.button_edit.disable()
         self.file_path = None
+        self.folder_path = None
+        self.folder_files = []
 
         # bind dnd and resize
         self.drop_target_register(DND_FILES)
@@ -494,7 +499,18 @@ class App(Tk):
                 return
             new_path = Path(event)
         else:
-            new_path = Path(event.data.replace("}", "").replace("{", ""))
+            paths = self.parse_drop_paths(event.data)
+            if not paths:
+                return
+            folder = next((path for path in paths if path.is_dir()), None)
+            new_path = folder if folder else paths[0]
+
+        if new_path.is_dir():
+            self.folder_mode(new_path)
+            return
+        else:
+            self.folder_path = None
+            self.folder_files = []
 
         # detect suffix and read
         if new_path.suffix.lower() in SUPPORTED_FORMATS:
@@ -588,6 +604,159 @@ class App(Tk):
             self.button_raw.enable()
             self.button_export.enable()
 
+    def folder_mode(self, folder_path: Path):
+        self.readable = False
+        self.folder_path = folder_path
+        self.folder_files = self.get_supported_images(folder_path)
+        self.file_path = None
+        self.image_data = None
+        self.image = None
+        self.image_tk = None
+
+        if self.button_edit.mode == EditMode.ON:
+            self.edit_mode_switch()
+        self.button_edit.disable()
+        self.button_save.disable()
+
+        self.setting_box.text = ""
+        self.positive_box.display("")
+        self.negative_box.display("")
+        self.setting_box_parameter.reset_text()
+
+        for button in self.function_buttons:
+            button.disable()
+        self.positive_box.all_off()
+        self.negative_box.all_off()
+        self.image_label.configure(image=self.drop_image, text=MESSAGE["drop"][0])
+
+        if not self.folder_files:
+            self.status_bar.warning(MESSAGE["folder_empty"][0])
+            return
+
+        self.button_export.enable()
+        self.status_bar.info(
+            MESSAGE["folder_selected"][0].format(len(self.folder_files))
+        )
+
+    def parse_drop_paths(self, event_data: str):
+        try:
+            raw_paths = self.tk.splitlist(event_data)
+        except Exception:
+            raw_paths = [event_data]
+
+        path_list = []
+        for raw_path in raw_paths:
+            cleaned_path = str(raw_path).strip()
+            if cleaned_path.startswith("{") and cleaned_path.endswith("}"):
+                cleaned_path = cleaned_path[1:-1]
+            if cleaned_path.startswith("file://"):
+                parsed = urlparse(cleaned_path)
+                cleaned_path = unquote(parsed.path or "")
+                if platform.system() == "Windows" and cleaned_path.startswith("/"):
+                    cleaned_path = cleaned_path[1:]
+            if cleaned_path:
+                path_list.append(Path(cleaned_path))
+        return path_list
+
+    @staticmethod
+    def get_supported_images(folder_path: Path):
+        return sorted(
+            [
+                path
+                for path in folder_path.rglob("*")
+                if path.is_file() and path.suffix.lower() in SUPPORTED_FORMATS
+            ]
+        )
+
+    @staticmethod
+    def has_metadata(image_data: ImageDataReader):
+        return (
+            image_data.tool
+            and image_data.status.name != "FORMAT_ERROR"
+            and bool(image_data.raw.strip())
+        )
+
+    @staticmethod
+    def get_batch_json_path(target_dir: Path, source_dir: Path, image_path: Path):
+        try:
+            relative_parent = image_path.parent.relative_to(source_dir)
+        except ValueError:
+            relative_parent = Path(".")
+        output_folder = target_dir / relative_parent
+        output_folder.mkdir(parents=True, exist_ok=True)
+        target_file = output_folder / f"{image_path.stem}.json"
+        if target_file.exists():
+            target_file = output_folder / f"{image_path.name}.json"
+        return target_file
+
+    @staticmethod
+    def metadata_to_json(image_data: ImageDataReader):
+        payload = {
+            "tool": image_data.tool,
+            "raw": image_data.raw,
+            "positive": image_data.positive,
+            "negative": image_data.negative,
+            "setting": image_data.setting,
+            "parameter": image_data.parameter,
+        }
+        return payload
+
+    def export_folder_metadata(self):
+        if not self.folder_path:
+            return
+
+        output_dir = filedialog.askdirectory(
+            title="Select directory",
+            initialdir=self.folder_path,
+            mustexist=True,
+        )
+        if not output_dir:
+            return
+
+        target_dir = Path(output_dir)
+        exported = 0
+        skipped = 0
+        failed = 0
+        for image_path in self.folder_files:
+            try:
+                with open(image_path, "rb") as f:
+                    image_data = ImageDataReader(f)
+            except Exception:
+                failed += 1
+                continue
+            if not self.has_metadata(image_data):
+                skipped += 1
+                continue
+
+            target_path = self.get_batch_json_path(
+                target_dir, self.folder_path, image_path
+            )
+            try:
+                with open(target_path, "w", encoding="utf-8") as f:
+                    json.dump(
+                        self.metadata_to_json(image_data),
+                        f,
+                        ensure_ascii=False,
+                        indent=4,
+                    )
+            except Exception:
+                failed += 1
+            else:
+                exported += 1
+
+        if exported:
+            message = MESSAGE["folder_export"][0].format(exported)
+            if skipped:
+                message += f", skipped {skipped}"
+            if failed:
+                message += f", failed {failed}"
+            self.status_bar.success(message)
+        else:
+            message = MESSAGE["folder_no_metadata"][0]
+            if failed:
+                message += f" (failed {failed})"
+            self.status_bar.warning(message)
+
     def resize_image(self, event=None):
         # resize image to window size
         if self.image:
@@ -643,9 +812,22 @@ class App(Tk):
         )
 
     def export_txt(self, export_mode: str = None):
+        if self.folder_path:
+            self.export_folder_metadata()
+            return
+
+        if not self.file_path or not self.image_data:
+            self.status_bar.warning(MESSAGE["suffix_error"][0])
+            return
+
         if not export_mode:
-            with open(self.file_path.with_suffix(".txt"), "w", encoding="utf-8") as f:
-                f.write(self.image_data.raw)
+            with open(self.file_path.with_suffix(".json"), "w", encoding="utf-8") as f:
+                json.dump(
+                    self.metadata_to_json(self.image_data),
+                    f,
+                    ensure_ascii=False,
+                    indent=4,
+                )
                 self.status_bar.success(MESSAGE["alongside"][0])
         else:
             match export_mode:
@@ -654,13 +836,18 @@ class App(Tk):
                         title="Select directory",
                         initialdir=self.file_path.parent,
                         initialfile=self.file_path.stem,
-                        filetypes=(("text file", "*.txt"),),
+                        filetypes=(("json file", "*.json"),),
                     )
                     if path:
                         with open(
-                            Path(path).with_suffix(".txt"), "w", encoding="utf-8"
+                            Path(path).with_suffix(".json"), "w", encoding="utf-8"
                         ) as f:
-                            f.write(self.image_data.raw)
+                            json.dump(
+                                self.metadata_to_json(self.image_data),
+                                f,
+                                ensure_ascii=False,
+                                indent=4,
+                            )
                             self.status_bar.success(MESSAGE["txt_select"][0])
 
     def remove_data(self, remove_mode: str = None):
