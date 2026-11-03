@@ -18,11 +18,13 @@ class DrawThings(BaseFormat):
         self._dt_format()
 
     def _dt_format(self):
-        data_json = self.info
+        data_json = self.info.copy()
         self._tool = "Draw Things"
-        self._positive = data_json.pop("c").strip()
-        self._negative = data_json.pop("uc").strip()
+        self._positive = data_json.get("c").strip()
+        self._negative = data_json.get("uc").strip()
         self._raw = "\n".join([self._positive, self._negative, str(data_json)])
+        data_json.pop("c")
+        data_json.pop("uc")
         self._setting = remove_quotes(str(data_json).strip("{ }"))
         [self._width, self._height] = data_json.get("size", "0x0").split("x")
 

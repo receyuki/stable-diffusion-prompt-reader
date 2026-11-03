@@ -67,6 +67,8 @@
 
 \* 见[格式限制](#TXT).
 
+开发版本新增 RuinedFooocus PNG 支持（[#77](https://github.com/receyuki/stable-diffusion-prompt-reader/issues/77)），尚未包含在已发布版本中。
+
 > [!NOTE]
 > 如果你使用的工具或格式不在这个列表中, 请帮助我支持你的格式: 将你的工具生成的原始图片文件上传到 issues, 谢谢.
 
@@ -236,6 +238,7 @@ SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式.
 `sd-prompt-reader-cli -w -i example.png -m new_metadata.json -o output_folder/`
 #### 清除模式
 - 从图像中删除所有元数据.
+- 清除已支持的 NovelAI 隐藏元数据时，RGB 保持不变，透明度值最多变化 1/255。
 - 用法:  
 `sd-prompt-reader-cli -c -i <input_path> [-o <output_path>]`
 - 示例:  
@@ -243,6 +246,26 @@ SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式.
 `sd-prompt-reader-cli -c -i example.png -o output.png`  
 `sd-prompt-reader-cli -c -i example.png -o output_folder/`  
 `sd-prompt-reader-cli -c -i input_folder/ -o output_folder/`
+
+## API
+使用 `ImageDataReader` 读取图片元数据：
+
+```python
+from sd_prompt_reader.image_data_reader import ImageDataReader
+
+with open("path/to/image.png", "rb") as image_file:
+    metadata = ImageDataReader(image_file)
+
+if metadata.status.name == "READ_SUCCESS":
+    print(metadata.positive)
+    print(metadata.negative)
+    print(metadata.parameter)
+else:
+    print(metadata.status.name)
+    print(metadata.raw)
+```
+
+`READ_SUCCESS` 表示解析成功，否则可查看 `status` 和 `raw` 获取状态及可用的元数据。
 
 ## 格式限制
 ### TXT

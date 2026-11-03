@@ -587,6 +587,7 @@ class App(Tk):
         if raw:
             self.button_raw.enable()
             self.button_export.enable()
+            self.button_remove.enable()
 
     def resize_image(self, event=None):
         # resize image to window size
@@ -664,46 +665,27 @@ class App(Tk):
                             self.status_bar.success(MESSAGE["txt_select"][0])
 
     def remove_data(self, remove_mode: str = None):
-        image_without_exif = self.image_data.remove_data(self.file_path)
-        new_stem = self.file_path.stem + "_data_removed"
-        new_path = self.file_path.with_stem(new_stem)
-        if not remove_mode:
-            try:
-                self.image_data.save_image(
-                    self.file_path, new_path, self.image_data.format
-                )
-            except:
-                print("Remove error")
-            else:
-                self.status_bar.success(MESSAGE["suffix"][0])
+        new_path = self.file_path.with_stem(self.file_path.stem + "_data_removed")
+        message = MESSAGE["suffix"][0]
+        if remove_mode == "overwrite the original image":
+            new_path = self.file_path
+            message = MESSAGE["overwrite"][0]
+        elif remove_mode == "select directory":
+            path = filedialog.asksaveasfilename(
+                title="Select directory",
+                initialdir=self.file_path.parent,
+                initialfile=new_path.name,
+            )
+            if not path:
+                return
+            new_path = Path(path)
+            message = MESSAGE["remove_select"][0]
+        try:
+            self.image_data.save_image(self.file_path, new_path, self.image_data.format)
+        except OSError as error:
+            self.status_bar.warning(f"Could not remove metadata: {error}")
         else:
-            match remove_mode:
-                # case "add suffix":
-                #
-                case "overwrite the original image":
-                    try:
-                        self.image_data.save_image(
-                            self.file_path, self.file_path, self.image_data.format
-                        )
-                    except:
-                        print("Remove error")
-                    else:
-                        self.status_bar.success(MESSAGE["overwrite"][0])
-                case "select directory":
-                    path = filedialog.asksaveasfilename(
-                        title="Select directory",
-                        initialdir=self.file_path.parent,
-                        initialfile=new_path.name,
-                    )
-                    if path:
-                        try:
-                            self.image_data.save_image(
-                                self.file_path, path, self.image_data.format
-                            )
-                        except:
-                            print("Remove error")
-                        else:
-                            self.status_bar.success(MESSAGE["remove_select"][0])
+            self.status_bar.success(message)
 
     def save_data(self, save_mode: str = None):
         with Image.open(self.file_path) as image:

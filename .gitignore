@@ -154,6 +154,15 @@ cython_debug/
 
 .idea/
 
-/tests/
+/tests/*
+!/tests/ruinedfooocus/
+/tests/ruinedfooocus/*
+!/tests/ruinedfooocus/test_ruinedfooocus.py
+!/tests/ruinedfooocus/issue77.png
+!/tests/ruinedfooocus/README.md
 /pyinstaller/
 /material/
+
+!/tests/maintenance/
+/tests/maintenance/*
+!/tests/maintenance/test_clear.py

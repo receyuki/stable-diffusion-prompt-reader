@@ -23,6 +23,7 @@ from .format import (
     DrawThings,
     SwarmUI,
     Fooocus,
+    RuinedFooocus,
 )
 
 
@@ -74,6 +75,14 @@ class ImageDataReader:
                         if "sui_image_params" in self._info.get("parameters"):
                             self._tool = "StableSwarmUI"
                             self._parser = SwarmUI(raw=self._info.get("parameters"))
+                        # ruined fooocus format
+                        elif RuinedFooocus.is_format(self._info.get("parameters")):
+                            self._tool = "Ruined Fooocus"
+                            self._parser = RuinedFooocus(
+                                raw=self._info.get("parameters"),
+                                width=self._width,
+                                height=self._height,
+                            )
                         # a1111 png compatible format
                         else:
                             if "prompt" in self._info:
@@ -255,23 +264,37 @@ class ImageDataReader:
                     )
 
         with Image.open(image_path) as f:
-            try:
-                match image_format.upper():
-                    case "PNG":
-                        if data:
-                            f.save(new_path, pnginfo=metadata)
-                        else:
-                            f.save(new_path)
-                    case "JPEG" | "JPG":
-                        f.save(new_path, quality="keep")
-                        if data:
-                            piexif.insert(metadata, str(new_path))
-                    case "WEBP":
-                        f.save(new_path, quality=100, lossless=True)
-                        if data:
-                            piexif.insert(metadata, str(new_path))
-            except Exception:
-                print("Save error")
+            f.load()
+            if not data:
+                # Stealth PNG info lives in alpha bits, not in PNG text chunks.
+                magic = ImageDataReader.NOVELAI_MAGIC.encode("utf-8")
+                if f.mode == "RGBA" and f.width * f.height >= len(magic) * 8:
+                    pixels = f.load()
+                    bits = [
+                        pixels[i // f.height, i % f.height][3] & 1
+                        for i in range(len(magic) * 8)
+                    ]
+                    signature = bytes(
+                        sum(bits[i + j] << (7 - j) for j in range(8))
+                        for i in range(0, len(bits), 8)
+                    )
+                    if signature == magic:
+                        f.putalpha(f.getchannel("A").point(lambda value: value & 254))
+                f.info.clear()
+            match image_format.upper():
+                case "PNG":
+                    if data:
+                        f.save(new_path, pnginfo=metadata)
+                    else:
+                        f.save(new_path)
+                case "JPEG" | "JPG":
+                    f.save(new_path, quality="keep")
+                    if data:
+                        piexif.insert(metadata, str(new_path))
+                case "WEBP":
+                    f.save(new_path, quality=100, lossless=True)
+                    if data:
+                        piexif.insert(metadata, str(new_path))
 
     @staticmethod
     def construct_data(positive, negative, setting):
@@ -323,7 +346,7 @@ class ImageDataReader:
 
     @property
     def raw(self):
-        return self._parser.raw or self._raw
+        return (self._parser.raw if self._parser else "") or self._raw
 
     @property
     def tool(self):
