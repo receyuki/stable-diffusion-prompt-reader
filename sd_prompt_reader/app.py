@@ -7,7 +7,6 @@ import platform
 import sys
 from tkinter import PhotoImage, Menu
 
-import pyperclip as pyperclip
 from CTkToolTip import *
 from PIL import Image
 from customtkinter import (
@@ -31,6 +30,7 @@ from .textbox import STkTextbox
 from .update_checker import UpdateChecker
 from .__version__ import VERSION
 from .logger import Logger
+from .utility import copy_to_clipboard
 
 
 class App(Tk):
@@ -507,20 +507,29 @@ class App(Tk):
                 ):
                     self.unsupported_format(MESSAGE["format_error"])
                 elif self.image_data.status.name == "COMFYUI_ERROR":
+                    if self.button_edit.mode == EditMode.ON:
+                        self.edit_mode_switch()
                     self.unsupported_format(
-                        MESSAGE["comfyui_error"], url=URL["comfyui"], raw=True
+                        MESSAGE["comfyui_error"],
+                        url=URL["comfyui"],
+                        raw=bool(self.image_data.raw),
+                    )
+                    self._display_parsed_fields()
+                    self.positive_box.copy_on()
+                    self.negative_box.copy_on()
+                    if self.image_data.setting:
+                        self.button_copy_setting.enable()
+                        self.button_copy_setting_simple.enable()
+                    self.button_edit.disable()
+                    self.button_save.disable()
+                    self.button_raw_option_arrow.disable()
+                    reason = "; ".join(self.image_data.parse_warnings)
+                    self.status_bar.warning(
+                        "ComfyUI metadata could not be fully parsed. " + reason
                     )
                 else:
                     self.readable = True
-                    # insert prompt
-                    if not self.image_data.is_sdxl:
-                        self.positive_box.display(self.image_data.positive)
-                        self.negative_box.display(self.image_data.negative)
-                    else:
-                        self.positive_box.display(self.image_data.positive_sdxl)
-                        self.negative_box.display(self.image_data.negative_sdxl)
-                    self.setting_box.text = self.image_data.setting
-                    self.setting_box_parameter.update_text(self.image_data.parameter)
+                    self._display_parsed_fields()
                     self.positive_box.mode_update()
                     self.negative_box.mode_update()
                     if self.button_edit.mode == EditMode.OFF:
@@ -565,6 +574,16 @@ class App(Tk):
                 for box in self.boxes:
                     box.edit_off()
             self.button_edit.disable()
+
+    def _display_parsed_fields(self):
+        self.positive_box.display(
+            self.image_data.positive_sdxl or self.image_data.positive
+        )
+        self.negative_box.display(
+            self.image_data.negative_sdxl or self.image_data.negative
+        )
+        self.setting_box.text = self.image_data.setting
+        self.setting_box_parameter.update_text(self.image_data.parameter)
 
     def unsupported_format(self, message, reset_image=False, url="", raw=False):
         self.readable = False
@@ -627,12 +646,7 @@ class App(Tk):
             self.image_label.configure(image=self.image_tk, text="")
 
     def copy_to_clipboard(self, content):
-        try:
-            pyperclip.copy(content)
-        except:
-            print("Copy error")
-        else:
-            self.status_bar.clipboard()
+        copy_to_clipboard(self.status_bar, content)
 
     # alt option menu button trigger for CTkOptionMenu
     @staticmethod
@@ -644,25 +658,26 @@ class App(Tk):
         )
 
     def export_txt(self, export_mode: str = None):
-        if not export_mode:
-            with open(self.file_path.with_suffix(".txt"), "w", encoding="utf-8") as f:
+        target = self.file_path.with_suffix(".txt")
+        message = MESSAGE["alongside"][0]
+        if export_mode == "select directory":
+            path = filedialog.asksaveasfilename(
+                title="Select directory",
+                initialdir=self.file_path.parent,
+                initialfile=self.file_path.stem,
+                filetypes=(("text file", "*.txt"),),
+            )
+            if not path:
+                return
+            target = Path(path).with_suffix(".txt")
+            message = MESSAGE["txt_select"][0]
+        try:
+            with open(target, "w", encoding="utf-8") as f:
                 f.write(self.image_data.raw)
-                self.status_bar.success(MESSAGE["alongside"][0])
+        except OSError as error:
+            self.status_bar.warning(f"Could not export metadata: {error}")
         else:
-            match export_mode:
-                case "select directory":
-                    path = filedialog.asksaveasfilename(
-                        title="Select directory",
-                        initialdir=self.file_path.parent,
-                        initialfile=self.file_path.stem,
-                        filetypes=(("text file", "*.txt"),),
-                    )
-                    if path:
-                        with open(
-                            Path(path).with_suffix(".txt"), "w", encoding="utf-8"
-                        ) as f:
-                            f.write(self.image_data.raw)
-                            self.status_bar.success(MESSAGE["txt_select"][0])
+            self.status_bar.success(message)
 
     def remove_data(self, remove_mode: str = None):
         new_path = self.file_path.with_stem(self.file_path.stem + "_data_removed")
@@ -688,53 +703,35 @@ class App(Tk):
             self.status_bar.success(message)
 
     def save_data(self, save_mode: str = None):
-        with Image.open(self.file_path) as image:
-            new_stem = self.file_path.stem + "_edited"
-            new_path = self.file_path.with_stem(new_stem)
-            data = (
-                self.positive_box.text
-                + "Negative prompt: "
-                + self.negative_box.text
-                + self.setting_box.ctext
+        new_path = self.file_path.with_stem(self.file_path.stem + "_edited")
+        message = MESSAGE["suffix"][0]
+        if save_mode == "overwrite the original image":
+            new_path = self.file_path
+            message = MESSAGE["overwrite"][0]
+        elif save_mode == "select directory":
+            path = filedialog.asksaveasfilename(
+                title="Select directory",
+                initialdir=self.file_path.parent,
+                initialfile=new_path.name,
             )
-            if not save_mode:
-                try:
-                    self.image_data.save_image(
-                        self.file_path, new_path, self.image_data.format, data
-                    )
-                except:
-                    print("Save error")
-                else:
-                    self.status_bar.success(MESSAGE["suffix"][0])
-            else:
-                match save_mode:
-                    case "overwrite the original image":
-                        try:
-                            self.image_data.save_image(
-                                self.file_path,
-                                self.file_path,
-                                self.image_data.format,
-                                data,
-                            )
-                        except:
-                            print("Save error")
-                        else:
-                            self.status_bar.success(MESSAGE["overwrite"][0])
-                    case "select directory":
-                        path = filedialog.asksaveasfilename(
-                            title="Select directory",
-                            initialdir=self.file_path.parent,
-                            initialfile=new_path.name,
-                        )
-                        if path:
-                            try:
-                                self.image_data.save_image(
-                                    self.file_path, path, self.image_data.format, data
-                                )
-                            except:
-                                print("Save error")
-                            else:
-                                self.status_bar.success(MESSAGE["remove_select"][0])
+            if not path:
+                return
+            new_path = Path(path)
+            message = MESSAGE["remove_select"][0]
+        data = (
+            self.positive_box.text
+            + "Negative prompt: "
+            + self.negative_box.text
+            + self.setting_box.ctext
+        )
+        try:
+            self.image_data.save_image(
+                self.file_path, new_path, self.image_data.format, data
+            )
+        except (OSError, ValueError) as error:
+            self.status_bar.warning(f"Could not save metadata: {error}")
+        else:
+            self.status_bar.success(message)
 
     def copy_raw(self, copy_mode: str = None):
         match copy_mode:

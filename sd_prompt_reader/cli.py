@@ -4,6 +4,8 @@ __copyright__ = "Copyright 2024"
 __email__ = "receyuki@gmail.com"
 
 import json
+import sys
+from contextlib import redirect_stdout
 from pathlib import Path
 
 import click
@@ -22,6 +24,11 @@ from .logger import Logger
 # Option
 @click.option("-i", "--input-path", type=str, help="Input path", required=True)
 @click.option("-o", "--output-path", type=str, help="Output path")
+@click.option(
+    "--raw",
+    is_flag=True,
+    help="Recover available raw metadata as text (read mode only).",
+)
 @click.option(
     "-f",
     "--format-type",
@@ -48,7 +55,11 @@ def cli(
     setting,
     format_type,
     log_level,
+    raw,
 ):
+
+    if raw and (operation != "read" or format_type.upper() != "TXT"):
+        raise click.UsageError("--raw requires read mode and TXT output.")
 
     logger = Logger("SD_Prompt_Reader.Cli")
     Logger.configure_global_logger(log_level)
@@ -79,19 +90,34 @@ def cli(
             failure_list = {}
             for file in file_list:
                 logger.debug(f"Reading file: {file}")
-                with open(file, "rb") as f:
-                    image_data = ImageDataReader(f)
-                    if image_data.status.name == "READ_SUCCESS":
-                        logger.debug("Read successfully")
-                        success_count += 1
-                        if source.is_file():
-                            click.echo(image_data.raw)
-                        read_list[file] = image_data
-                    else:
-                        logger.warning(
-                            f"Unable to read {file} due to {image_data.status.name}"
-                        )
-                        failure_list[file] = image_data.status.name
+                try:
+                    with open(file, "rb") as f:
+                        with redirect_stdout(sys.stderr):
+                            image_data = ImageDataReader(f)
+                        for warning in image_data.parse_warnings:
+                            click.echo(f"Warning: {file}: {warning}", err=True)
+                        if image_data.status.name != "READ_SUCCESS" and raw:
+                            click.echo(
+                                f"Unable to fully read {file} due to {image_data.status.name}",
+                                err=True,
+                            )
+                        if (raw and image_data.raw) or (
+                            not raw and image_data.status.name == "READ_SUCCESS"
+                        ):
+                            logger.debug("Read successfully")
+                            success_count += 1
+                            if source.is_file() or (raw and not output_path):
+                                click.echo(image_data.raw)
+                            read_list[file] = image_data
+                        else:
+                            click.echo(
+                                f"Unable to read {file} due to {image_data.status.name}",
+                                err=True,
+                            )
+                            failure_list[file] = image_data.status.name
+                except Exception as e:
+                    logger.error(f"Unable to read {file}: {e}")
+                    failure_list[file] = str(e)
             if source.is_dir():
                 logger.info(f"Total files read: {len(file_list)}")
                 logger.info(f"Successful: {success_count}")
@@ -104,44 +130,44 @@ def cli(
                 target = Path(output_path)
                 logger.debug(f"Output: {target}")
                 for file, image_data in read_list.items():
-                    logger.debug(f"Exporting file: {file}")
-                    file_path = Path(file)
-                    if target.is_dir():
-                        logger.debug("Output folder exists")
-                        folder = target
-                        stem = file_path.stem
-                    elif target.is_file():
-                        if source.is_dir():
-                            logger.error("Output is a file not a folder")
-                            raise click.UsageError(
-                                "If input path is a directory, the output path must be a directory, not a file."
-                            )
-                        logger.debug("Output file exists, overwrite the old file.")
-                        folder = target.parent
-                        stem = target.stem
-                        if not format_type:
-                            format_type = target.suffix.strip(".")
-                    else:
-                        if target.suffix:
+                    try:
+                        logger.debug(f"Exporting file: {file}")
+                        file_path = Path(file)
+                        if target.is_dir():
+                            logger.debug("Output folder exists")
+                            folder = target
+                            stem = file_path.stem
+                        elif target.is_file():
                             if source.is_dir():
                                 logger.error("Output is a file not a folder")
                                 raise click.UsageError(
                                     "If input path is a directory, the output path must be a directory, not a file."
                                 )
-                            logger.debug("Output file doesn't exist")
-                            logger.debug("Creating a new file")
+                            logger.debug("Output file exists, overwrite the old file.")
                             folder = target.parent
                             stem = target.stem
                             if not format_type:
                                 format_type = target.suffix.strip(".")
                         else:
-                            logger.debug("Output folder doesn't exist")
-                            logger.debug("Creating a new folder")
-                            folder = target
-                            stem = file_path.stem
-                        folder.mkdir(parents=True, exist_ok=True)
-                    target_file_name = folder / stem
-                    try:
+                            if target.suffix:
+                                if source.is_dir():
+                                    logger.error("Output is a file not a folder")
+                                    raise click.UsageError(
+                                        "If input path is a directory, the output path must be a directory, not a file."
+                                    )
+                                logger.debug("Output file doesn't exist")
+                                logger.debug("Creating a new file")
+                                folder = target.parent
+                                stem = target.stem
+                                if not format_type:
+                                    format_type = target.suffix.strip(".")
+                            else:
+                                logger.debug("Output folder doesn't exist")
+                                logger.debug("Creating a new folder")
+                                folder = target
+                                stem = file_path.stem
+                            folder.mkdir(parents=True, exist_ok=True)
+                        target_file_name = folder / stem
                         match format_type:
                             case "TXT":
                                 logger.debug("Output format: TXT")
@@ -151,7 +177,7 @@ def cli(
                                     encoding="utf-8",
                                 ) as f:
                                     f.write(image_data.raw)
-                                    logger.debug("Output successful")
+                                logger.debug("Output successful")
                             case "JSON":
                                 logger.debug("Output format: JSON")
                                 with open(
@@ -166,13 +192,21 @@ def cli(
                                     }
                                     parameter.update(image_data.parameter)
                                     json.dump(parameter, f, indent=4)
-                                    logger.debug("Output successful")
+                                logger.debug("Output successful")
                             case _:
                                 logger.error(
                                     f"{format_type} is not one of 'TXT', 'JSON'"
                                 )
-                    except IOError as e:
+                    except click.UsageError:
+                        raise
+                    except Exception as e:
                         logger.error(f"File save failed: {e}")
+                        failure_list[file] = str(e)
+
+            if raw and not read_list:
+                click.echo("No available raw metadata was recovered.", err=True)
+            if failure_list or (raw and not read_list):
+                raise click.exceptions.Exit(1)
 
         case "write" | "clear":
             if operation == "write":
@@ -185,19 +219,24 @@ def cli(
                 if metadata:
                     logger.debug("Metadata file is specified")
                     metadata_path = Path(metadata)
-                    with open(metadata_path, "rb") as f:
-                        if metadata_path.suffix.lower() == ".txt":
-                            data = f.read()
-                        elif metadata_path.suffix.lower() == ".json":
-                            data_dict = json.load(f)
-                            data = ImageDataReader.construct_data(
-                                data_dict.get("positive"),
-                                data_dict.get("negative"),
-                                data_dict.get("setting"),
-                            )
-                        else:
-                            data = ""
-                        click.echo(data)
+                    try:
+                        with open(metadata_path, "rb") as f:
+                            if metadata_path.suffix.lower() == ".txt":
+                                data = f.read()
+                            elif metadata_path.suffix.lower() == ".json":
+                                data_dict = json.load(f)
+                                data = ImageDataReader.construct_data(
+                                    data_dict.get("positive"),
+                                    data_dict.get("negative"),
+                                    data_dict.get("setting"),
+                                )
+                            else:
+                                data = ""
+                            click.echo(data)
+                    except Exception as e:
+                        raise click.ClickException(
+                            f"Unable to read metadata: {e}"
+                        ) from e
                 elif positive or negative or setting:
                     logger.debug("Metadata text is specified")
                     data = ImageDataReader.construct_data(positive, negative, setting)
@@ -209,47 +248,49 @@ def cli(
                 target = Path(output_path)
                 logger.debug(f"Output: {target}")
                 for file in file_list:
-                    logger.debug(f"Processing file: {file}")
-                    file_path = Path(file)
-                    if target.is_dir():
-                        logger.debug("Output folder exists")
-                        folder = target
-                        stem = file_path.stem
-                    elif target.is_file():
-                        if source.is_dir():
-                            logger.error("Output is a file not a folder")
-                            raise click.UsageError(
-                                "If input path is a directory, the output path must be a directory, not a file."
-                            )
-                        logger.debug("Output file exists, overwrite the old file.")
-                        folder = target.parent
-                        stem = target.stem
-                    else:
-                        if target.suffix:
+                    try:
+                        logger.debug(f"Processing file: {file}")
+                        file_path = Path(file)
+                        if target.is_dir():
+                            logger.debug("Output folder exists")
+                            folder = target
+                            stem = file_path.stem
+                        elif target.is_file():
                             if source.is_dir():
                                 logger.error("Output is a file not a folder")
                                 raise click.UsageError(
                                     "If input path is a directory, the output path must be a directory, not a file."
                                 )
-                            logger.debug("Output file doesn't exist")
-                            logger.debug("Creating a new file")
+                            logger.debug("Output file exists, overwrite the old file.")
                             folder = target.parent
                             stem = target.stem
                         else:
-                            logger.debug("Output folder doesn't exist")
-                            logger.debug("Creating a new folder")
-                            folder = target
-                            stem = file_path.stem
-                        folder.mkdir(parents=True, exist_ok=True)
-                    target_file_name = folder / stem
-                    try:
+                            if target.suffix:
+                                if source.is_dir():
+                                    logger.error("Output is a file not a folder")
+                                    raise click.UsageError(
+                                        "If input path is a directory, the output path must be a directory, not a file."
+                                    )
+                                logger.debug("Output file doesn't exist")
+                                logger.debug("Creating a new file")
+                                folder = target.parent
+                                stem = target.stem
+                            else:
+                                logger.debug("Output folder doesn't exist")
+                                logger.debug("Creating a new folder")
+                                folder = target
+                                stem = file_path.stem
+                            folder.mkdir(parents=True, exist_ok=True)
+                        target_file_name = folder / stem
                         ImageDataReader.save_image(
                             file,
                             target_file_name.with_suffix(file_path.suffix),
                             file_path.suffix.lstrip(".").upper(),
                             None if operation == "clear" else data,
                         )
-                    except IOError as e:
+                    except click.UsageError:
+                        raise
+                    except Exception as e:
                         logger.error(f"File save failed: {e}")
                     else:
                         logger.debug("Output successful")
@@ -272,7 +313,7 @@ def cli(
                             file_path.suffix.lstrip(".").upper(),
                             None if operation == "clear" else data,
                         )
-                    except IOError as e:
+                    except Exception as e:
                         logger.error(f"File save failed: {e}")
                     else:
                         logger.debug("Output successful")
@@ -281,6 +322,8 @@ def cli(
             if len(file_list) > 1:
                 logger.info(f"Total files processed: {len(file_list)}")
                 logger.info(f"Successful: {success_count}")
+            if success_count != len(file_list):
+                raise click.exceptions.Exit(1)
 
 
 if __name__ == "__main__":

@@ -189,6 +189,7 @@ There are two interface options available for the multi-set prompt display mode,
 
 ## CLI
 A CLI tool for reading, modifying, and clearing metadata is provided. 
+Raw recovery and failure exit codes below apply to current source and are not included in v1.3.5.
 ### Platforms
 #### For Windows users
 `SD Prompt Reader CLI.exe` will be placed in the zip package as a separate executable.   
@@ -211,6 +212,7 @@ Examples:
 - `-o`, `--output-path`: Path to the output file or directory where the processed files will be saved.
 - `-l`, `--log-level`: Specify the log verbosity level (e.g.DEBUG, INFO, WARN, ERROR).
 #### Read Options
+- `--raw`: Recover available raw metadata as text, including incomplete ComfyUI results; use with read mode and TXT output.
 - `-f`, `--format-type`: Specifies the output metadata format, choices are "TXT" or "JSON". Default format is "TXT"
 #### Write Options
 - `-m`, `--metadata`: Provides a metadata file for writing.
@@ -222,6 +224,7 @@ Examples:
 with a suffix added to the original filename.  
 - To overwrite the source file, set the output path equal to the input path.
 - The write mode only supports modifications to a single image.
+- Failed operations return a nonzero exit code; batches continue processing other files. Successful `--raw` recovery can return success with parsing warnings on stderr.
 #### Read Mode
 - Read metadata from an image.
 - Usage:  
@@ -229,6 +232,7 @@ with a suffix added to the original filename.
 - Examples:  
 `sd-prompt-reader-cli -i example.png`  
 `sd-prompt-reader-cli -i example.png -o metadata.txt`  
+`sd-prompt-reader-cli --raw -i example.png -o raw.txt`\
 `sd-prompt-reader-cli -r -i example.png -f TXT -o output_folder/`  
 `sd-prompt-reader-cli -r -i input_folder/ -f JSON -o output_folder/`
 #### Write Mode
@@ -269,7 +273,7 @@ else:
     print(metadata.raw)
 ```
 
-`READ_SUCCESS` means parsing succeeded. Otherwise, check `status` and `raw` for available metadata.
+`READ_SUCCESS` means parsing succeeded. Incomplete ComfyUI results retain usable fields; check `parse_warnings` and `raw` for details and original metadata. Conditioning text is recovered for inspection, with warnings for unsupported paths.
 
 ## Format Limitations
 ### TXT

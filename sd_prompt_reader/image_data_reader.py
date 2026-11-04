@@ -119,7 +119,7 @@ class ImageDataReader:
                             info=self._info, width=self._width, height=self._height
                         )
                     # comfyui format
-                    elif "prompt" in self._info:
+                    elif "prompt" in self._info or "workflow" in self._info:
                         self._tool = "ComfyUI"
                         self._parser = ComfyUI(
                             info=self._info, width=self._width, height=self._height
@@ -367,6 +367,10 @@ class ImageDataReader:
     @property
     def props(self):
         return self._parser.props if self._tool else self._props
+
+    @property
+    def parse_warnings(self) -> tuple[str, ...]:
+        return self._parser.parse_warnings if self._parser else ()
 
     @property
     def status(self):
