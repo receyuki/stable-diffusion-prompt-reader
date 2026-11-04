@@ -14,8 +14,9 @@ Usage:
 import platform
 import toml
 from pathlib import Path
+from packaging.requirements import Requirement
 from packaging import version
-import os
+import subprocess
 
 
 # from sd_prompt_reader.__version__ import VERSION
@@ -144,15 +145,21 @@ elif platform.system() == "Darwin":
         lines = file.readlines()
 
     for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
         skip = any(skip_package in line for skip_package in skip_packages)
         if not skip:
+            # Reject malformed requirements and option-shaped operands.
+            Requirement(line)
+            package_details = line.split(";", 1)[0].strip()
             if "; sys_platform == 'darwin'" in line:
-                package_name = line.split(";")[0].strip()
-                command = f"poetry add {package_name} --platform darwin"
+                subprocess.run(
+                    ["poetry", "add", "--platform", "darwin", "--", package_details],
+                    check=True,
+                )
             else:
-                package_details = line.split(";")[0].strip()
-                command = f"poetry add {package_details}"
-            os.system(command)
+                subprocess.run(["poetry", "add", "--", package_details], check=True)
             print(f"Added: {line.strip()}")
         else:
             print(f"Skipped: {line.strip()}")
