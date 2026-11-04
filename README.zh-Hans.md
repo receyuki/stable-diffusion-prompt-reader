@@ -90,8 +90,8 @@ brew install --no-quarantine receyuki/sd-prompt-reader/sd-prompt-reader
 
 ### Linux 用户 (不定期测试)
 ~~我很确定 Linux 用户可以在没有可执行文件的情况下搞明白怎么用~~
-- 最低Python版本要求: 3.10
-- 确保你的 Python 中安装了 tkinter 包.  
+- 当前源码最低 Python 版本要求: 3.11; 已发布的 v1.3.5 最低要求为 3.10.
+- 图形界面请使用带 tkinter 和 Tcl/Tk 8.6 的 Python.
 如果没有，请使用软件包管理器安装 python3-tk 包.  
 e.g. `sudo apt-get install python3-tk` (基于 Debian 的发行版)  
 

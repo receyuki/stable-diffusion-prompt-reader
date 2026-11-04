@@ -91,8 +91,8 @@ brew install --no-quarantine receyuki/sd-prompt-reader/sd-prompt-reader
 The parameter `--no-quarantine` is used since the SD Prompt Reader is currently unsigned as I mentioned [here](https://github.com/receyuki/stable-diffusion-prompt-reader#sd-prompt-readerapp-is-damaged-and-cant-be-opened-you-should-move-it-to-the-trash)
 ### For Linux users (not regularly tested)
 ~~I'm pretty sure linux users can figure things out without an executable.~~
-- The minimum version of Python required is 3.10
-- Make sure you have the tkinter package installed in your Python.  
+- Current source requires Python 3.11 or newer; released v1.3.5 has a minimum of 3.10.
+- Use a Python build with tkinter and Tcl/Tk 8.6 for the GUI.
 If not, install the python3-tk package with package managers.  
 e.g. `sudo apt-get install python3-tk` for Debian-based distributions  
 
