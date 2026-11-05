@@ -187,6 +187,7 @@ SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式.
 
 ## 命令行
 可用于读取、修改和清除图像的元数据的命令行工具
+原始数据恢复及下述失败退出码适用于当前源码，尚未包含在 v1.3.5 中。
 ### 平台
 #### Windows 用户
 `SD Prompt Reader CLI.exe` 将作为一个独立的可执行文件放置在压缩包中.   
@@ -209,6 +210,7 @@ SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式.
 - `-o`, `--output-path`: 处理后文件保存的输出文件或目录路径.
 - `-l`, `--log-level`: 指定日志的详细级别(如 DEBUG、INFO、WARN、ERROR).
 #### 读取选项
+- `--raw`: 将可用原始元数据恢复为文本，包括未完整解析的 ComfyUI 数据；适用于读取模式和 TXT 输出.
 - `-f`, `--format-type`: 指定输出元数据的格式，选择为 "TXT" 或 "JSON". 默认格式为 "TXT"
 #### 写入选项
 - `-m`, `--metadata`: 提供用于写入的元数据文件.
@@ -219,6 +221,7 @@ SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式.
 - 如果未指定输出路径, 修改后的图像会保存在当前目录中, 并在原始文件名后加上后缀.
 - 如需覆盖源文件, 请将输出路径设置为与输入路径相同.
 - 写入模式仅支持对单个图像进行修改.
+- 操作失败时返回非零退出码，批处理中继续处理其他文件；`--raw` 成功恢复数据时可返回成功，解析警告输出到 stderr.
 #### 读取模式
 - 从图像中读取元数据.
 - 用法:  
@@ -226,6 +229,7 @@ SD Prompt Reader 会切换到如下图所示的多组 prompt 显示模式.
 - 示例:  
 `sd-prompt-reader-cli -i example.png`  
 `sd-prompt-reader-cli -i example.png -o metadata.txt`  
+`sd-prompt-reader-cli --raw -i example.png -o raw.txt`\
 `sd-prompt-reader-cli -r -i example.png -f TXT -o output_folder/`  
 `sd-prompt-reader-cli -r -i input_folder/ -f JSON -o output_folder/`
 #### 写入模式
@@ -265,7 +269,7 @@ else:
     print(metadata.raw)
 ```
 
-`READ_SUCCESS` 表示解析成功，否则可查看 `status` 和 `raw` 获取状态及可用的元数据。
+`READ_SUCCESS` 表示解析成功。未完整解析的 ComfyUI 数据会保留可用字段，可查看 `parse_warnings` 和 `raw` 获取原因及原始元数据；conditioning 文本用于查看原文，不支持的路径会明确提示。
 
 ## 格式限制
 ### TXT

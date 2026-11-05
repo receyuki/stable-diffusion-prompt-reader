@@ -3,8 +3,9 @@ __filename__ = "parameter_viewer.py"
 __copyright__ = "Copyright 2023"
 __email__ = "receyuki@gmail.com"
 
-import pyperclip as pyperclip
 from customtkinter import CTkFrame, CTkLabel
+
+from .utility import copy_to_clipboard
 
 from .constants import (
     BUTTON_HOVER,
@@ -158,9 +159,4 @@ class ParameterViewer:
             p.configure(text=PARAMETER_PLACEHOLDER)
 
     def copy_to_clipboard(self, content):
-        try:
-            pyperclip.copy(content)
-        except:
-            print("Copy error")
-        else:
-            self.status_bar.clipboard()
+        copy_to_clipboard(self.status_bar, content)

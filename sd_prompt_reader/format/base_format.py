@@ -25,6 +25,7 @@ class BaseFormat:
         self._raw = raw
         self._parameter = dict.fromkeys(BaseFormat.PARAMETER_KEY, "")
         self._is_sdxl = False
+        self._parse_warnings = ()
         self._status = self.Status.UNREAD
         self._logger = Logger("SD_Prompt_Reader.Parser")
 
@@ -89,6 +90,10 @@ class BaseFormat:
     @property
     def status(self):
         return self._status
+
+    @property
+    def parse_warnings(self) -> tuple[str, ...]:
+        return self._parse_warnings
 
     @property
     def props(self):

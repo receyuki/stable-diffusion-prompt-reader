@@ -44,8 +44,8 @@ def select_image(file_path=None):
 def copy_to_clipboard(status_bar, content):
     try:
         pyperclip.copy(content)
-    except Exception:
-        print("Copy error")
+    except Exception as error:
+        status_bar.warning(f"Could not copy metadata: {error}")
     else:
         status_bar.clipboard()
 
