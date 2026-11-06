@@ -101,6 +101,7 @@ try {
     $null = New-Item -ItemType Directory -Path $Root -Force
     $logs = New-Item -ItemType Directory -Path (Join-Path $Root 'logs')
     function Run([string]$Exe, [string[]]$Arguments, [string]$Log, [int[]]$Allowed = @(0)) {
+        Write-Output "Running $Log"
         Add-Content -LiteralPath (Join-Path $logs 'commands.jsonl') -Value (@{executable=$Exe; arguments=$Arguments; cwd=(Get-Location).Path} | ConvertTo-Json -Compress)
         & $Exe @Arguments 2>&1 | Tee-Object -FilePath (Join-Path $logs $Log) | Out-Host
         if ($LASTEXITCODE -notin $Allowed) { throw "$Exe failed with exit $LASTEXITCODE (see $Log)." }
@@ -112,12 +113,19 @@ try {
     @{ImageOS=$env:ImageOS; ImageVersion=$env:ImageVersion; OS=[Environment]::OSVersion.VersionString; VisualStudio=$vs; VCToolsVersion=$env:VCToolsVersion; SDK=$env:WindowsSDKVersion; dumpbin=(Get-Command dumpbin.exe -CommandType Application | Select-Object -First 1).Source} | ConvertTo-Json | Set-Content (Join-Path $logs 'host.json')
     $downloads = New-Item -ItemType Directory -Path (Join-Path $Root 'downloads')
     $src = New-Item -ItemType Directory -Path (Join-Path $Root 'src')
+    $downloadOptions = @{TimeoutSec=120;MaximumRetryCount=2;RetryIntervalSec=3}
+    $webParameters = (Get-Command Invoke-WebRequest -CommandType Cmdlet).Parameters
+    if ($webParameters.ContainsKey('OperationTimeoutSeconds')) { $downloadOptions.OperationTimeoutSeconds = 180 }
+    if ($webParameters.ContainsKey('ProgressAction')) { $downloadOptions.ProgressAction = 'SilentlyContinue' }
     foreach ($item in $manifest.archives) {
         $archive = Join-Path $downloads $item.filename
-        Invoke-WebRequest -Uri $item.url -OutFile $archive
+        Write-Output "Downloading $($item.name): $($item.filename)"
+        Invoke-WebRequest -Uri $item.url -OutFile $archive @downloadOptions
         Check-Archive $archive $item
+        Write-Output "Verified $($item.name); extracting pinned archive"
         $destination = New-Item -ItemType Directory -Path (Join-Path $src $item.name)
         Run $tarExe @('-xf',$archive,'--strip-components=1','-C',$destination.FullName) "extract-$($item.name).txt"
+        Write-Output "Prepared $($item.name) source"
     }
     $cpython = Join-Path $src 'cpython'
     $tcl = Join-Path $src 'tcl'
