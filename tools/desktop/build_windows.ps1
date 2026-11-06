@@ -45,6 +45,17 @@ function Check-Archive([string]$Path, $InputRecord) {
     $actual = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($actual -ne $InputRecord.sha256) { throw "SHA256 mismatch for $($InputRecord.name): expected $($InputRecord.sha256), got $actual" }
 }
+function Write-ArchiveIdentity([string]$SourceDir, $InputRecord) {
+    if ($InputRecord.url -notmatch '/tar.gz/([0-9a-f]{40})$') { throw 'Expected a commit-pinned Git archive.' }
+    $revision = $Matches[1]
+    $template = Join-Path $SourceDir 'win/gitmanifest.in'
+    if ((Get-Content -Raw -LiteralPath $template) -cne 'git-') { throw 'Pinned Tcl/Tk Git identity template changed.' }
+    $identity = Join-Path $SourceDir 'manifest.uuid'
+    # Source archives lack .git; use their pinned upstream identity, not the
+    # application's checkout or a fabricated local Git commit.
+    $null = New-Item -ItemType File -Path $identity -Value "git-$revision`n" -ErrorAction Stop
+    return @{revision=$revision;sha256=(Get-FileHash -LiteralPath $identity -Algorithm SHA256).Hash.ToLowerInvariant()}
+}
 try {
     $manifest = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'windows-inputs.json') | ConvertFrom-Json
     if ($CheckInputs) {
@@ -128,6 +139,11 @@ try {
     $cpython = Join-Path $src 'cpython'
     $tcl = Join-Path $src 'tcl'
     $tk = Join-Path $src 'tk'
+    $sourceIdentities = @{}
+    foreach ($name in @('tcl','tk')) {
+        $record = @($manifest.archives | Where-Object { $_.name -eq $name })[0]
+        $sourceIdentities[$name] = Write-ArchiveIdentity (Join-Path $src $name) $record
+    }
     $tcltk = Join-Path $Root 'tcltk'
     $openssl = Join-Path $src 'openssl/amd64'
     $ffi = Join-Path $src 'libffi/amd64'
@@ -260,7 +276,7 @@ print(json.dumps(dict(python=sys.executable, python_version=platform.python_vers
         foreach ($name in @('zlib.h','zconf.h','win64/zlib1.dll','win64/zdll.lib')) {
             $staging += @{path="tcl/compat/zlib/$name";sha256=(Get-FileHash (Join-Path $tcl "compat/zlib/$name") -Algorithm SHA256).Hash.ToLowerInvariant()}
         }
-        $result = [ordered]@{schema_version=1;target=$Target;python=$runtime.python;python_version=$runtime.python_version;architecture=$runtime.architecture;tcl_version=$runtime.tcl_version;tk_version=$runtime.tk_version;openssl_version=$runtime.openssl_version;zlib_version=$runtime.zlib_version;inputs=$manifest;native_review=$manifest.native_review;optional_modules=$runtime.optional_modules;runtime_checks=$runtime;binary_inventory=$inventory;toolchain_logs=$logs.FullName;bootstrap=($bootstrapInfo | ConvertFrom-Json);source_transform=@{file='PCbuild/pcbuild.proj';action='omit _bz2/_lzma/_sqlite3 in private copy';sha256=(Get-FileHash $project -Algorithm SHA256).Hash.ToLowerInvariant()};tcl_zlib_staging=$staging}
+        $result = [ordered]@{schema_version=1;target=$Target;python=$runtime.python;python_version=$runtime.python_version;architecture=$runtime.architecture;tcl_version=$runtime.tcl_version;tk_version=$runtime.tk_version;openssl_version=$runtime.openssl_version;zlib_version=$runtime.zlib_version;inputs=$manifest;native_review=$manifest.native_review;optional_modules=$runtime.optional_modules;runtime_checks=$runtime;binary_inventory=$inventory;toolchain_logs=$logs.FullName;bootstrap=($bootstrapInfo | ConvertFrom-Json);source_transform=@{file='PCbuild/pcbuild.proj';action='omit _bz2/_lzma/_sqlite3 in private copy';sha256=(Get-FileHash $project -Algorithm SHA256).Hash.ToLowerInvariant()};source_identities=$sourceIdentities;tcl_zlib_staging=$staging}
         $result | ConvertTo-Json -Depth 15 | Set-Content -LiteralPath $Receipt
         Write-Output "Runtime prepared; native review: $($manifest.native_review.status). Receipt: $Receipt"
     } finally {
