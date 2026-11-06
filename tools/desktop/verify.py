@@ -59,7 +59,9 @@ def clean_env():
     }
     env["PYTHONNOUSERSITE"] = "1"
     env["PATH"] = (
-        os.pathsep.join((str(Path(env["SystemRoot"]) / "System32"), env["SystemRoot"]))
+        os.pathsep.join(
+            (str(Path(os.environ["SystemRoot"]) / "System32"), os.environ["SystemRoot"])
+        )
         if os.name == "nt"
         else "/usr/bin:/bin:/usr/sbin:/sbin"
     )
