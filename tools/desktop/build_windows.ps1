@@ -95,7 +95,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Existing 64-bit bootstrap Python >=3.10 is required.' }
     $bootstrapPrefix = ($bootstrapInfo | ConvertFrom-Json).prefix
     if ((Within $Root $bootstrapPrefix) -or (Within $bootstrapPrefix $Root)) { throw 'Root cannot overlap the bootstrap Python installation.' }
-    foreach ($name in @('MSBuild.exe','cl.exe','nmake.exe','dumpbin.exe','tar.exe')) { $null = Get-Command $name -CommandType Application }
+    foreach ($name in @('MSBuild.exe','cl.exe','nmake.exe','dumpbin.exe')) { $null = Get-Command $name -CommandType Application }
+    $tarExe = Join-Path $env:SystemRoot 'System32/tar.exe'
+    if (-not (Test-Path -LiteralPath $tarExe)) { throw 'Windows system tar.exe is required.' }
     $null = New-Item -ItemType Directory -Path $Root -Force
     $logs = New-Item -ItemType Directory -Path (Join-Path $Root 'logs')
     function Run([string]$Exe, [string[]]$Arguments, [string]$Log, [int[]]$Allowed = @(0)) {
@@ -115,7 +117,7 @@ try {
         Invoke-WebRequest -Uri $item.url -OutFile $archive
         Check-Archive $archive $item
         $destination = New-Item -ItemType Directory -Path (Join-Path $src $item.name)
-        Run 'tar.exe' @('-xf',$archive,'--strip-components=1','-C',$destination.FullName) "extract-$($item.name).txt"
+        Run $tarExe @('-xf',$archive,'--strip-components=1','-C',$destination.FullName) "extract-$($item.name).txt"
     }
     $cpython = Join-Path $src 'cpython'
     $tcl = Join-Path $src 'tcl'
