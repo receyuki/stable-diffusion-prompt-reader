@@ -601,10 +601,10 @@ def native_links(root, target):
             )
             continue
         listing = subprocess.check_output(
-            ["/usr/bin/otool", "-L", str(path)], text=True
+            ["/usr/bin/otool", "-arch", expected, "-L", str(path)], text=True
         )
         commands = subprocess.check_output(
-            ["/usr/bin/otool", "-l", str(path)], text=True
+            ["/usr/bin/otool", "-arch", expected, "-l", str(path)], text=True
         ).splitlines()
         rpaths = [
             commands[i + 2].strip().split(" (offset")[0][5:]
