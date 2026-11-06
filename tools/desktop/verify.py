@@ -119,6 +119,40 @@ def unchanged_artifact(artifact, target, before):
     return {"identity_sha256": after["identity_sha256"], "unchanged": True}
 
 
+def verify_execution_manifest(data):
+    """Check a bounded PE manifest without permitting DTDs or entity loading."""
+    from xml.parsers import expat
+
+    if not 0 < len(data) <= 2 * 1024 * 1024:
+        raise ValueError("Invalid manifest size")
+    encoding = "utf-16" if data.startswith((b"\xff\xfe", b"\xfe\xff")) else "utf-8-sig"
+    text = data.decode(encoding).rstrip("\0")
+    levels = []
+
+    def reject_entities(*_):
+        raise ValueError("Manifest DTDs and entities are forbidden")
+
+    def collect_level(name, attributes):
+        if name == "urn:schemas-microsoft-com:asm.v3}requestedExecutionLevel":
+            levels.append(attributes)
+
+    parser = expat.ParserCreate(namespace_separator="}")
+    parser.StartDoctypeDeclHandler = reject_entities
+    parser.EntityDeclHandler = reject_entities
+    parser.ExternalEntityRefHandler = reject_entities
+    parser.SetParamEntityParsing(expat.XML_PARAM_ENTITY_PARSING_NEVER)
+    parser.StartElementHandler = collect_level
+    try:
+        parser.Parse(text, True)
+    except expat.ExpatError as error:
+        raise ValueError("Invalid execution manifest XML") from error
+    assert (
+        len(levels) == 1
+        and levels[0].get("level") == "asInvoker"
+        and levels[0].get("uiAccess") == "false"
+    ), "Unexpected EXE execution manifest"
+
+
 def windows_metadata(path, base_version):
     """Read PE resources through data-only native APIs; never run the executable."""
     if os.name != "nt":
@@ -127,7 +161,6 @@ def windows_metadata(path, base_version):
         )
     import ctypes
     from ctypes import wintypes
-    from xml.etree import ElementTree
 
     version = ctypes.WinDLL("version", use_last_error=True)
     version.GetFileVersionInfoSizeW.argtypes = [
@@ -253,15 +286,7 @@ def windows_metadata(path, base_version):
     finally:
         kernel.FreeLibrary(handle)
     for manifest in resources[24]:
-        root = ElementTree.fromstring(manifest.rstrip(b"\0"))
-        levels = root.findall(
-            ".//{urn:schemas-microsoft-com:asm.v3}requestedExecutionLevel"
-        )
-        assert (
-            len(levels) == 1
-            and levels[0].get("level") == "asInvoker"
-            and levels[0].get("uiAccess") == "false"
-        ), "Unexpected EXE execution manifest"
+        verify_execution_manifest(manifest)
     return {
         **fields,
         "resource_counts": {
@@ -1024,6 +1049,90 @@ def windows_gui(executable, folder, env):
                 process.communicate(timeout=5)
 
 
+def verify_artifact(args, report, gate, folder):
+    artifact = args.artifact.resolve()
+    assert artifact.is_dir(), "Artifact directory missing"
+    assert (
+        not args.target.startswith("macos") or artifact.suffix == ".app"
+    ), "Expected .app directory"
+    report["artifact"] = gate(
+        "artifact-identity",
+        lambda: artifact_identity(artifact, args.target),
+    )
+    report["metadata"] = gate(
+        "artifact-metadata",
+        lambda: artifact_metadata(artifact, args.target, args.expected_version),
+    )
+    report["native"] = gate(
+        "native-architecture-links",
+        lambda: native_links(artifact, args.target),
+    )
+    if args.target.startswith("macos"):
+        command = [artifact / "Contents/MacOS/SD Prompt Reader"]
+        probe, bootstrap, env = embedded(artifact)
+        facts = gate(
+            "bundled-runtime",
+            lambda: result_json(run([*probe, bootstrap + RUNTIME_PROBE], folder, env)),
+        )
+        gate("bundled-versions", lambda: versions(facts, args.target))
+        gate(
+            "bundled-loaded-native",
+            lambda: loaded_native(facts, args.target, artifact),
+        )
+        assert all(
+            Path(p).resolve().is_relative_to(artifact.resolve())
+            for p in facts["module_origins"].values()
+        ), "Bundled runtime imported external module"
+        report["runtime"] = facts
+    else:
+        command, env = [artifact / EXES[1]], clean_env()
+    cases, source, edited, cleared = gate(
+        "packaged-cli", lambda: cli_checks(command, folder, clean_env())
+    )
+    report["cli_cases"] = cases
+    if args.target.startswith("macos"):
+        gui = gate(
+            "bundled-gui-widgets-close",
+            lambda: result_json(
+                run(
+                    [
+                        *probe,
+                        bootstrap + GUI_PROBE,
+                        source,
+                        edited,
+                        cleared,
+                    ],
+                    folder,
+                    env,
+                )
+            ),
+        )
+        assert all(
+            Path(p).resolve().is_relative_to(artifact.resolve())
+            for p in gui["module_origins"].values()
+        ), "GUI imported source fallback"
+        report["limitations"].append(
+            "GUI widgets/normal Tk close were exercised in the embedded interpreter; CLI used actual app launcher. Physical native GUI interactions remain manual."
+        )
+        report["gui"] = gui
+    else:
+        report["gui"] = gate(
+            "gui-exe-visible-wm-close",
+            lambda: windows_gui(artifact / EXES[0], folder, env),
+        )
+        for image in (source, edited, cleared):
+            metadata = png_contents(image)
+            if image == cleared:
+                assert not metadata, "Clear retained ordinary metadata"
+        report["limitations"].append(
+            "Windows checks actual GUI/CLI EXEs and extracted DLL imports; source-module widget probes were not substituted for EXE behavior."
+        )
+    gate(
+        "artifact-unchanged",
+        lambda: unchanged_artifact(artifact, args.target, report["artifact"]),
+    )
+
+
 def main():
     args = parser().parse_args()
     if not __debug__:
@@ -1108,93 +1217,7 @@ def main():
                     "Local TLS rejects an untrusted certificate with SSLCertVerificationError; no remote HTTPS service was contacted."
                 )
             else:
-                artifact = args.artifact.resolve()
-                assert artifact.is_dir(), "Artifact directory missing"
-                assert (
-                    not args.target.startswith("macos") or artifact.suffix == ".app"
-                ), "Expected .app directory"
-                report["artifact"] = gate(
-                    "artifact-identity",
-                    lambda: artifact_identity(artifact, args.target),
-                )
-                report["metadata"] = gate(
-                    "artifact-metadata",
-                    lambda: artifact_metadata(
-                        artifact, args.target, args.expected_version
-                    ),
-                )
-                report["native"] = gate(
-                    "native-architecture-links",
-                    lambda: native_links(artifact, args.target),
-                )
-                if args.target.startswith("macos"):
-                    command = [artifact / "Contents/MacOS/SD Prompt Reader"]
-                    probe, bootstrap, env = embedded(artifact)
-                    facts = gate(
-                        "bundled-runtime",
-                        lambda: result_json(
-                            run([*probe, bootstrap + RUNTIME_PROBE], folder, env)
-                        ),
-                    )
-                    gate("bundled-versions", lambda: versions(facts, args.target))
-                    gate(
-                        "bundled-loaded-native",
-                        lambda: loaded_native(facts, args.target, artifact),
-                    )
-                    assert all(
-                        Path(p).resolve().is_relative_to(artifact.resolve())
-                        for p in facts["module_origins"].values()
-                    ), "Bundled runtime imported external module"
-                    report["runtime"] = facts
-                else:
-                    command, env = [artifact / EXES[1]], clean_env()
-                cases, source, edited, cleared = gate(
-                    "packaged-cli", lambda: cli_checks(command, folder, clean_env())
-                )
-                report["cli_cases"] = cases
-                if args.target.startswith("macos"):
-                    gui = gate(
-                        "bundled-gui-widgets-close",
-                        lambda: result_json(
-                            run(
-                                [
-                                    *probe,
-                                    bootstrap + GUI_PROBE,
-                                    source,
-                                    edited,
-                                    cleared,
-                                ],
-                                folder,
-                                env,
-                            )
-                        ),
-                    )
-                    assert all(
-                        Path(p).resolve().is_relative_to(artifact.resolve())
-                        for p in gui["module_origins"].values()
-                    ), "GUI imported source fallback"
-                    report["limitations"].append(
-                        "GUI widgets/normal Tk close were exercised in the embedded interpreter; CLI used actual app launcher. Physical native GUI interactions remain manual."
-                    )
-                    report["gui"] = gui
-                else:
-                    report["gui"] = gate(
-                        "gui-exe-visible-wm-close",
-                        lambda: windows_gui(artifact / EXES[0], folder, env),
-                    )
-                    for image in (source, edited, cleared):
-                        metadata = png_contents(image)
-                        if image == cleared:
-                            assert not metadata, "Clear retained ordinary metadata"
-                    report["limitations"].append(
-                        "Windows checks actual GUI/CLI EXEs and extracted DLL imports; source-module widget probes were not substituted for EXE behavior."
-                    )
-                gate(
-                    "artifact-unchanged",
-                    lambda: unchanged_artifact(
-                        artifact, args.target, report["artifact"]
-                    ),
-                )
+                verify_artifact(args, report, gate, folder)
         report["status"] = "passed"
     except Exception as error:
         report["error"] = str(error)

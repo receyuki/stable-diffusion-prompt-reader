@@ -54,7 +54,7 @@ def write_json(path, value):
     )
 
 
-def validate(args):
+def validate_native_target(args):
     if sys.version_info < (3, 11):
         raise ValueError("Build preparation requires Python 3.11 or newer")
     if not args.work_dir.is_absolute():
@@ -79,8 +79,9 @@ def validate(args):
         and any(c.isspace() for c in str(args.work_dir))
     ):
         raise ValueError("Private macOS toolchain paths must not contain whitespace")
-    source = args.source.resolve(strict=True)
-    output = args.work_dir.resolve()
+
+
+def validate_work_directory(source, output):
     if (
         source == output
         or source.is_relative_to(output)
@@ -124,6 +125,26 @@ def validate(args):
         )
     if output.exists() and (not output.is_dir() or any(output.iterdir())):
         raise ValueError("Work directory must be fresh and empty")
+
+
+def validate_reused_runtime(args):
+    if args.python:
+        interpreter = args.python.resolve(strict=True)
+        receipt = json.loads(args.runtime_receipt.read_text(encoding="utf-8"))
+        if (
+            receipt.get("target") != args.target
+            or Path(receipt["python"]).resolve() != interpreter
+        ):
+            raise ValueError(
+                "Runtime receipt must describe the supplied interpreter and target"
+            )
+
+
+def validate(args):
+    validate_native_target(args)
+    source = args.source.resolve(strict=True)
+    output = args.work_dir.resolve()
+    validate_work_directory(source, output)
     if bool(args.python) != bool(args.runtime_receipt):
         raise ValueError("--python and --runtime-receipt must be supplied together")
     revision = args.revision
@@ -135,16 +156,7 @@ def validate(args):
         raise ValueError(
             "Source revision must be a full 40-character lowercase Git SHA"
         )
-    if args.python:
-        interpreter = args.python.resolve(strict=True)
-        receipt = json.loads(args.runtime_receipt.read_text(encoding="utf-8"))
-        if (
-            receipt.get("target") != args.target
-            or Path(receipt["python"]).resolve() != interpreter
-        ):
-            raise ValueError(
-                "Runtime receipt must describe the supplied interpreter and target"
-            )
+    validate_reused_runtime(args)
     return source, output, revision
 
 
@@ -391,6 +403,79 @@ def audit(uv, lock, work, logs, env):
     return report
 
 
+def prepare_source(source, work, revision):
+    files = source_files(source)
+    hashes = {path.relative_to(source).as_posix(): digest(path) for path in files}
+    provenance = work / "source-inputs.json"
+    git_state = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(source),
+            "status",
+            "--porcelain",
+            "--untracked-files=normal",
+        ],
+        text=True,
+        capture_output=True,
+    )
+    write_json(
+        provenance,
+        {
+            "revision": revision,
+            "working_tree_dirty": (
+                bool(git_state.stdout) if git_state.returncode == 0 else None
+            ),
+            "sha256": hashes,
+            "helper_sha256": {
+                p.name: digest(p)
+                for p in TOOLS.iterdir()
+                if p.is_file() and not p.name.startswith(".")
+            },
+        },
+    )
+    source_copy = work / "source"
+    snapshot(source, source_copy, files)
+    return hashes, provenance, source_copy
+
+
+def prepare_native_runtime(args, work, logs, env):
+    runtime_receipt = work / "runtime.json"
+    if args.python:
+        shutil.copy2(args.runtime_receipt, runtime_receipt)
+    else:
+        runtime_root = work / "runtime-build"
+        if args.target.startswith("macos-"):
+            command = [
+                "bash",
+                TOOLS / "build_macos.sh",
+                "--root",
+                runtime_root,
+                "--target",
+                args.target,
+                "--receipt",
+                runtime_receipt,
+            ]
+        else:
+            command = [
+                "pwsh",
+                "-NoProfile",
+                "-File",
+                TOOLS / "build_windows.ps1",
+                "-Root",
+                runtime_root,
+                "-Target",
+                args.target,
+                "-Receipt",
+                runtime_receipt,
+            ]
+        run(command, logs / "native-toolchain.log", env=env)
+    native = json.loads(runtime_receipt.read_text(encoding="utf-8"))
+    if native.get("target") != args.target or native.get("schema_version") != 1:
+        raise ValueError("Native builder returned a mismatched receipt")
+    return native
+
+
 def execute(args, source, work, revision):
     work.mkdir(parents=True, exist_ok=True)
     logs = work / "logs"
@@ -412,73 +497,12 @@ def execute(args, source, work, revision):
         if not version.startswith("uv 0.13.6 "):
             raise ValueError(f"Expected reviewed uv 0.13.6; found {version}")
         summary["uv"] = version
-        files = source_files(source)
-        hashes = {path.relative_to(source).as_posix(): digest(path) for path in files}
-        provenance = work / "source-inputs.json"
-        git_state = subprocess.run(
-            [
-                "git",
-                "-C",
-                str(source),
-                "status",
-                "--porcelain",
-                "--untracked-files=normal",
-            ],
-            text=True,
-            capture_output=True,
-        )
-        write_json(
-            provenance,
-            {
-                "revision": revision,
-                "working_tree_dirty": (
-                    bool(git_state.stdout) if git_state.returncode == 0 else None
-                ),
-                "sha256": hashes,
-                "helper_sha256": {
-                    p.name: digest(p)
-                    for p in TOOLS.iterdir()
-                    if p.is_file() and not p.name.startswith(".")
-                },
-            },
-        )
-        source_copy = work / "source"
-        snapshot(source, source_copy, files)
+        hashes, provenance, source_copy = prepare_source(source, work, revision)
+        native = prepare_native_runtime(args, work, logs, env)
         runtime_receipt = work / "runtime.json"
-        if args.python:
-            shutil.copy2(args.runtime_receipt, runtime_receipt)
-            summary["runtime_origin"] = "explicitly reused interpreter"
-        else:
-            runtime_root = work / "runtime-build"
-            if args.target.startswith("macos-"):
-                command = [
-                    "bash",
-                    TOOLS / "build_macos.sh",
-                    "--root",
-                    runtime_root,
-                    "--target",
-                    args.target,
-                    "--receipt",
-                    runtime_receipt,
-                ]
-            else:
-                command = [
-                    "pwsh",
-                    "-NoProfile",
-                    "-File",
-                    TOOLS / "build_windows.ps1",
-                    "-Root",
-                    runtime_root,
-                    "-Target",
-                    args.target,
-                    "-Receipt",
-                    runtime_receipt,
-                ]
-            run(command, logs / "native-toolchain.log", env=env)
-            summary["runtime_origin"] = "fresh native build"
-        native = json.loads(runtime_receipt.read_text(encoding="utf-8"))
-        if native.get("target") != args.target or native.get("schema_version") != 1:
-            raise ValueError("Native builder returned a mismatched receipt")
+        summary["runtime_origin"] = (
+            "explicitly reused interpreter" if args.python else "fresh native build"
+        )
         python = Path(native["python"]).resolve(strict=True)
         build_env = work / "build-env"
         run(

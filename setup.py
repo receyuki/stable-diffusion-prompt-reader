@@ -179,7 +179,7 @@ def build_windows(version, output):
             os.environ["SDPR_VERSION_FILE"] = previous
 
 
-def main(argv=None):
+def build_arguments(argv):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", nargs="?", choices=["py2app"])
     parser.add_argument(
@@ -207,28 +207,10 @@ def main(argv=None):
         parser.error(
             "Use a native 64-bit x86_64/arm64 macOS or x64 Windows interpreter"
         )
-    try:
-        version = get_version()
-        import tkinter
+    return parser, args, target, architecture
 
-        if tkinter.TkVersion != 8.6 or tkinter.TclVersion != 8.6:
-            raise ValueError(
-                "Desktop builds require Tcl/Tk 8.6; verify runtime patchlevels and TkDND separately"
-            )
-        output = args.output_dir.resolve()
-        if output == ROOT or output in ROOT.parents:
-            raise ValueError(
-                "Output must not be the source directory or one of its parents"
-            )
-        if output.is_relative_to(ROOT) and not output.is_relative_to(ROOT / "build"):
-            raise ValueError("Outputs inside the source tree must be under build/")
-        if output.exists() and (not output.is_dir() or any(output.iterdir())):
-            raise ValueError(
-                "Output directory must be fresh and empty; choose a new path"
-            )
-    except (OSError, ValueError, ImportError) as error:
-        parser.error(str(error))
 
+def source_inputs():
     source_files = {
         ROOT / name
         for name in (
@@ -255,6 +237,13 @@ def main(argv=None):
             for part in path.relative_to(ROOT).parts
         )
     )
+    return source_files
+
+
+def describe_inputs(version, architecture, argv):
+    import tkinter
+
+    source_files = source_inputs()
     inputs = {
         "version": str(version),
         "source": str(ROOT),
@@ -275,6 +264,34 @@ def main(argv=None):
             for path in sorted(source_files)
         },
     }
+    return inputs
+
+
+def main(argv=None):
+    parser, args, target, architecture = build_arguments(argv)
+    try:
+        version = get_version()
+        import tkinter
+
+        if tkinter.TkVersion != 8.6 or tkinter.TclVersion != 8.6:
+            raise ValueError(
+                "Desktop builds require Tcl/Tk 8.6; verify runtime patchlevels and TkDND separately"
+            )
+        output = args.output_dir.resolve()
+        if output == ROOT or output in ROOT.parents:
+            raise ValueError(
+                "Output must not be the source directory or one of its parents"
+            )
+        if output.is_relative_to(ROOT) and not output.is_relative_to(ROOT / "build"):
+            raise ValueError("Outputs inside the source tree must be under build/")
+        if output.exists() and (not output.is_dir() or any(output.iterdir())):
+            raise ValueError(
+                "Output directory must be fresh and empty; choose a new path"
+            )
+    except (OSError, ValueError, ImportError) as error:
+        parser.error(str(error))
+
+    inputs = describe_inputs(version, architecture, argv)
     if args.preflight:
         print(json.dumps(inputs, indent=2, sort_keys=True))
         return

@@ -113,65 +113,127 @@ def sanitize(value):
     return value
 
 
+def validate_package_paths(args):
+    if not all(
+        p.is_absolute()
+        for p in (
+            args.artifact,
+            args.output_dir,
+            args.report,
+            args.verification,
+            *args.manifest,
+        )
+    ):
+        raise ValueError("All input/output paths must be absolute")
+    artifact, output = args.artifact.resolve(), args.output_dir.resolve()
+    if not re.fullmatch(r"[0-9a-fA-F]{40}", args.revision):
+        raise ValueError("--revision must be the full 40-character source SHA")
+    if not artifact.is_dir():
+        raise ValueError("Artifact directory missing")
+    if (
+        output.exists()
+        or output.is_relative_to(artifact)
+        or artifact.is_relative_to(output)
+    ):
+        raise ValueError("Output directory must be fresh and outside artifact")
+    if not output.parent.is_dir():
+        raise ValueError("Output parent must exist")
+    if args.report.resolve().is_relative_to(artifact):
+        raise ValueError("Package report must be outside the input artifact")
+    if args.report.exists() or not args.report.parent.is_dir():
+        raise ValueError("Package report must be a new file with an existing parent")
+    return artifact, output
+
+
+def verified_artifact(args, artifact):
+    report = json.loads(args.verification.read_text(encoding="utf-8"))
+    actual, files = identity(artifact, args.target)
+    if (
+        report.get("schema_version") != 1
+        or report.get("kind") != "artifact"
+        or report.get("status") != "passed"
+        or report.get("target") != args.target
+        or report.get("artifact", {}).get("identity_sha256") != actual
+    ):
+        raise ValueError(
+            "Passed target-matched artifact verification report required; artifact must be unchanged"
+        )
+    required = {"artifact-metadata", "artifact-unchanged"}
+    if not required.issubset({c.get("name") for c in report.get("checks", [])}):
+        raise ValueError(
+            "Verification must include artifact metadata and unchanged-content gates"
+        )
+    if not report.get("checks") or any(
+        c.get("status") != "passed" for c in report["checks"]
+    ):
+        raise ValueError("Verification checks must all pass")
+    if args.target.startswith("macos") and artifact.suffix != ".app":
+        raise ValueError("macOS artifact must be an .app directory")
+    for name in EXES if args.target == "windows-x64" else ():
+        if not (artifact / name).is_file():
+            raise ValueError("Both independent Windows executables required")
+    return report, actual, files
+
+
+def write_archive(archive, artifact, manifest, report, manual):
+    with tempfile.TemporaryDirectory(prefix="sdpr-package-") as folder:
+        metadata = Path(folder)
+        (metadata / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+        (metadata / "validation.json").write_text(
+            json.dumps(sanitize(report), indent=2) + "\n"
+        )
+        shutil.copyfile(manual, metadata / "MANUAL_CHECK.md")
+        payload = (
+            [(artifact, artifact.name)]
+            if manifest["target"].startswith("macos")
+            else [(artifact / name, name) for name in EXES]
+        )
+        checksums = []
+        for entry in manifest["artifact_files"]:
+            if "sha256" in entry:
+                prefix = (
+                    artifact.name + "/"
+                    if manifest["target"].startswith("macos")
+                    else ""
+                )
+                checksums.append(entry["sha256"] + "  " + prefix + entry["path"])
+        checksums.extend(
+            digest(metadata / name) + "  " + name
+            for name in ("manifest.json", "validation.json", "MANUAL_CHECK.md")
+        )
+        (metadata / "SHA256SUMS").write_text("\n".join(checksums) + "\n")
+        payload += [
+            (metadata / name, name)
+            for name in (
+                "manifest.json",
+                "validation.json",
+                "MANUAL_CHECK.md",
+                "SHA256SUMS",
+            )
+        ]
+        if archive.name.endswith(".tar.gz"):
+            with tarfile.open(archive, "w:gz", dereference=False) as stream:
+
+                def clean_owner(info):
+                    info.uid = info.gid = 0
+                    info.uname = info.gname = ""
+                    return info
+
+                for source, name in payload:
+                    stream.add(source, arcname=name, filter=clean_owner)
+        else:
+            with zipfile.ZipFile(
+                archive, "w", compression=zipfile.ZIP_DEFLATED
+            ) as stream:
+                for source, name in payload:
+                    stream.write(source, name)
+
+
 def main():
     args = parser().parse_args()
     try:
-        if not all(
-            p.is_absolute()
-            for p in (
-                args.artifact,
-                args.output_dir,
-                args.report,
-                args.verification,
-                *args.manifest,
-            )
-        ):
-            raise ValueError("All input/output paths must be absolute")
-        artifact, output = args.artifact.resolve(), args.output_dir.resolve()
-        if not re.fullmatch(r"[0-9a-fA-F]{40}", args.revision):
-            raise ValueError("--revision must be the full 40-character source SHA")
-        if not artifact.is_dir():
-            raise ValueError("Artifact directory missing")
-        if (
-            output.exists()
-            or output.is_relative_to(artifact)
-            or artifact.is_relative_to(output)
-        ):
-            raise ValueError("Output directory must be fresh and outside artifact")
-        if not output.parent.is_dir():
-            raise ValueError("Output parent must exist")
-        if args.report.resolve().is_relative_to(artifact):
-            raise ValueError("Package report must be outside the input artifact")
-        if args.report.exists() or not args.report.parent.is_dir():
-            raise ValueError(
-                "Package report must be a new file with an existing parent"
-            )
-        report = json.loads(args.verification.read_text(encoding="utf-8"))
-        actual, files = identity(artifact, args.target)
-        if (
-            report.get("schema_version") != 1
-            or report.get("kind") != "artifact"
-            or report.get("status") != "passed"
-            or report.get("target") != args.target
-            or report.get("artifact", {}).get("identity_sha256") != actual
-        ):
-            raise ValueError(
-                "Passed target-matched artifact verification report required; artifact must be unchanged"
-            )
-        required = {"artifact-metadata", "artifact-unchanged"}
-        if not required.issubset({c.get("name") for c in report.get("checks", [])}):
-            raise ValueError(
-                "Verification must include artifact metadata and unchanged-content gates"
-            )
-        if not report.get("checks") or any(
-            c.get("status") != "passed" for c in report["checks"]
-        ):
-            raise ValueError("Verification checks must all pass")
-        if args.target.startswith("macos") and artifact.suffix != ".app":
-            raise ValueError("macOS artifact must be an .app directory")
-        for name in EXES if args.target == "windows-x64" else ():
-            if not (artifact / name).is_file():
-                raise ValueError("Both independent Windows executables required")
+        artifact, output = validate_package_paths(args)
+        report, actual, files = verified_artifact(args, artifact)
         provenance = [
             {
                 "name": p.name,
@@ -197,57 +259,7 @@ def main():
             "artifact_files": files,
             "provenance": sanitize(provenance),
         }
-        with tempfile.TemporaryDirectory(prefix="sdpr-package-") as folder:
-            metadata = Path(folder)
-            (metadata / "manifest.json").write_text(
-                json.dumps(manifest, indent=2) + "\n"
-            )
-            (metadata / "validation.json").write_text(
-                json.dumps(sanitize(report), indent=2) + "\n"
-            )
-            shutil.copyfile(manual, metadata / "MANUAL_CHECK.md")
-            payload = (
-                [(artifact, artifact.name)]
-                if args.target.startswith("macos")
-                else [(artifact / name, name) for name in EXES]
-            )
-            checksums = []
-            for entry in files:
-                if "sha256" in entry:
-                    prefix = (
-                        artifact.name + "/" if args.target.startswith("macos") else ""
-                    )
-                    checksums.append(entry["sha256"] + "  " + prefix + entry["path"])
-            checksums.extend(
-                digest(metadata / name) + "  " + name
-                for name in ("manifest.json", "validation.json", "MANUAL_CHECK.md")
-            )
-            (metadata / "SHA256SUMS").write_text("\n".join(checksums) + "\n")
-            payload += [
-                (metadata / name, name)
-                for name in (
-                    "manifest.json",
-                    "validation.json",
-                    "MANUAL_CHECK.md",
-                    "SHA256SUMS",
-                )
-            ]
-            if suffix == ".tar.gz":
-                with tarfile.open(archive, "w:gz", dereference=False) as stream:
-
-                    def clean_owner(info):
-                        info.uid = info.gid = 0
-                        info.uname = info.gname = ""
-                        return info
-
-                    for source, name in payload:
-                        stream.add(source, arcname=name, filter=clean_owner)
-            else:
-                with zipfile.ZipFile(
-                    archive, "w", compression=zipfile.ZIP_DEFLATED
-                ) as stream:
-                    for source, name in payload:
-                        stream.write(source, name)
+        write_archive(archive, artifact, manifest, report, manual)
         receipt = {
             "schema_version": 1,
             "target": args.target,
