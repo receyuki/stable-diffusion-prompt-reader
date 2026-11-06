@@ -1,6 +1,9 @@
 name: Desktop candidates
 
 on:
+  pull_request:
+    branches: [master]
+    types: [labeled]
   workflow_dispatch:
     inputs:
       target:
@@ -22,20 +25,30 @@ permissions:
   contents: read
 
 concurrency:
-  group: desktop-${{ github.ref }}-${{ inputs.target }}-${{ inputs.stage }}
+  group: desktop-${{ github.event.pull_request.number || github.ref }}-${{ inputs.target || 'all' }}-${{ inputs.stage || 'candidate' }}
   cancel-in-progress: true
 
 jobs:
   select:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       github.event.label.name == 'ci:desktop-candidate' &&
+       github.actor == github.repository_owner &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       matrix: ${{ steps.targets.outputs.matrix }}
+      stage: ${{ steps.targets.outputs.stage }}
+      retain: ${{ steps.targets.outputs.retain }}
     steps:
       - name: Select native targets
         id: targets
         env:
-          REQUESTED_TARGET: ${{ inputs.target }}
+          REQUESTED_TARGET: ${{ inputs.target || 'all' }}
+          REQUESTED_STAGE: ${{ inputs.stage || 'candidate' }}
+          RETAIN_CANDIDATE: ${{ inputs.retain_candidate || github.event_name == 'pull_request' }}
         run: |
           python3 - <<'PY'
           import json
@@ -47,11 +60,17 @@ jobs:
               {"target": "windows-x64", "runner": "windows-2022", "python_arch": "x64"},
           ]
           requested = os.environ["REQUESTED_TARGET"]
+          stage = os.environ["REQUESTED_STAGE"]
+          retain = os.environ["RETAIN_CANDIDATE"]
+          if stage not in ("toolchain", "candidate") or retain not in ("true", "false"):
+              raise SystemExit("Unknown build stage or retention selection")
           selected = [item for item in targets if requested in ("all", item["target"])]
           if not selected:
               raise SystemExit("Unknown native target")
           with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as stream:
               stream.write("matrix=" + json.dumps({"include": selected}) + "\n")
+              stream.write("stage=" + stage + "\n")
+              stream.write("retain=" + retain + "\n")
           PY
 
   native:
@@ -59,7 +78,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
-    name: ${{ matrix.target }} / ${{ inputs.stage }}
+    name: ${{ matrix.target }} / ${{ needs.select.outputs.stage }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     defaults:
@@ -69,7 +88,7 @@ jobs:
       - name: Check out the selected source revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
           set-safe-directory: false
       - name: Set up preparation Python (not the application interpreter)
@@ -87,7 +106,7 @@ jobs:
         id: build
         env:
           SDPR_TARGET: ${{ matrix.target }}
-          SDPR_STAGE: ${{ inputs.stage }}
+          SDPR_STAGE: ${{ needs.select.outputs.stage }}
         run: |
           python tools/desktop/build.py \
             --target "$SDPR_TARGET" \
@@ -118,7 +137,7 @@ jobs:
               stream.write("\n".join(lines) + "\n")
           PY
       - name: Retain only the passed development archive
-        if: ${{ success() && inputs.stage == 'candidate' && inputs.retain_candidate }}
+        if: ${{ success() && needs.select.outputs.stage == 'candidate' && needs.select.outputs.retain == 'true' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           path: ${{ steps.build.outputs.archive }}

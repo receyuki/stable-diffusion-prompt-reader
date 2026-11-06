@@ -149,8 +149,13 @@ their own evidence before distribution.
 `.github/workflows/desktop-build.yml` is manually triggered. It selects Windows
 x64 (`windows-2022`), Intel macOS (`macos-26-intel`), Apple Silicon macOS
 (`macos-26`), or all three. Jobs run independently. The workflow must exist on the
-default branch before its manual trigger is available; adding it locally does
-not register or run it on GitHub.
+default branch before its dispatch button is available; adding it locally does
+not register or run it on GitHub. To test an unmerged PR, the repository owner
+can apply the `ci:desktop-candidate` label to a PR from this repository. That
+explicit action builds all three targets at the PR's head SHA and retains passed
+candidates for seven days. Other labels, fork PRs and labels applied by other
+actors do not start desktop builds. Later pushes do not automatically rebuild;
+remove and reapply the label to build an updated PR head.
 
 The preparation Python is distinct from the privately built application Python.
 `tools/desktop/build_macos.sh` builds the pinned framework/Tcl/Tk/OpenSSL inputs
