@@ -434,9 +434,6 @@ with tempfile.TemporaryDirectory(prefix='sdpr-tls-') as directory:
         raise AssertionError('TLS accepted an untrusted certificate')
     thread.join(timeout=10)
     assert not thread.is_alive(), 'Local TLS server did not finish'
-modules = {}
-for name in ('_ssl', '_hashlib', '_tkinter', 'zlib', 'tkinterdnd2'):
-    module = __import__(name); modules[name] = str(Path(module.__file__).resolve())
 loaded = []
 if sys.platform == 'darwin':
     native = ctypes.CDLL(None)
@@ -460,7 +457,7 @@ else:
 result = dict(python_version=platform.python_version(), architecture=platform.machine(), bits=ctypes.sizeof(ctypes.c_void_p)*8,
               tcl_version=root.tk.call('info', 'patchlevel'), tk_version=root.tk.call('package', 'provide', 'Tk'),
               tk_window_system=root.tk.call('tk', 'windowingsystem'), tkdnd_version=version, openssl_version=ssl.OPENSSL_VERSION,
-              module_origins=modules, loaded_libraries=loaded, optional_modules=optional, ssl_default_verification=True, native_operations=True)
+              loaded_libraries=loaded, optional_modules=optional, ssl_default_verification=True, native_operations=True)
 root.update(); root.destroy()
 result['module_origins'] = {name: str(Path(module.__file__).resolve()) for name, module in tuple(sys.modules.items()) if getattr(module, '__file__', None) and not str(module.__file__).startswith('<')}
 print('SDPR_RESULT=' + json.dumps(result))
