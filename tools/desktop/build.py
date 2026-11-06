@@ -166,13 +166,18 @@ def run(command, log, *, cwd=None, env=None):
     with log.open("w", encoding="utf-8") as stream:
         stream.write(json.dumps([str(part) for part in command]) + "\n")
         stream.flush()
-        result = subprocess.run(
+        with subprocess.Popen(
             [str(part) for part in command],
             cwd=cwd,
             env=env,
-            stdout=stream,
+            stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-        )
+            text=True,
+            errors="replace",
+        ) as result:
+            for line in result.stdout:
+                stream.write(line)
+                print(line, end="", flush=True)
     if result.returncode:
         with log.open(encoding="utf-8", errors="replace") as stream:
             print("".join(deque(stream, maxlen=80)), file=sys.stderr, end="")
