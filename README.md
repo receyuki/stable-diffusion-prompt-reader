@@ -79,6 +79,7 @@ RuinedFooocus PNG support is available in the development version only ([#77](ht
 > of this project, and it is recommended to embed the [Prompt Saver node](https://github.com/receyuki/comfyui-prompt-reader-node#prompt-saver-node--parameter-generator-node) in the [ComfyUI Prompt Reader Node](https://github.com/receyuki/comfyui-prompt-reader-node) within your workflow to ensure maximum compatibility.
 
 ## Download
+For desktop builds from current source, see [Building desktop applications](docs/building.md).
 ### For Windows users
 Download executable from [GitHub Releases](https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest)
 ### For macOS users
