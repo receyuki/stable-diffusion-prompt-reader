@@ -24,10 +24,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: desktop-${{ github.event.pull_request.number || github.ref }}-${{ inputs.target || 'all' }}-${{ inputs.stage || 'candidate' }}
-  cancel-in-progress: true
-
 jobs:
   select:
     if: >-
@@ -75,6 +71,10 @@ jobs:
 
   native:
     needs: select
+    if: ${{ needs.select.result == 'success' }}
+    concurrency:
+      group: desktop-${{ github.head_ref || github.ref_name }}-${{ matrix.target }}-${{ needs.select.outputs.stage }}
+      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
