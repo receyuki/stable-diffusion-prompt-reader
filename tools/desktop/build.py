@@ -1,6 +1,7 @@
 """Prepare and validate native desktop development candidates without publishing."""
 
 import argparse
+from collections import deque
 from contextlib import contextmanager
 import hashlib
 import json
@@ -173,6 +174,8 @@ def run(command, log, *, cwd=None, env=None):
             stderr=subprocess.STDOUT,
         )
     if result.returncode:
+        with log.open(encoding="utf-8", errors="replace") as stream:
+            print("".join(deque(stream, maxlen=80)), file=sys.stderr, end="")
         raise RuntimeError(f"{log.stem} failed (exit {result.returncode}); see {log}")
 
 
