@@ -96,8 +96,6 @@ try {
     $bootstrapPrefix = ($bootstrapInfo | ConvertFrom-Json).prefix
     if ((Within $Root $bootstrapPrefix) -or (Within $bootstrapPrefix $Root)) { throw 'Root cannot overlap the bootstrap Python installation.' }
     foreach ($name in @('MSBuild.exe','cl.exe','nmake.exe','dumpbin.exe')) { $null = Get-Command $name -CommandType Application }
-    $tarExe = Join-Path $env:SystemRoot 'System32/tar.exe'
-    if (-not (Test-Path -LiteralPath $tarExe)) { throw 'Windows system tar.exe is required.' }
     $null = New-Item -ItemType Directory -Path $Root -Force
     $logs = New-Item -ItemType Directory -Path (Join-Path $Root 'logs')
     function Run([string]$Exe, [string[]]$Arguments, [string]$Log, [int[]]$Allowed = @(0)) {
@@ -123,8 +121,8 @@ try {
         Invoke-WebRequest -Uri $item.url -OutFile $archive @downloadOptions
         Check-Archive $archive $item
         Write-Output "Verified $($item.name); extracting pinned archive"
-        $destination = New-Item -ItemType Directory -Path (Join-Path $src $item.name)
-        Run $tarExe @('-xf',$archive,'--strip-components=1','-C',$destination.FullName) "extract-$($item.name).txt"
+        $destination = Join-Path $src $item.name
+        Run $bootstrap @((Join-Path $PSScriptRoot 'extract_sources.py'),'--archive',$archive,'--output-dir',$destination,'--sha256',$item.sha256) "extract-$($item.name).txt"
         Write-Output "Prepared $($item.name) source"
     }
     $cpython = Join-Path $src 'cpython'
