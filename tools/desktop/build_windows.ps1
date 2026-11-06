@@ -90,7 +90,7 @@ try {
     }
     foreach ($line in $devEnv) { if ($line -match '^([^=]+)=(.*)$') { [Environment]::SetEnvironmentVariable($Matches[1], $Matches[2], 'Process') } }
     if ($env:VSCMD_ARG_TGT_ARCH -ne 'x64' -or $env:WindowsSDKVersion.TrimEnd('\') -ne '10.0.22621.0') { throw 'Selected x64 SDK environment does not match 10.0.22621.0.' }
-    $bootstrap = (Get-Command python.exe -CommandType Application).Source
+    $bootstrap = (Get-Command python.exe -CommandType Application | Select-Object -First 1).Source
     $bootstrapInfo = & $bootstrap -I -c 'import sys,struct,json; assert sys.version_info >= (3,10) and struct.calcsize("P")==8; print(json.dumps({"executable":sys.executable,"version":sys.version,"prefix":sys.prefix}))'
     if ($LASTEXITCODE -ne 0) { throw 'Existing 64-bit bootstrap Python >=3.10 is required.' }
     $bootstrapPrefix = ($bootstrapInfo | ConvertFrom-Json).prefix
@@ -107,7 +107,7 @@ try {
     Run 'cl.exe' @('/Bv') 'compiler.txt' @(0,2)
     Run 'nmake.exe' @('/?') 'nmake.txt'
     $bootstrapInfo | Set-Content -LiteralPath (Join-Path $logs 'bootstrap.json')
-    @{ImageOS=$env:ImageOS; ImageVersion=$env:ImageVersion; OS=[Environment]::OSVersion.VersionString; VisualStudio=$vs; VCToolsVersion=$env:VCToolsVersion; SDK=$env:WindowsSDKVersion; dumpbin=(Get-Command dumpbin.exe).Source} | ConvertTo-Json | Set-Content (Join-Path $logs 'host.json')
+    @{ImageOS=$env:ImageOS; ImageVersion=$env:ImageVersion; OS=[Environment]::OSVersion.VersionString; VisualStudio=$vs; VCToolsVersion=$env:VCToolsVersion; SDK=$env:WindowsSDKVersion; dumpbin=(Get-Command dumpbin.exe -CommandType Application | Select-Object -First 1).Source} | ConvertTo-Json | Set-Content (Join-Path $logs 'host.json')
     $downloads = New-Item -ItemType Directory -Path (Join-Path $Root 'downloads')
     $src = New-Item -ItemType Directory -Path (Join-Path $Root 'src')
     foreach ($item in $manifest.archives) {

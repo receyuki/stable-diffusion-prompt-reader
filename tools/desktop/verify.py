@@ -1222,6 +1222,11 @@ def main():
     except Exception as error:
         report["error"] = str(error)
     output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    if report["status"] != "passed":
+        print(
+            "Verification failed: " + report.get("error", "Unknown failure"),
+            file=sys.stderr,
+        )
     print(json.dumps({"status": report["status"], "report": str(output)}))
     return 0 if report["status"] == "passed" else 1
 
