@@ -74,8 +74,20 @@ try {
     $vs = (& $vswhere -latest -version '[17.0,18.0)' -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath | Out-String).Trim()
     if ($LASTEXITCODE -ne 0 -or -not $vs) { throw 'VS2022 x64 tools are unavailable.' }
     $devcmd = Join-Path $vs 'Common7/Tools/VsDevCmd.bat'
-    $devEnv = & $env:ComSpec /d /s /c "`"`"$devcmd`" -no_logo -host_arch=amd64 -arch=amd64 -winsdk=10.0.22621.0 >nul && set`""
-    if ($LASTEXITCODE -ne 0) { throw 'VS2022 x64 environment initialization failed.' }
+    $devStdout = [IO.Path]::GetTempFileName()
+    $devStderr = [IO.Path]::GetTempFileName()
+    try {
+        # Start-Process takes one raw argument line. A leading CALL avoids cmd's
+        # special first/last-quote handling of paths under Program Files.
+        $devArguments = "/d /c call `"$devcmd`" -no_logo -host_arch=amd64 -arch=amd64 -winsdk=10.0.22621.0 >nul && set"
+        $devProcess = Start-Process -FilePath $env:ComSpec -ArgumentList $devArguments -NoNewWindow -Wait -PassThru -RedirectStandardOutput $devStdout -RedirectStandardError $devStderr
+        if ($devProcess.ExitCode -ne 0) { throw ("VS2022 x64 environment initialization failed: " + (Get-Content -Raw -LiteralPath $devStderr)) }
+        # Environment output can contain runner credentials; consume it locally
+        # without printing it or retaining it in build logs/artifacts.
+        $devEnv = Get-Content -LiteralPath $devStdout
+    } finally {
+        Remove-Item -LiteralPath $devStdout,$devStderr -Force
+    }
     foreach ($line in $devEnv) { if ($line -match '^([^=]+)=(.*)$') { [Environment]::SetEnvironmentVariable($Matches[1], $Matches[2], 'Process') } }
     if ($env:VSCMD_ARG_TGT_ARCH -ne 'x64' -or $env:WindowsSDKVersion.TrimEnd('\') -ne '10.0.22621.0') { throw 'Selected x64 SDK environment does not match 10.0.22621.0.' }
     $bootstrap = (Get-Command python.exe -CommandType Application).Source
