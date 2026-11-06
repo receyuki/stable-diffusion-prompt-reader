@@ -77,6 +77,7 @@
 > [ComfyUI Prompt Reader Node](https://github.com/receyuki/comfyui-prompt-reader-node) 是本项目的一个子项目，建议在你的工作流程中嵌入其中的 [Prompt Saver node](https://github.com/receyuki/comfyui-prompt-reader-node#prompt-saver-node--parameter-generator-node) 以确保最大的兼容性。
 
 ## 下载
+从当前源码构建桌面程序请参考[构建说明](docs/building.md).
 ### Windows 用户
 从 [GitHub Releases](https://github.com/receyuki/stable-diffusion-prompt-reader/releases/latest) 下载可执行文件
 ### macOS 用户

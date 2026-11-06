@@ -1,72 +1,57 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+from pathlib import Path
 
-block_cipher = None
+from PyInstaller.utils.hooks import collect_data_files
 
 
-a = Analysis(
-    ['main.py'],
-    pathex=[],
-    binaries=[],
-    datas=[('sd_prompt_reader/resources', 'sd_prompt_reader/resources'), ('venv/lib/site-packages/customtkinter', 'customtkinter')],
-    hiddenimports=['sd_prompt_reader'],
-    hookspath=['.'],
-    hooksconfig={},
-    runtime_hooks=[],
-    excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
-    noarchive=False,
+ROOT = Path(SPECPATH)
+VERSION_FILE = os.environ.get("SDPR_VERSION_FILE", str(ROOT / "file_version_info.txt"))
+DATAS = [
+    (str(ROOT / "sd_prompt_reader/resources"), "sd_prompt_reader/resources"),
+] + collect_data_files("customtkinter")
+
+
+def build_executable(script, name, icon, console):
+    analysis = Analysis(
+        [str(ROOT / script)],
+        pathex=[str(ROOT)],
+        binaries=[],
+        datas=DATAS,
+        hiddenimports=["sd_prompt_reader"],
+        hookspath=[str(ROOT)],
+        hooksconfig={},
+        runtime_hooks=[],
+        excludes=[],
+        noarchive=False,
+        optimize=0,
+    )
+    pyz = PYZ(analysis.pure)
+    # Passing binaries and data to EXE preserves the two standalone one-file outputs.
+    return EXE(
+        pyz,
+        analysis.scripts,
+        analysis.binaries,
+        analysis.datas,
+        [],
+        name=name,
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=True,
+        upx_exclude=[],
+        runtime_tmpdir=None,
+        console=console,
+        disable_windowed_traceback=False,
+        icon=str(ROOT / "sd_prompt_reader/resources" / icon),
+        version=VERSION_FILE,
+    )
+
+
+exe_gui = build_executable(
+    "gui_main.py", "SD Prompt Reader", "icon-gui.ico", console=False
 )
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
-
-exe_gui = EXE(
-    pyz,
-    a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    [],
-    name='SD Prompt Reader',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    windowed=True,
-    console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-    icon='sd_prompt_reader/resources/icon-gui.ico',
-    version='file_version_info.txt',
-)
-
-exe_cli = EXE(
-    pyz,
-    a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    [],
-    name='SD Prompt Reader CLI',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    windowed=False,
-    console=True,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-    icon='sd_prompt_reader/resources/icon-cli.ico',
-    version='file_version_info.txt',
+exe_cli = build_executable(
+    "cli_main.py", "SD Prompt Reader CLI", "icon-cli.ico", console=True
 )

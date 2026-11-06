@@ -470,7 +470,7 @@ class App(Tk):
         # bind dnd and resize
         self.drop_target_register(DND_FILES)
         self.dnd_bind("<<Drop>>", self.display_info)
-        self.bind("<Configure>", self.resize_image)
+        self._resize_binding = self.bind("<Configure>", self.resize_image)
 
         # update checker
         self.update_checker = UpdateChecker(self.status_bar)
@@ -480,6 +480,16 @@ class App(Tk):
             self.display_info(sys.argv[1], is_selected=True)
         # open with in macOS
         self.createcommand("::tk::mac::OpenDocument", self.open_document_handler)
+
+    def destroy(self):
+        # Stop resizing before the image frame is destroyed.
+        self.unbind("<Configure>", self._resize_binding)
+        # Tooltip Destroy callbacks can redraw a button after its canvas is gone.
+        # Remove the tooltips and their bindings while the buttons still exist.
+        for child in self.winfo_children():
+            if isinstance(child, CTkToolTip):
+                child.destroy()
+        super().destroy()
 
     def open_document_handler(self, *args):
         self.display_info(args[0], is_selected=True)
@@ -494,7 +504,10 @@ class App(Tk):
                 return
             new_path = Path(event)
         else:
-            new_path = Path(event.data.replace("}", "").replace("{", ""))
+            dropped_paths = self.tk.splitlist(event.data)
+            if not dropped_paths:
+                return
+            new_path = Path(dropped_paths[0])
 
         # detect suffix and read
         if new_path.suffix.lower() in SUPPORTED_FORMATS:

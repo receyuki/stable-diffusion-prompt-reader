@@ -46,10 +46,13 @@ class NovelAI(BaseFormat):
                 if self.row == self.height:
                     self.row = 0
                     self.col += 1
+                return True
+            return False
 
         def get_one_byte(self):
             while self.bits < 8:
-                self._extract_next_bit()
+                if not self._extract_next_bit():
+                    return bytearray()
             byte = bytearray([self.byte])
             self.bits = 0
             self.byte = 0
