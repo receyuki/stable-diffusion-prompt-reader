@@ -1,0 +1,146 @@
+name: Desktop candidates
+
+on:
+  pull_request:
+    branches: [master]
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Native target to build
+        type: choice
+        options: [macos-x86_64, macos-arm64, windows-x64, all]
+        default: macos-x86_64
+      stage:
+        description: Validate the toolchain or build a development candidate
+        type: choice
+        options: [toolchain, candidate]
+        default: toolchain
+      retain_candidate:
+        description: Retain a passed candidate for manual testing (7 days)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  select:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       github.event.label.name == 'ci:desktop-candidate' &&
+       github.actor == github.repository_owner &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.targets.outputs.matrix }}
+      stage: ${{ steps.targets.outputs.stage }}
+      retain: ${{ steps.targets.outputs.retain }}
+    steps:
+      - name: Select native targets
+        id: targets
+        env:
+          REQUESTED_TARGET: ${{ inputs.target || 'all' }}
+          REQUESTED_STAGE: ${{ inputs.stage || 'candidate' }}
+          RETAIN_CANDIDATE: ${{ inputs.retain_candidate || github.event_name == 'pull_request' }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          targets = [
+              {"target": "macos-x86_64", "runner": "macos-26-intel", "python_arch": "x64"},
+              {"target": "macos-arm64", "runner": "macos-26", "python_arch": "arm64"},
+              {"target": "windows-x64", "runner": "windows-2022", "python_arch": "x64"},
+          ]
+          requested = os.environ["REQUESTED_TARGET"]
+          stage = os.environ["REQUESTED_STAGE"]
+          retain = os.environ["RETAIN_CANDIDATE"]
+          if stage not in ("toolchain", "candidate") or retain not in ("true", "false"):
+              raise SystemExit("Unknown build stage or retention selection")
+          selected = [item for item in targets if requested in ("all", item["target"])]
+          if not selected:
+              raise SystemExit("Unknown native target")
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as stream:
+              stream.write("matrix=" + json.dumps({"include": selected}) + "\n")
+              stream.write("stage=" + stage + "\n")
+              stream.write("retain=" + retain + "\n")
+          PY
+
+  native:
+    needs: select
+    if: ${{ needs.select.result == 'success' }}
+    concurrency:
+      group: desktop-${{ github.head_ref || github.ref_name }}-${{ matrix.target }}-${{ needs.select.outputs.stage }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
+    name: ${{ matrix.target }} / ${{ needs.select.outputs.stage }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the selected source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          set-safe-directory: false
+      - name: Set up preparation Python (not the application interpreter)
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.14.10'
+          architecture: ${{ matrix.python_arch }}
+          check-latest: false
+      - name: Set up reviewed dependency installer
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.13.6'
+          enable-cache: false
+      - name: Prepare and verify native development inputs
+        id: build
+        env:
+          SDPR_TARGET: ${{ matrix.target }}
+          SDPR_STAGE: ${{ needs.select.outputs.stage }}
+        run: |
+          python tools/desktop/build.py \
+            --target "$SDPR_TARGET" \
+            --stage "$SDPR_STAGE" \
+            --work-dir "$RUNNER_TEMP/sdpr-desktop-$SDPR_TARGET"
+      - name: Summarize the validation boundary
+        if: always()
+        env:
+          SDPR_TARGET: ${{ matrix.target }}
+        run: |
+          python - <<'PY'
+          import html
+          import json
+          import os
+          from pathlib import Path
+          report = Path(os.environ["RUNNER_TEMP"]) / ("sdpr-desktop-" + os.environ["SDPR_TARGET"]) / "summary.json"
+          result = json.loads(report.read_text(encoding="utf-8")) if report.exists() else {"status": "failed before a receipt was available"}
+          lines = ["### " + html.escape(os.environ["SDPR_TARGET"])]
+          for key in ("status", "stage", "revision", "validation_scope", "native_review", "error"):
+              if key in result:
+                  lines.append("- " + key + ": " + html.escape(str(result[key])))
+          package = result.get("package", {})
+          for key in ("filename", "sha256", "size"):
+              if key in package:
+                  lines.append("- candidate " + key + ": " + html.escape(str(package[key])))
+          lines.append("Development validation only; physical interaction, installed/downloaded behavior, oldest OS and release approval remain separate.")
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as stream:
+              stream.write("\n".join(lines) + "\n")
+          PY
+      - name: Retain only the passed development archive
+        if: ${{ success() && needs.select.outputs.stage == 'candidate' && needs.select.outputs.retain == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: ${{ steps.build.outputs.archive }}
+          archive: false
+          retention-days: 7
+          if-no-files-found: error

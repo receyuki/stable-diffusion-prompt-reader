@@ -1,5 +1,8 @@
-# Desktop build tools; validate this toolchain separately from runtime installation.
+# Desktop tool inputs; native artifact validation is separate from runtime installation.
 -r requirements.txt
-pyinstaller~=6.6.0; platform_system == "Windows"
-pyinstaller-hooks-contrib~=2024.6; platform_system == "Windows"
-py2app~=0.28.6; sys_platform == 'darwin'
+setuptools==84.2.1
+packaging==26.3
+pyinstaller==6.22.3; platform_system == "Windows"
+pyinstaller-hooks-contrib==2026.9; platform_system == "Windows"
+pyinstaller-versionfile==3.1.0; platform_system == "Windows"
+py2app==0.28.10; sys_platform == 'darwin'

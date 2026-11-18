@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "target": "windows-x64",
+  "archives": [
+    {
+      "name": "cpython",
+      "filename": "Python-3.11.18.tar.xz",
+      "url": "https://www.python.org/ftp/python/3.11.18/Python-3.11.18.tar.xz",
+      "sha256": "9120e0a653868f6e3698d36cdd99e5a58903ec9469e448f21d98f7b16d8fa290",
+      "version": "3.11.18"
+    },
+    {
+      "name": "tcl",
+      "filename": "tcl-8.6.18.tar.gz",
+      "url": "https://codeload.github.com/tcltk/tcl/tar.gz/515167c897a7c8066abfbd71e8fe7bd8bf3569de",
+      "sha256": "a505b3e801896e2273be4d922ef46179ee3c4f8d77823d9a53a64bddd1965978",
+      "version": "8.6.18"
+    },
+    {
+      "name": "tk",
+      "filename": "tk-8.6.18.tar.gz",
+      "url": "https://codeload.github.com/tcltk/tk/tar.gz/6dbe68819aac4a22f6f7a143133ce26c5e8d2b05",
+      "sha256": "f968d5c3b3e16ede93d4cd8fbb0ba552f2ba8cdc4a2942d68528f8036ec127c6",
+      "version": "8.6.18"
+    },
+    {
+      "name": "openssl",
+      "filename": "openssl-bin-3.5.9.tar.gz",
+      "url": "https://codeload.github.com/python/cpython-bin-deps/tar.gz/ddb46a415b4995440723183e644f8d2c346567a2",
+      "sha256": "b8edfcbf494bb5b9d797ce3871a2c954d92d15a9a5a54b2eeb24475e8b4effc6",
+      "version": "3.5.9"
+    },
+    {
+      "name": "libffi",
+      "filename": "libffi-3.4.4.tar.gz",
+      "url": "https://codeload.github.com/python/cpython-bin-deps/tar.gz/94cb9a1c7feb608adf2b9f8fe2dbd6925ffbf90d",
+      "sha256": "a285552414f66e59f3b664840a0ccda1ebc9082dd2b304eaa59ab9d47f734fec",
+      "version": "3.4.4"
+    },
+    {
+      "name": "zlib",
+      "filename": "zlib-1.4.tar.gz",
+      "url": "https://zlib.net/fossils/zlib-1.4.tar.gz",
+      "sha256": "02dd159783677a749c04adbdd02b55b8a2bcc7e054f51b76b549199a916ad584",
+      "version": "1.4"
+    }
+  ],
+  "binary_checks": [
+    {
+      "name": "libcrypto-3.dll",
+      "filename": "libcrypto-3.dll",
+      "sha256": "75495fe0e079ab00d49be740d3c710a0b94e3f74f9648cb7cc9f768fc7f52319"
+    },
+    {
+      "name": "libssl-3.dll",
+      "filename": "libssl-3.dll",
+      "sha256": "8957182a9c385bfd9f3f790921de2ddc614cf91f99edbed4e9e5446a46504e32"
+    }
+  ],
+  "zlib": {
+    "version": "1.4",
+    "source": "Official pinned zlib archive; CPython static source and freshly built Tcl DLL",
+    "tcl_staging": "Replace private Tcl compat/zlib/{zlib.h,zconf.h,win64/zlib1.dll,win64/zdll.lib} with matching 1.4 inputs; retain no bundled 1.3.2 binary in runtime",
+    "msvc_flags": "LOC=-D_FILE_OFFSET_BITS=64",
+    "native_tests": "nmake -f win32/Makefile.msc all test testdll; CPython/Tcl compression; actual DLL zlibVersion"
+  },
+  "omitted_modules": {
+    "_bz2": "Unused by desktop application; no bzip2 native input",
+    "_lzma": "Unused by desktop application; no xz native input",
+    "_sqlite3": "Unused by desktop application; no SQLite native input"
+  },
+  "native_review": {
+    "status": "approved",
+    "reviewed_at": "2026-11-06",
+    "scope": "Input selection review for the explicitly pinned private Windows AMD64 CPython/Tcl/Tk/OpenSSL/libffi/zlib graph. Issued runtime receipt requires all native build/probe gates to pass; selection approval is not a claim of executed Windows validation or general security certification.",
+    "notes": [
+      "zlib 1.3.2 is replaced by official 1.4 for both CPython and Tcl after upstream Nov4 security fixes. Matching Tcl headers/import library/DLL are staged together and actual zlib versions are asserted.",
+      "Official CPython binary dependency tags currently end at libffi 3.4.4. Upstream publishes no security advisories. The 3.4.8 small-argument overread fix concerns ffi64.c after d21881f (2024-09-15), introduced after 3.4.4, separate from MSVC ffiw64.c. Retain exact CPython-compatible 3.4.4 AMD64 bundle rather than changing ABI for unrelated targets. Later hardening/correctness changes do not establish a known exploitable flaw in this selection.",
+      "Expat 2.9.0 is explicitly security-upgraded by CPython 3.11.18. Reviewed mpdecimal post-2.5.1 C changes cover formatting/flag/reliability behavior; no published target security finding was identified in this bounded primary-source review.",
+      "Unused native bz2/lzma/sqlite modules are omitted. Compiler/SDK/OS and Python package advisory audits are separate; actual TkDND loading, packaged behavior, repeatability and human desktop checks remain mandatory downstream gates."
+    ],
+    "sources": [
+      "https://zlib.net/",
+      "https://raw.githubusercontent.com/madler/zlib/v1.4/win32/Makefile.msc",
+      "https://github.com/libffi/libffi/security",
+      "https://github.com/libffi/libffi/blob/master/README.md",
+      "https://github.com/libffi/libffi/pull/889",
+      "https://github.com/libffi/libffi/commit/d21881f",
+      "https://api.github.com/repos/python/cpython-bin-deps/git/matching-refs/tags/libffi",
+      "https://www.python.org/downloads/release/python-31118/",
+      "https://www.bytereef.org/mpdecimal/changelog.html",
+      "https://openssl-library.org/news/vulnerabilities/index.html"
+    ]
+  },
+  "embedded_native": {
+    "expat": "2.9.0 bundled in CPython3.11.18; security update documented by CPython release",
+    "mpdecimal": "2.5.1 bundled C library in CPython3.11.18; upstream post2.5.1 change review retained baseline"
+  }
+}
