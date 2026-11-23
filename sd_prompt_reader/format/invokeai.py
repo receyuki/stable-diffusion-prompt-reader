@@ -61,16 +61,11 @@ class InvokeAI(BaseFormat):
         for p, s in zip(super().PARAMETER_KEY, InvokeAI.SETTING_KEY_INVOKEAI_METADATA):
             match p:
                 case "model":
-                    self._parameter[p] = remove_quotes(
-                        str(
-                            (
-                                data_json.get("model").get("model_name"),
-                                data_json.get("refiner_model").get("model_name"),
-                            )
-                        )
-                        if has_refiner
-                        else str(data_json.get("model").get("model_name"))
-                    )
+                    model = self._model_name(data_json.get("model"))
+                    if has_refiner:
+                        refiner = self._model_name(data_json["refiner_model"])
+                        model = (model, refiner)
+                    self._parameter[p] = remove_quotes(str(model))
                 case "seed":
                     self._parameter["seed"] = str(data_json.get("seed"))
                 case "size":
@@ -83,6 +78,11 @@ class InvokeAI(BaseFormat):
                         if has_refiner
                         else str(data_json.get(s[0]))
                     )
+
+    @staticmethod
+    def _model_name(model):
+        if isinstance(model, dict):
+            return model.get("model_name") or model.get("name")
 
     def _invoke_sd_metadata(self):
         data_json = json.loads(self._info.get("sd-metadata"))

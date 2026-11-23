@@ -208,7 +208,9 @@ class ImageDataReader:
                         else:
                             try:
                                 # swarm format
-                                if "sui_image_params" in user_comment[8:].decode(
+                                if not user_comment.startswith(
+                                    (b"ASCII", b"JIS")
+                                ) and "sui_image_params" in user_comment[8:].decode(
                                     "utf-16"
                                 ):
                                     self._tool = "StableSwarmUI"
@@ -219,10 +221,11 @@ class ImageDataReader:
                                     self._raw = piexif.helper.UserComment.load(
                                         user_comment
                                     )
-                                    # easydiff jpeg and webp format
-                                    if self._raw[0] == "{":
-                                        self._tool = "Easy Diffusion"
-                                        self._parser = EasyDiffusion(raw=self._raw)
+                                    # JSON metadata in JPEG and WebP
+                                    if not self._raw:
+                                        self._status = BaseFormat.Status.FORMAT_ERROR
+                                    elif self._raw.lstrip().startswith("{"):
+                                        self._read_json_comment()
                                     # a1111 jpeg and webp format
                                     else:
                                         self._tool = "A1111 webUI"
@@ -233,6 +236,25 @@ class ImageDataReader:
                 self._logger.info(f"Format: {self._tool}")
                 self._status = self._parser.parse()
             self._logger.info(f"Reading Status: {self._status.name}")
+
+    def _read_json_comment(self):
+        data = json.loads(self._raw)
+        nodes = [
+            node for key, node in data.items() if key not in ("extra", "extraMetadata")
+        ]
+        if nodes and all(
+            isinstance(node, dict)
+            and isinstance(node.get("class_type"), str)
+            and isinstance(node.get("inputs"), dict)
+            for node in nodes
+        ):
+            self._tool = "ComfyUI"
+            self._parser = ComfyUI(
+                info={"prompt": self._raw}, width=self._width, height=self._height
+            )
+        else:
+            self._tool = "Easy Diffusion"
+            self._parser = EasyDiffusion(raw=self._raw)
 
     @staticmethod
     def remove_data(image_file):
