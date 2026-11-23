@@ -67,7 +67,7 @@ A simple standalone viewer for reading prompt from Stable Diffusion generated im
 
 \* Limitations apply. See [format limitations](#TXT).
 
-RuinedFooocus PNG support is available in the development version only ([#77](https://github.com/receyuki/stable-diffusion-prompt-reader/issues/77)).
+RuinedFooocus PNG support is available in the development version only ([#77](https://github.com/receyuki/stable-diffusion-prompt-reader/issues/77)). The development version also reads ComfyUI API graphs stored in JPEG or WebP EXIF UserComment.
 
 > [!NOTE]
 > If you are using a tool or format that is not on this list, please help me to support your format 

@@ -67,7 +67,7 @@
 
 \* 见[格式限制](#TXT).
 
-开发版本新增 RuinedFooocus PNG 支持（[#77](https://github.com/receyuki/stable-diffusion-prompt-reader/issues/77)），尚未包含在已发布版本中。
+开发版本新增 RuinedFooocus PNG 支持（[#77](https://github.com/receyuki/stable-diffusion-prompt-reader/issues/77)），并支持读取 JPEG 和 WebP 的 EXIF UserComment 中保存的 ComfyUI API 工作流。
 
 > [!NOTE]
 > 如果你使用的工具或格式不在这个列表中, 请帮助我支持你的格式: 将你的工具生成的原始图片文件上传到 issues, 谢谢.
